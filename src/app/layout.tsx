@@ -5,8 +5,8 @@ import ClientLayout from '@/components/layout/ClientLayout';
 
 export const metadata: Metadata = {
   title: {
-    default: 'HONGSHENG MACHINERY',
-    template: '%s | HONGSHENG MACHINERY',
+    default: '湖南协力鸿胜机械有限公司',
+    template: '%s | 湖南协力鸿胜机械有限公司',
   },
   description:
     '湖南协力鸿胜机械有限公司（HONGSHENG MACHINERY）专注液压系统与电控系统的设计、研发与制造，提供定制化、智能化、一站式系统解决方案。',
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    shortcut: '/favicon.ico',
+    shortcut: '/images/hs/logo.png',
   },
 };
 

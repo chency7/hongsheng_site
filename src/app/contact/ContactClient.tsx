@@ -3,39 +3,23 @@
 import React, { useMemo, useState } from 'react';
 import Container from '@/components/site/Container';
 import MotionReveal from '@/components/site/MotionReveal';
-import SectionHeading from '@/components/site/SectionHeading';
 import ButtonLink from '@/components/site/ButtonLink';
-import Image from 'next/image';
+import { Mail, MapPin, Phone, Send } from 'lucide-react';
+import MapLibreMap from '@/components/site/MapLibreMap';
 
-type Industry =
-  | '工程机械'
-  | '船舶海洋'
-  | '风力发电'
-  | '轨道交通'
-  | '航空航天/其他'
-  | '工业制造'
-  | '其他';
+type NeedType = '业务咨询' | '技术咨询' | '售后服务' | '合作咨询' | '其他';
 
 type FormState = {
-  company: string;
   name: string;
   phone: string;
   email: string;
-  industry: Industry;
+  needType: NeedType;
   message: string;
 };
 
 type SubmitStatus = 'idle' | 'submitting' | 'success';
 
-const industryOptions: Industry[] = [
-  '工程机械',
-  '船舶海洋',
-  '风力发电',
-  '轨道交通',
-  '航空航天/其他',
-  '工业制造',
-  '其他',
-];
+const needTypeOptions: NeedType[] = ['业务咨询', '技术咨询', '售后服务', '合作咨询', '其他'];
 
 function isEmailValid(email: string) {
   if (!email) return true;
@@ -44,11 +28,10 @@ function isEmailValid(email: string) {
 
 export default function ContactClient() {
   const [form, setForm] = useState<FormState>({
-    company: '',
     name: '',
     phone: '',
     email: '',
-    industry: '工程机械',
+    needType: '业务咨询',
     message: '',
   });
   const [status, setStatus] = useState<SubmitStatus>('idle');
@@ -60,12 +43,11 @@ export default function ContactClient() {
 
   const requiredMissing = useMemo(() => {
     const missing: string[] = [];
-    if (!form.company.trim()) missing.push('公司/单位');
     if (!form.name.trim()) missing.push('姓名');
     if (!form.phone.trim()) missing.push('电话');
-    if (!form.message.trim()) missing.push('需求描述');
+    if (!form.message.trim()) missing.push('留言内容');
     return missing;
-  }, [form.company, form.name, form.phone, form.message]);
+  }, [form.name, form.phone, form.message]);
 
   const canSubmit = requiredMissing.length === 0 && !emailError && status !== 'submitting';
 
@@ -103,18 +85,6 @@ export default function ContactClient() {
               提交工况与需求，我们将在方案评审中对齐边界、指标与交付范围，并提供选型建议与系统方案。
             </p>
           </MotionReveal>
-          <MotionReveal delay={0.16}>
-            <div className="mt-8 overflow-hidden rounded-2xl border border-zinc-200/80 bg-white dark:border-white/10 dark:bg-black/30">
-              <div className="relative aspect-[16/8]">
-                <Image
-                  src="/images/hs/service.svg"
-                  alt="联系页面主视觉占位图"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            </div>
-          </MotionReveal>
           <MotionReveal delay={0.18}>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
               <ButtonLink href="/service" variant="secondary">
@@ -133,71 +103,61 @@ export default function ContactClient() {
           <div className="grid gap-10 lg:grid-cols-12">
             <div className="lg:col-span-5">
               <MotionReveal>
-                <SectionHeading
-                  eyebrow="REQUEST"
-                  title="快速提交需求"
-                  description="字段尽量精简，便于快速进入方案评审；更详细参数可在沟通中补充。"
-                />
-              </MotionReveal>
+                <div className="rounded-2xl border border-zinc-200/80 bg-white p-7 shadow-sm dark:border-white/10 dark:bg-black/30">
+                  <div className="text-lg font-semibold text-[#0B0F16] dark:text-white">联系方式</div>
+                  <div className="mt-6 grid gap-5">
+                    <div className="flex gap-4">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#0B2A4A]/5 text-[#0B2A4A] dark:bg-white/10 dark:text-[#F4B400]">
+                        <MapPin className="h-5 w-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold text-[#0B0F16] dark:text-white">
+                          公司地址
+                        </div>
+                        <div className="mt-1 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
+                          湖南省长沙市宁乡经济开发区车站路
+                        </div>
+                      </div>
+                    </div>
 
-              <MotionReveal delay={0.1}>
-                <div className="mt-8 rounded-2xl border border-zinc-200/80 bg-white p-7 text-sm leading-7 text-zinc-700 dark:border-white/10 dark:bg-black/30 dark:text-zinc-300">
-                  <div className="font-semibold text-[#0B0F16] dark:text-white">售后承诺</div>
-                  <div className="mt-3 grid gap-2">
-                    <div className="rounded-lg bg-zinc-50 px-4 py-3 dark:bg-white/5">
-                      24小时专业售后响应
+                    <div className="flex gap-4">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#0B2A4A]/5 text-[#0B2A4A] dark:bg-white/10 dark:text-[#F4B400]">
+                        <Phone className="h-5 w-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold text-[#0B0F16] dark:text-white">
+                          联系电话
+                        </div>
+                        <div className="mt-1 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
+                          13574880391 / 13419668797
+                          <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                            周一至周五 9:00 - 18:00
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="rounded-lg bg-zinc-50 px-4 py-3 dark:bg-white/5">
-                      预防性维护与系统升级支持
-                    </div>
-                    <div className="rounded-lg bg-zinc-50 px-4 py-3 dark:bg-white/5">
-                      全生命周期管理方案
+
+                    <div className="flex gap-4">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#0B2A4A]/5 text-[#0B2A4A] dark:bg-white/10 dark:text-[#F4B400]">
+                        <Mail className="h-5 w-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold text-[#0B0F16] dark:text-white">
+                          电子邮箱
+                        </div>
+                        <div className="mt-1 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
+                          william_tung@163.com
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </MotionReveal>
 
-              <MotionReveal delay={0.16}>
-                <div className="mt-6 rounded-2xl border border-zinc-200/80 bg-white p-7 dark:border-white/10 dark:bg-black/30">
-                  <div className="text-sm font-semibold text-[#0B0F16] dark:text-white">
-                    联系信息（占位）
-                  </div>
-                  <div className="mt-4 grid gap-2 text-sm leading-7 text-zinc-700 dark:text-zinc-300">
-                    <div className="rounded-lg bg-zinc-50 px-4 py-3 dark:bg-white/5">
-                      地址：湖南省长沙市宁乡经济开发区车站路
-                      <span className="block text-xs text-zinc-500 dark:text-zinc-500">
-                        Add: Station road, Economy Development Zone, Ningxiang, Changsha, Hunan,
-                        China
-                      </span>
-                    </div>
-                    <div className="rounded-lg bg-zinc-50 px-4 py-3 dark:bg-white/5">
-                      销售热线：13574880391 / 13419668797
-                      <span className="block text-xs text-zinc-500 dark:text-zinc-500">
-                        Sale Hot Line: +86-13574880391 / +86-13419668797
-                      </span>
-                    </div>
-                    <div className="rounded-lg bg-zinc-50 px-4 py-3 dark:bg-white/5">
-                      邮编：410600
-                      <span className="block text-xs text-zinc-500 dark:text-zinc-500">
-                        Post Code: 410600
-                      </span>
-                    </div>
-                    <div className="rounded-lg bg-zinc-50 px-4 py-3 dark:bg-white/5">
-                      电子邮箱：william_tung@163.com / 13419668797@163.com
-                      <span className="block text-xs text-zinc-500 dark:text-zinc-500">
-                        E-mail: william_tung@163.com / 13419668797@163.com
-                      </span>
-                    </div>
-                  </div>
-                  <div className="mt-6 overflow-hidden rounded-xl border border-zinc-200/70 bg-zinc-50 dark:border-white/10 dark:bg-white/5">
-                    <div className="relative aspect-[16/9]">
-                      <Image
-                        src="/images/hs/factory.svg"
-                        alt="地图与位置占位图"
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
+              <MotionReveal delay={0.08}>
+                <div className="mt-6 overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-sm dark:border-white/10 dark:bg-black/30">
+                  <div className="h-[375px] w-full">
+                    <MapLibreMap className="h-full w-full" />
                   </div>
                 </div>
               </MotionReveal>
@@ -221,11 +181,10 @@ export default function ContactClient() {
                           onClick={() => {
                             setStatus('idle');
                             setForm({
-                              company: '',
                               name: '',
                               phone: '',
                               email: '',
-                              industry: '工程机械',
+                              needType: '业务咨询',
                               message: '',
                             });
                           }}
@@ -239,73 +198,66 @@ export default function ContactClient() {
                     </div>
                   ) : (
                     <form onSubmit={onSubmit} className="grid gap-4">
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <label className="grid gap-2">
-                          <span className="text-sm font-semibold text-[#0B0F16] dark:text-white">
-                            公司/单位
-                          </span>
-                          <input
-                            value={form.company}
-                            onChange={(e) => setForm((v) => ({ ...v, company: e.target.value }))}
-                            className="h-11 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none transition-colors focus:border-[#F4B400] dark:border-white/10 dark:bg-black/20 dark:text-white"
-                            placeholder="请输入公司名称"
-                          />
-                        </label>
-
-                        <label className="grid gap-2">
-                          <span className="text-sm font-semibold text-[#0B0F16] dark:text-white">
-                            姓名
-                          </span>
-                          <input
-                            value={form.name}
-                            onChange={(e) => setForm((v) => ({ ...v, name: e.target.value }))}
-                            className="h-11 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none transition-colors focus:border-[#F4B400] dark:border-white/10 dark:bg-black/20 dark:text-white"
-                            placeholder="请输入联系人姓名"
-                          />
-                        </label>
-                      </div>
-
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <label className="grid gap-2">
-                          <span className="text-sm font-semibold text-[#0B0F16] dark:text-white">
-                            电话
-                          </span>
-                          <input
-                            value={form.phone}
-                            onChange={(e) => setForm((v) => ({ ...v, phone: e.target.value }))}
-                            className="h-11 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none transition-colors focus:border-[#F4B400] dark:border-white/10 dark:bg-black/20 dark:text-white"
-                            placeholder="请输入联系电话"
-                          />
-                        </label>
-
-                        <label className="grid gap-2">
-                          <span className="text-sm font-semibold text-[#0B0F16] dark:text-white">
-                            邮箱（可选）
-                          </span>
-                          <input
-                            value={form.email}
-                            onChange={(e) => setForm((v) => ({ ...v, email: e.target.value }))}
-                            className="h-11 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none transition-colors focus:border-[#F4B400] dark:border-white/10 dark:bg-black/20 dark:text-white"
-                            placeholder="name@company.com"
-                          />
-                          {emailError ? (
-                            <span className="text-xs font-semibold text-red-600">{emailError}</span>
-                          ) : null}
-                        </label>
+                      <div>
+                        <div className="text-lg font-semibold text-[#0B0F16] dark:text-white">
+                          合作咨询
+                        </div>
+                        <div className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
+                          欢迎留下您的需求信息，我们会尽快与您联系。
+                        </div>
                       </div>
 
                       <label className="grid gap-2">
                         <span className="text-sm font-semibold text-[#0B0F16] dark:text-white">
-                          行业
+                          姓名
+                        </span>
+                        <input
+                          value={form.name}
+                          onChange={(e) => setForm((v) => ({ ...v, name: e.target.value }))}
+                          className="h-11 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none transition-colors focus:border-[#F4B400] dark:border-white/10 dark:bg-black/20 dark:text-white"
+                          placeholder="请输入您的姓名"
+                        />
+                      </label>
+
+                      <label className="grid gap-2">
+                        <span className="text-sm font-semibold text-[#0B0F16] dark:text-white">
+                          联系电话
+                        </span>
+                        <input
+                          value={form.phone}
+                          onChange={(e) => setForm((v) => ({ ...v, phone: e.target.value }))}
+                          className="h-11 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none transition-colors focus:border-[#F4B400] dark:border-white/10 dark:bg-black/20 dark:text-white"
+                          placeholder="请输入您的联系电话"
+                        />
+                      </label>
+
+                      <label className="grid gap-2">
+                        <span className="text-sm font-semibold text-[#0B0F16] dark:text-white">
+                          电子邮箱（选填）
+                        </span>
+                        <input
+                          value={form.email}
+                          onChange={(e) => setForm((v) => ({ ...v, email: e.target.value }))}
+                          className="h-11 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none transition-colors focus:border-[#F4B400] dark:border-white/10 dark:bg-black/20 dark:text-white"
+                          placeholder="请输入您的电子邮箱（选填）"
+                        />
+                        {emailError ? (
+                          <span className="text-xs font-semibold text-red-600">{emailError}</span>
+                        ) : null}
+                      </label>
+
+                      <label className="grid gap-2">
+                        <span className="text-sm font-semibold text-[#0B0F16] dark:text-white">
+                          需求类型
                         </span>
                         <select
-                          value={form.industry}
+                          value={form.needType}
                           onChange={(e) =>
-                            setForm((v) => ({ ...v, industry: e.target.value as Industry }))
+                            setForm((v) => ({ ...v, needType: e.target.value as NeedType }))
                           }
                           className="h-11 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none transition-colors focus:border-[#F4B400] dark:border-white/10 dark:bg-black/20 dark:text-white"
                         >
-                          {industryOptions.map((opt) => (
+                          {needTypeOptions.map((opt) => (
                             <option key={opt} value={opt}>
                               {opt}
                             </option>
@@ -315,13 +267,13 @@ export default function ContactClient() {
 
                       <label className="grid gap-2">
                         <span className="text-sm font-semibold text-[#0B0F16] dark:text-white">
-                          需求描述
+                          留言内容
                         </span>
                         <textarea
                           value={form.message}
                           onChange={(e) => setForm((v) => ({ ...v, message: e.target.value }))}
                           className="min-h-[140px] rounded-lg border border-zinc-200 bg-white px-3 py-3 text-sm text-zinc-900 outline-none transition-colors focus:border-[#F4B400] dark:border-white/10 dark:bg-black/20 dark:text-white"
-                          placeholder="请描述应用场景、工况、目标指标、接口与安装约束等"
+                          placeholder="请详细描述您的需求…"
                         />
                       </label>
 
@@ -338,13 +290,19 @@ export default function ContactClient() {
                         type="submit"
                         disabled={!canSubmit}
                         className={[
-                          'inline-flex h-11 items-center justify-center rounded-lg px-4 text-sm font-semibold transition-colors',
+                          'inline-flex h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-colors',
                           canSubmit
-                            ? 'bg-[#F4B400] text-[#0B0F16] hover:bg-[#F4B400]/90'
+                            ? 'bg-[#0B2A4A] text-white hover:bg-[#0B2A4A]/90 dark:bg-white dark:text-[#0B2A4A] dark:hover:bg-white/90'
                             : 'cursor-not-allowed bg-zinc-200 text-zinc-500 dark:bg-white/10 dark:text-zinc-500',
                         ].join(' ')}
                       >
-                        {status === 'submitting' ? '提交中…' : '提交需求'}
+                        {status === 'submitting' ? (
+                          '发送中…'
+                        ) : (
+                          <>
+                            发送留言 <Send className="h-4 w-4" />
+                          </>
+                        )}
                       </button>
                     </form>
                   )}

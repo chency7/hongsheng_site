@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { I18nProvider } from '@/components/providers/i18n-provider';
 import SiteHeader from '@/components/site/SiteHeader';
 import SiteFooter from '@/components/site/SiteFooter';
+import ScrollToTop from '@/components/site/ScrollToTop';
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -22,6 +23,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             <SiteHeader />
             <main>{children}</main>
             <SiteFooter />
+            <ScrollToTop />
           </div>
         </I18nProvider>
       </React.Suspense>

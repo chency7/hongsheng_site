@@ -21,6 +21,8 @@
   },
   "dependencies": {
     "@next/mdx": "^15.1.7",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.5.0",
     "@tailwindcss/typography": "^0.5.16",
     "better-sqlite3": "^12.4.1",
     "drizzle-orm": "^0.44.6",
@@ -31,6 +33,7 @@
     "lodash": "^4.17.21",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.475.0",
+    "maplibre-gl": "^5.7.0",
     "next": "15.1.7",
     "next-intl": "^4.3.12",
     "next-mdx-remote": "^5.0.0",
@@ -50,6 +53,7 @@
     "rimraf": "^6.0.1",
     "swr": "^2.3.2",
     "tailwindcss-debug-screens": "^2.2.1",
+    "three": "^0.183.1",
     "zod": "^4.1.12"
   },
   "devDependencies": {

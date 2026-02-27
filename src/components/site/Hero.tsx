@@ -2,26 +2,32 @@
 
 import React from 'react';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 import Container from '@/components/site/Container';
 import ButtonLink from '@/components/site/ButtonLink';
 import MotionReveal from '@/components/site/MotionReveal';
 
+const HydraulicModel = dynamic(() => import('@/components/site/HydraulicModel'), {
+  ssr: false,
+  loading: () => <div className="absolute inset-0 -z-10" />,
+});
+
 export default function Hero() {
   return (
     <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0B0F16]">
       {/* Dynamic Background */}
-      <div className="absolute inset-0 -z-10">
+      <div className="absolute inset-0 -z-20">
         <Image
           src="/images/hs/hero.svg"
           alt="Background"
           fill
-          className="object-cover opacity-80"
+          className="object-cover opacity-60"
           priority
         />
         {/* Animated Gradient Overlay */}
         <motion.div
-          className="absolute inset-0 bg-[linear-gradient(45deg,rgba(11,15,22,0.8),rgba(11,42,74,0.7),rgba(11,15,22,0.8))]"
+          className="absolute inset-0 bg-[linear-gradient(45deg,rgba(11,15,22,0.9),rgba(11,42,74,0.8),rgba(11,15,22,0.9))]"
           animate={{
             backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
           }}
@@ -34,8 +40,11 @@ export default function Hero() {
             backgroundSize: '200% 200%',
           }}
         />
-        <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute inset-0 bg-black/50" />
       </div>
+
+      {/* 3D Hydraulic Animation */}
+      <HydraulicModel />
 
       {/* Particles/Geometric Elements */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
@@ -66,7 +75,7 @@ export default function Hero() {
         />
       </div>
 
-      <Container className="relative z-10 py-20 text-center">
+      <Container className="relative z-10 py-0 text-center mt-[-10rem]">
         <MotionReveal>
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-semibold tracking-wide text-white backdrop-blur-md transition-colors hover:bg-white/10">
             <span className="flex h-2 w-2">
@@ -80,19 +89,20 @@ export default function Hero() {
         </MotionReveal>
 
         <MotionReveal delay={0.1}>
-          <h1 className="mx-auto mt-8 max-w-5xl font-display text-5xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl">
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/70">
+          <h1 className="mx-auto mt-6 max-w-6xl font-display text-5xl font-bold leading-tight tracking-tight text-white sm:text-6xl lg:text-7xl">
+            <span className="block py-2 text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/70">
               智能液压与电控系统
             </span>
-            <span className="mt-2 block bg-gradient-to-r from-[#F4B400] to-[#F7D060] bg-clip-text text-transparent">
+            <span className="mt-2 block py-2 bg-gradient-to-r from-[#F4B400] to-[#F7D060] bg-clip-text text-transparent">
               定制化解决方案
             </span>
           </h1>
         </MotionReveal>
 
         <MotionReveal delay={0.2}>
-          <p className="mx-auto mt-8 max-w-2xl text-lg leading-8 text-zinc-300">
-            湖南协力鸿胜机械有限公司专注液压系统设计、研发与制造，以需求导向与仿真验证为基础，提供从方案到运维的一站式系统服务，面向复杂工况实现稳定可靠交付。
+          <p className="mx-auto mt-8 max-w-3xl text-lg leading-8 text-zinc-300">
+            <span className="font-semibold text-white">湖南协力鸿胜</span>
+            机械有限公司专注液压系统设计、研发与制造，以需求导向与仿真验证为基础，提供从方案到运维的一站式系统服务，面向复杂工况实现稳定可靠交付。
           </p>
         </MotionReveal>
 

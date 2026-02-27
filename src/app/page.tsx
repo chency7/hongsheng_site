@@ -98,6 +98,7 @@ export default function HomePage() {
                       alt="厂房与车间占位图"
                       fill
                       className="object-cover"
+                      priority
                     />
                   </div>
                 </div>
