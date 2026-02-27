@@ -1,0 +1,40 @@
+<svg width="1600" height="1000" viewBox="0 0 1600 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="200" y1="160" x2="1400" y2="900" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0B0F16"/>
+      <stop offset="0.5" stop-color="#0B2A4A" stop-opacity="0.75"/>
+      <stop offset="1" stop-color="#0B0F16"/>
+    </linearGradient>
+    <linearGradient id="acc" x1="520" y1="260" x2="1180" y2="820" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F4B400" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#F4B400" stop-opacity="0.10"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="1000" rx="48" fill="url(#bg)"/>
+  <rect x="110" y="170" width="1380" height="660" rx="36" fill="#FFFFFF" fill-opacity="0.04" stroke="#FFFFFF" stroke-opacity="0.10"/>
+
+  <rect x="220" y="270" width="1160" height="520" rx="30" fill="#FFFFFF" fill-opacity="0.06" stroke="#FFFFFF" stroke-opacity="0.10"/>
+
+  <g opacity="0.95">
+    <rect x="270" y="320" width="250" height="90" rx="18" fill="#FFFFFF" fill-opacity="0.05" stroke="#FFFFFF" stroke-opacity="0.10"/>
+    <rect x="550" y="320" width="250" height="90" rx="18" fill="#FFFFFF" fill-opacity="0.05" stroke="#FFFFFF" stroke-opacity="0.10"/>
+    <rect x="830" y="320" width="250" height="90" rx="18" fill="#FFFFFF" fill-opacity="0.05" stroke="#FFFFFF" stroke-opacity="0.10"/>
+    <rect x="1110" y="320" width="220" height="90" rx="18" fill="url(#acc)"/>
+
+    <rect x="270" y="440" width="250" height="90" rx="18" fill="#FFFFFF" fill-opacity="0.05" stroke="#FFFFFF" stroke-opacity="0.10"/>
+    <rect x="550" y="440" width="250" height="90" rx="18" fill="#FFFFFF" fill-opacity="0.05" stroke="#FFFFFF" stroke-opacity="0.10"/>
+    <rect x="830" y="440" width="250" height="90" rx="18" fill="#FFFFFF" fill-opacity="0.05" stroke="#FFFFFF" stroke-opacity="0.10"/>
+    <rect x="1110" y="440" width="220" height="90" rx="18" fill="#FFFFFF" fill-opacity="0.05" stroke="#FFFFFF" stroke-opacity="0.10"/>
+
+    <rect x="270" y="560" width="250" height="90" rx="18" fill="#FFFFFF" fill-opacity="0.05" stroke="#FFFFFF" stroke-opacity="0.10"/>
+    <rect x="550" y="560" width="250" height="90" rx="18" fill="#FFFFFF" fill-opacity="0.05" stroke="#FFFFFF" stroke-opacity="0.10"/>
+    <rect x="830" y="560" width="250" height="90" rx="18" fill="#FFFFFF" fill-opacity="0.05" stroke="#FFFFFF" stroke-opacity="0.10"/>
+    <rect x="1110" y="560" width="220" height="90" rx="18" fill="#FFFFFF" fill-opacity="0.05" stroke="#FFFFFF" stroke-opacity="0.10"/>
+  </g>
+
+  <g opacity="0.85">
+    <text x="120" y="930" fill="#FFFFFF" fill-opacity="0.42" font-family="Inter, Arial, sans-serif" font-size="18">PARTNERS PLACEHOLDER · 可替换为客户与品牌 Logo 墙</text>
+  </g>
+</svg>
+

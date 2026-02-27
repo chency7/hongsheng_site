@@ -1,0 +1,38 @@
+<svg width="1600" height="1000" viewBox="0 0 1600 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="120" y1="120" x2="1480" y2="920" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0B2A4A"/>
+      <stop offset="0.55" stop-color="#0B0F16"/>
+      <stop offset="1" stop-color="#0B2A4A"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="480" y1="320" x2="1180" y2="760" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F4B400" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#F4B400" stop-opacity="0.08"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="1000" rx="48" fill="url(#bg)"/>
+  <rect x="70" y="140" width="1460" height="720" rx="36" fill="#FFFFFF" fill-opacity="0.04" stroke="#FFFFFF" stroke-opacity="0.10"/>
+
+  <path d="M160 760V520L340 430V520L520 400V520L700 360V760H160Z" fill="#FFFFFF" fill-opacity="0.08"/>
+  <path d="M700 760V360L940 420V760H700Z" fill="#FFFFFF" fill-opacity="0.06"/>
+  <path d="M940 760V420L1240 330V760H940Z" fill="#FFFFFF" fill-opacity="0.08"/>
+  <path d="M1240 760V330L1440 420V760H1240Z" fill="#FFFFFF" fill-opacity="0.06"/>
+
+  <rect x="240" y="560" width="90" height="80" rx="10" fill="#0B0F16" fill-opacity="0.45" stroke="#FFFFFF" stroke-opacity="0.10"/>
+  <rect x="360" y="560" width="90" height="80" rx="10" fill="#0B0F16" fill-opacity="0.45" stroke="#FFFFFF" stroke-opacity="0.10"/>
+  <rect x="480" y="560" width="90" height="80" rx="10" fill="#0B0F16" fill-opacity="0.45" stroke="#FFFFFF" stroke-opacity="0.10"/>
+
+  <rect x="790" y="520" width="120" height="120" rx="14" fill="#0B0F16" fill-opacity="0.45" stroke="#FFFFFF" stroke-opacity="0.10"/>
+  <rect x="960" y="520" width="120" height="120" rx="14" fill="#0B0F16" fill-opacity="0.45" stroke="#FFFFFF" stroke-opacity="0.10"/>
+
+  <rect x="1110" y="230" width="320" height="260" rx="24" fill="url(#accent)"/>
+  <path d="M1150 280H1390" stroke="#FFFFFF" stroke-opacity="0.14" stroke-width="2" stroke-linecap="round"/>
+  <path d="M1150 320H1330" stroke="#FFFFFF" stroke-opacity="0.14" stroke-width="2" stroke-linecap="round"/>
+  <path d="M1150 360H1360" stroke="#FFFFFF" stroke-opacity="0.14" stroke-width="2" stroke-linecap="round"/>
+
+  <g opacity="0.85">
+    <text x="90" y="930" fill="#FFFFFF" fill-opacity="0.42" font-family="Inter, Arial, sans-serif" font-size="18">FACTORY PLACEHOLDER · 可替换为厂房航拍/车间场景</text>
+  </g>
+</svg>
+

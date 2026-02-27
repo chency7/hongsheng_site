@@ -1,0 +1,12 @@
+.git
+node_modules
+.next
+.husky
+.vscode
+README.md
+.env*
+.dockerignore
+.gitignore
+.eslintrc*
+.prettier*
+*.log
