@@ -39,7 +39,6 @@ export default function SiteHeader() {
     () => [
       { href: '/', label: '首页' },
       { href: '/products', label: '产品中心' },
-      { href: '/solutions', label: '定制方案' },
       { href: '/cases', label: '工程案例' },
       { href: '/capability', label: '技术实力' },
       { href: '/service', label: '服务支持' },

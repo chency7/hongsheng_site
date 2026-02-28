@@ -1,10 +1,8 @@
-import React from 'react';
 import Container from '@/components/site/Container';
 import ButtonLink from '@/components/site/ButtonLink';
 import MotionReveal from '@/components/site/MotionReveal';
 import SectionHeading from '@/components/site/SectionHeading';
-import { Card } from '@/components/ui/card';
-import Link from 'next/link';
+import EquipmentCarousel from '@/components/site/EquipmentCarousel';
 import Image from 'next/image';
 import Hero from '@/components/site/Hero';
 
@@ -49,18 +47,88 @@ export default function HomePage() {
       <Hero />
 
       <section className="border-b border-zinc-200/70 py-14 dark:border-white/10 sm:py-20">
-        <Container>
-          <div className="grid gap-10 lg:grid-cols-12 lg:items-center">
-            <div className="lg:col-span-6">
-              <MotionReveal>
-                <SectionHeading
-                  eyebrow="MANUFACTURING"
-                  title="现代化生产与检测能力"
-                  description="以精密加工、自动化焊接与试验检测为基础，结合精益管理与工艺优化，保障交付一致性并降低运维成本。"
-                />
-              </MotionReveal>
-              <MotionReveal delay={0.08}>
-                <div className="mt-8 grid gap-3 sm:grid-cols-2">
+        <MotionReveal>
+          <div className="w-full bg-[#0B0F16]">
+            <EquipmentCarousel
+              aspect="16/9"
+              captionMode="hover"
+              imageSizes="100vw"
+              frameClassName="rounded-none border-x-0"
+              controlsClassName="mx-auto w-full max-w-[1600px] px-6 md:px-8"
+              overlay={
+                <div className="hidden h-full w-full lg:block">
+                  <div className="absolute inset-0 z-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+                  <Container className="relative z-10 h-full">
+                    <div className="flex h-full items-center">
+                      <div className="pointer-events-auto max-w-xl py-10">
+                        <div className="text-xs font-semibold tracking-[0.18em] text-white/70">
+                          MANUFACTURING
+                        </div>
+                        <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                          现代化生产与检测能力
+                        </h2>
+                        <p className="mt-4 text-sm leading-7 text-zinc-200">
+                          以精密加工、自动化焊接与试验检测为基础，结合精益管理与工艺优化，保障交付一致性并降低运维成本。
+                        </p>
+                        <div className="mt-7 grid gap-3 sm:grid-cols-2">
+                          {[
+                            '数控设备（CNC）与加工中心',
+                            '大型深孔镗床与焊接机器人',
+                            '油漆线表面处理',
+                            '液压试验台检测与记录',
+                          ].map((t) => (
+                            <div
+                              key={t}
+                              className="rounded-xl border border-white/15 bg-black/25 px-5 py-4 text-sm text-zinc-100 backdrop-blur"
+                            >
+                              {t}
+                            </div>
+                          ))}
+                        </div>
+                        <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
+                          <ButtonLink
+                            href="/capability"
+                            variant="secondary"
+                            className="border-white/20 bg-white/5 text-white hover:bg-white/10"
+                          >
+                            查看设备与品控
+                          </ButtonLink>
+                          <ButtonLink
+                            href="/contact"
+                            variant="accent"
+                            className="shadow-[0_0_22px_rgba(244,180,0,0.35)] hover:shadow-[0_0_28px_rgba(244,180,0,0.55)]"
+                          >
+                            获取方案评审
+                          </ButtonLink>
+                        </div>
+                      </div>
+                    </div>
+                  </Container>
+                </div>
+              }
+              slides={[
+                { src: '/images/scsb/生产基地.png', name: '生产基地' },
+                { src: '/images/scsb/数控设备.png', name: '数控设备' },
+                { src: '/images/scsb/数控高速加工中心.png', name: '数控高速加工中心' },
+                { src: '/images/scsb/4.5米长加工中心.png', name: '4.5米长加工中心' },
+                { src: '/images/scsb/大型深孔镗.png', name: '大型深孔镗' },
+                { src: '/images/scsb/焊接机器人工作站.png', name: '焊接机器人工作站' },
+                { src: '/images/scsb/数控焊接摆塔机.png', name: '数控焊接摆塔机' },
+                { src: '/images/scsb/油漆线.png', name: '油漆线' },
+                { src: '/images/scsb/液压试验台.png', name: '液压试验台' },
+              ]}
+            />
+
+            <div className="py-8 lg:hidden">
+              <Container>
+                <div className="text-xs font-semibold tracking-[0.18em] text-white/70">MANUFACTURING</div>
+                <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+                  现代化生产与检测能力
+                </h2>
+                <p className="mt-4 text-sm leading-7 text-zinc-200">
+                  以精密加工、自动化焊接与试验检测为基础，结合精益管理与工艺优化，保障交付一致性并降低运维成本。
+                </p>
+                <div className="mt-6 grid gap-3 sm:grid-cols-2">
                   {[
                     '数控设备（CNC）与加工中心',
                     '大型深孔镗床与焊接机器人',
@@ -69,43 +137,32 @@ export default function HomePage() {
                   ].map((t) => (
                     <div
                       key={t}
-                      className="rounded-xl border border-zinc-200/80 bg-white px-5 py-4 text-sm text-zinc-700 dark:border-white/10 dark:bg-black/30 dark:text-zinc-200"
+                      className="rounded-xl border border-white/15 bg-black/25 px-5 py-4 text-sm text-zinc-100 backdrop-blur"
                     >
                       {t}
                     </div>
                   ))}
                 </div>
-              </MotionReveal>
-              <MotionReveal delay={0.14}>
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <ButtonLink href="/capability" variant="secondary">
+                <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <ButtonLink
+                    href="/capability"
+                    variant="secondary"
+                    className="border-white/20 bg-white/5 text-white hover:bg-white/10"
+                  >
                     查看设备与品控
                   </ButtonLink>
-                  <ButtonLink href="/contact" variant="accent">
+                  <ButtonLink
+                    href="/contact"
+                    variant="accent"
+                    className="shadow-[0_0_22px_rgba(244,180,0,0.35)] hover:shadow-[0_0_28px_rgba(244,180,0,0.55)]"
+                  >
                     获取方案评审
                   </ButtonLink>
                 </div>
-              </MotionReveal>
-            </div>
-
-            <div className="lg:col-span-6">
-              <MotionReveal delay={0.06}>
-                <div className="relative overflow-hidden rounded-2xl border border-zinc-200/80 bg-zinc-50 dark:border-white/10 dark:bg-black/30">
-                  <div className="absolute inset-0 bg-[radial-gradient(40%_40%_at_30%_10%,rgba(244,180,0,0.18),transparent_60%)]" />
-                  <div className="relative aspect-[16/10]">
-                    <Image
-                      src="/images/hs/factory.svg"
-                      alt="厂房与车间占位图"
-                      fill
-                      className="object-cover"
-                      priority
-                    />
-                  </div>
-                </div>
-              </MotionReveal>
+              </Container>
             </div>
           </div>
-        </Container>
+        </MotionReveal>
       </section>
 
       <section className="py-14 sm:py-20">

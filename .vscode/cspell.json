@@ -1,0 +1,36 @@
+{
+  "version": "0.2",
+  "language": "en,zh-CN",
+  "words": [
+    "maplibre",
+    "mapbox",
+    "maplibregl",
+    "geojson",
+    "lucide",
+    "framer",
+    "tailwindcss",
+    "clsx",
+    "nextjs",
+    "hongsheng",
+    "xieli",
+    "hunan",
+    "cnpm",
+    "pnpm",
+    "turbopack",
+    "ecmascript",
+    "hitokoto",
+    "wenkai",
+    "minzoom",
+    "maxzoom"
+  ],
+  "ignorePaths": [
+    "node_modules",
+    ".next",
+    "dist",
+    "build",
+    "*.min.js",
+    "*.map",
+    "package-lock.json",
+    "pnpm-lock.yaml"
+  ]
+}

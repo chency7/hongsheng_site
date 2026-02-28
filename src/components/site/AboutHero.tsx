@@ -22,7 +22,7 @@ export default function AboutHero() {
       </div>
 
       <Container>
-        <div className="grid gap-12 lg:grid-cols-12 lg:items-center lg:gap-16">
+        <div className="grid gap-12 lg:grid-cols-12 lg:items-start lg:gap-16">
           {/* Left Content */}
           <div className="relative z-10 lg:col-span-4">
             <MotionReveal>

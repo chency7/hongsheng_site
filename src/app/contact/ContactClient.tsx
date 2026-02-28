@@ -63,7 +63,7 @@ export default function ContactClient() {
 
   return (
     <div>
-      <section className="border-b border-zinc-200/70 bg-zinc-50 py-12 dark:border-white/10 dark:bg-white/5 sm:py-16">
+      <section className="border-b border-zinc-200/70 bg-zinc-50 py-12 dark:border-white/10 dark:bg-white/5 sm:py-10">
         <Container>
           <MotionReveal>
             <div className="text-xs font-semibold tracking-[0.18em] text-[#0B2A4A]/70 dark:text-white/60">
@@ -98,13 +98,15 @@ export default function ContactClient() {
         </Container>
       </section>
 
-      <section className="py-14 sm:py-20">
+      <section className="py-14 sm:py-10">
         <Container>
           <div className="grid gap-10 lg:grid-cols-12">
             <div className="lg:col-span-5">
               <MotionReveal>
                 <div className="rounded-2xl border border-zinc-200/80 bg-white p-7 shadow-sm dark:border-white/10 dark:bg-black/30">
-                  <div className="text-lg font-semibold text-[#0B0F16] dark:text-white">联系方式</div>
+                  <div className="text-lg font-semibold text-[#0B0F16] dark:text-white">
+                    联系方式
+                  </div>
                   <div className="mt-6 grid gap-5">
                     <div className="flex gap-4">
                       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#0B2A4A]/5 text-[#0B2A4A] dark:bg-white/10 dark:text-[#F4B400]">
@@ -156,7 +158,7 @@ export default function ContactClient() {
 
               <MotionReveal delay={0.08}>
                 <div className="mt-6 overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-sm dark:border-white/10 dark:bg-black/30">
-                  <div className="h-[375px] w-full">
+                  <div className="h-[470px] w-full">
                     <MapLibreMap className="h-full w-full" />
                   </div>
                 </div>
