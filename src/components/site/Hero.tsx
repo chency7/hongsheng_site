@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 import Container from '@/components/site/Container';
@@ -17,63 +16,50 @@ export default function Hero() {
   return (
     <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0B0F16]">
       {/* Dynamic Background */}
-      <div className="absolute inset-0 -z-20">
-        <Image
-          src="/images/hs/hero.svg"
-          alt="Background"
-          fill
-          className="object-cover opacity-60"
-          priority
-        />
-        {/* Animated Gradient Overlay */}
-        <motion.div
-          className="absolute inset-0 bg-[linear-gradient(45deg,rgba(11,15,22,0.9),rgba(11,42,74,0.8),rgba(11,15,22,0.9))]"
-          animate={{
-            backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-          }}
-          transition={{
-            duration: 20,
-            ease: 'linear',
-            repeat: Infinity,
-          }}
-          style={{
-            backgroundSize: '200% 200%',
-          }}
-        />
-        <div className="absolute inset-0 bg-black/50" />
-      </div>
+      {
+        <div className="hero-bg absolute inset-0 z-5  bg-[rgba(11,15,22,1)] h-full w-full">
+          <div
+            className="absolute inset-0 bg-cover bg-center opacity-50"
+            style={{ backgroundImage: "url('images/scsb/生产基地.png')" }}
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(11,15,22,0.5),rgba(11,15,22,0.3),rgba(11,15,22,0.5))]" />
+        </div>
+      }
 
-      {/* 3D Hydraulic Animation */}
-      <HydraulicModel />
 
       {/* Particles/Geometric Elements */}
-      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute -top-20 -right-20 h-96 w-96 rounded-full bg-[#F4B400]/10 blur-3xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-        <motion.div
-          className="absolute -bottom-20 -left-20 h-[500px] w-[500px] rounded-full bg-[#0B2A4A]/20 blur-3xl"
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.2, 0.4, 0.2],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1,
-          }}
-        />
-      </div>
+      {
+        (
+          <div className="bg-[rgba(11,15,22,1)] absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+            <motion.div
+              className="absolute -top-20 -right-20 h-96 w-96 rounded-full bg-[#F4B400]/8 blur-xl"
+              animate={{
+                scale: [1, 1.1, 1],
+                opacity: [0.25, 0.35, 0.25],
+              }}
+              transition={{
+                duration: 15,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              style={{ willChange: 'transform, opacity' }}
+            />
+            <motion.div
+              className="absolute -bottom-20 -left-20 h-[500px] w-[500px] rounded-full bg-[#0B2A4A]/15 blur-xl"
+              animate={{
+                scale: [1, 1.1, 1],
+                opacity: [0.15, 0.25, 0.15],
+              }}
+              transition={{
+                duration: 18,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 2,
+              }}
+              style={{ willChange: 'transform, opacity' }}
+            />
+          </div>)
+      }
 
       <Container className="relative z-10 py-0 text-center mt-[-10rem]">
         <MotionReveal>
@@ -89,7 +75,7 @@ export default function Hero() {
         </MotionReveal>
 
         <MotionReveal delay={0.1}>
-          <h1 className="mx-auto mt-6 max-w-6xl font-display text-5xl font-bold leading-tight tracking-tight text-white sm:text-6xl lg:text-7xl">
+          <h1 className="mx-auto mt-6 max-w-6xl font-display text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
             <span className="block py-2 text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/70">
               智能液压与电控系统
             </span>
@@ -136,12 +122,12 @@ export default function Hero() {
               <motion.div
                 key={item.label}
                 whileHover={{ y: -5 }}
-                className="group relative overflow-hidden rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur transition-colors hover:bg-white/10 hover:border-white/20"
+                className="group relative overflow-hidden rounded-xl border border-white/20 bg-white/15 p-6 backdrop-blur-md shadow-lg transition-all hover:bg-white/25 hover:border-white/30 hover:shadow-xl"
               >
                 <div className="absolute -right-4 -top-4 h-16 w-16 rounded-full bg-gradient-to-br from-[#F4B400]/20 to-transparent blur-xl transition-all group-hover:scale-150" />
                 <div className="relative z-10">
                   <div className="mb-2 text-2xl">{item.icon}</div>
-                  <div className="text-sm font-medium text-zinc-400 group-hover:text-zinc-300 transition-colors">
+                  <div className="text-sm font-medium text-zinc-300 group-hover:text-zinc-200 transition-colors">
                     {item.label}
                   </div>
                   <div className="mt-1 text-lg font-bold text-white tracking-wide">

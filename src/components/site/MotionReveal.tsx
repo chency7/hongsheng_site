@@ -34,10 +34,15 @@ export default function MotionReveal({ children, className, delay = 0 }: MotionR
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-10% 0px -10% 0px' }}
-      transition={{ duration: 0.45, ease: 'easeOut', delay }}
+      transition={{ 
+        duration: 0.6, 
+        ease: [0.4, 0, 0.2, 1], 
+        delay 
+      }}
+      style={{ willChange: 'transform, opacity' }}
     >
       {children}
     </motion.div>

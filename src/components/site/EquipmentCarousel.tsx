@@ -23,6 +23,10 @@ type EquipmentCarouselProps = {
   imageSizes?: string;
   frameClassName?: string;
   controlsClassName?: string;
+  activeIndex?: number;
+  onIndexChange?: (index: number) => void;
+  showControls?: boolean;
+  showArrows?: boolean;
 };
 
 export default function EquipmentCarousel({
@@ -35,10 +39,17 @@ export default function EquipmentCarousel({
   imageSizes = '(min-width: 1024px) 55vw, 100vw',
   frameClassName,
   controlsClassName,
+  activeIndex: controlledIndex,
+  onIndexChange,
+  showControls = true,
+  showArrows = true,
 }: EquipmentCarouselProps) {
   const reducedMotion = useReducedMotion();
-  const [activeIndex, setActiveIndex] = useState<number>(0);
+  const [internalIndex, setInternalIndex] = useState<number>(0);
   const [paused, setPaused] = useState<boolean>(false);
+
+  const isControlled = controlledIndex !== undefined;
+  const activeIndex = isControlled ? controlledIndex : internalIndex;
 
   const safeSlides = useMemo<Slide[]>(() => slides.filter((s) => s.src && s.name), [slides]);
   const count = safeSlides.length;
@@ -56,27 +67,36 @@ export default function EquipmentCarousel({
     }
   }, [aspect]);
 
+  const setActive = (newIndex: number | ((prev: number) => number)) => {
+    const next = typeof newIndex === 'function' ? newIndex(activeIndex) : newIndex;
+    if (isControlled) {
+      onIndexChange?.(next);
+    } else {
+      setInternalIndex(next);
+    }
+  };
+
   useEffect(() => {
     if (count <= 1) return;
     if (paused) return;
     if (reducedMotion) return;
 
     const t = window.setInterval(() => {
-      setActiveIndex((v) => (v + 1) % count);
+      setActive((v) => (v + 1) % count);
     }, autoplayMs);
 
     return () => window.clearInterval(t);
-  }, [autoplayMs, count, paused, reducedMotion]);
+  }, [autoplayMs, count, paused, reducedMotion, isControlled, onIndexChange, activeIndex]);
 
   useEffect(() => {
     if (count === 0) return;
-    if (activeIndex >= count) setActiveIndex(0);
+    if (activeIndex >= count) setActive(0);
   }, [activeIndex, count]);
 
   const go = (nextIndex: number) => {
     if (count === 0) return;
     const normalized = ((nextIndex % count) + count) % count;
-    setActiveIndex(normalized);
+    setActive(normalized);
   };
 
   const active = safeSlides[activeIndex];
@@ -141,7 +161,7 @@ export default function EquipmentCarousel({
         </div>
 
         {/* Navigation Arrows - High Z-Index */}
-        {count > 1 ? (
+        {showArrows && count > 1 ? (
           <>
             <button
               type="button"
@@ -163,7 +183,7 @@ export default function EquipmentCarousel({
         ) : null}
       </div>
 
-      {count > 1 ? (
+      {showControls && count > 1 ? (
         <div
           className={['mt-4 flex items-center justify-between gap-4', controlsClassName]
             .filter(Boolean)
@@ -193,7 +213,7 @@ export default function EquipmentCarousel({
             {activeIndex + 1} / {count}
           </div>
         </div>
-      ) : (
+      ) : showControls ? (
         <div
           className={[
             'mt-4 text-sm font-semibold text-zinc-700 dark:text-zinc-200',
@@ -204,7 +224,7 @@ export default function EquipmentCarousel({
         >
           {active.name}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
