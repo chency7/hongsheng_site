@@ -3,13 +3,9 @@ import ButtonLink from '@/components/site/ButtonLink';
 import MotionReveal from '@/components/site/MotionReveal';
 import SectionHeading from '@/components/site/SectionHeading';
 import HomeCarouselSection from '@/components/site/HomeCarouselSection';
+import ApplicationAreasSection from '@/components/site/ApplicationAreasSection';
 import Image from 'next/image';
 import Hero from '@/components/site/Hero';
-
-type Industry = {
-  title: string;
-  description: string;
-};
 
 type CaseItem = {
   industry: string;
@@ -17,15 +13,6 @@ type CaseItem = {
 };
 
 export default function HomePage() {
-  const industries: Industry[] = [
-    { title: '轨道交通', description: '铰接器试验、车辆液压系统与测试平台。' },
-    { title: '工程机械', description: '起重机、塔吊、建筑机械液压与电控系统。' },
-    { title: '船舶海洋', description: '打桩船、挖泥船等船用液压系统。' },
-    { title: '风力发电', description: '联轴器压力/疲劳测试与风电系统测试。' },
-    { title: '航空航天', description: '制动系统测试与精密液压控制。' },
-    { title: '工业制造', description: '发泡产线与自动化设备系统集成。' },
-  ];
-
   const caseItems: CaseItem[] = [
     { industry: '船舶海洋', projects: ['100米打桩船', '绞吸式挖泥船', '船用大型综合检测试验台'] },
     {
@@ -48,34 +35,9 @@ export default function HomePage() {
 
       <HomeCarouselSection />
 
-      <section className="py-14 sm:py-20">
-        <Container>
-          <MotionReveal>
-            <SectionHeading
-              eyebrow="INDUSTRIES"
-              title="六大核心应用领域"
-              description="覆盖轨道交通、工程机械、船舶海洋、风力发电、航空航天与工业制造等关键行业，输出可验证的系统能力与交付质量。"
-            />
-          </MotionReveal>
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {industries.map((item, idx) => (
-              <MotionReveal key={item.title} delay={idx * 0.04}>
-                <div className="rounded-xl border border-zinc-200/80 bg-white p-6 transition-colors hover:bg-zinc-50 dark:border-white/10 dark:bg-black/30 dark:hover:bg-white/5">
-                  <div className="text-sm font-semibold text-[#0B0F16] dark:text-white">
-                    {item.title}
-                  </div>
-                  <div className="mt-2 text-sm leading-7 text-zinc-700 dark:text-zinc-300">
-                    {item.description}
-                  </div>
-                  <div className="mt-5 h-[2px] w-10 rounded-full bg-[#F4B400]" />
-                </div>
-              </MotionReveal>
-            ))}
-          </div>
-        </Container>
-      </section>
+      <ApplicationAreasSection />
 
-      <section className="border-y border-zinc-200/70 bg-zinc-50 py-14 dark:border-white/10 dark:bg-white/5 sm:py-20">
+      <section className="border-y border-zinc-200/70 bg-zinc-50 py-14 dark:border-white/10 dark:bg-white/5 sm:py-20" style={{ display: 'none' }}>
         <Container>
           <MotionReveal>
             <SectionHeading
@@ -167,7 +129,7 @@ export default function HomePage() {
         </Container>
       </section>
 
-      <section className="py-14 sm:py-20">
+      <section className="py-14 sm:py-20" style={{ display: 'none' }}>
         <Container>
           <MotionReveal>
             <SectionHeading
@@ -219,7 +181,7 @@ export default function HomePage() {
         </Container>
       </section>
 
-      <section className="border-t border-zinc-200/70 bg-zinc-50 py-14 dark:border-white/10 dark:bg-white/5 sm:py-20">
+      <section className="border-t border-zinc-200/70 bg-zinc-50 py-14 dark:border-white/10 dark:bg-white/5 sm:py-20" style={{ display: 'none' }}>
         <Container>
           <MotionReveal>
             <SectionHeading

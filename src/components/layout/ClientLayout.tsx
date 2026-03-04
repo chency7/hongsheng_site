@@ -22,7 +22,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           <div className="min-h-screen bg-white text-[#0B0F16] dark:bg-black dark:text-white">
             <SiteHeader />
             <main>{children}</main>
-            <SiteFooter />
+            <SiteFooter showPartners={pathname === '/'} />
             <ScrollToTop />
           </div>
         </I18nProvider>
