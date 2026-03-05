@@ -52,23 +52,23 @@ export default function ServicePage() {
 
   return (
     <div>
-      <section className="border-b border-zinc-200/70 bg-zinc-50 py-12 dark:border-white/10 dark:bg-white/5 sm:py-16">
+      <section className="border-b border-blue-100 bg-blue-50 py-12 dark:border-white/10 dark:bg-white/5 sm:py-16">
         <Container>
           <MotionReveal>
-            <div className="text-xs font-semibold tracking-[0.18em] text-[#0B2A4A]/70 dark:text-white/60">SERVICE</div>
+            <div className="text-xs font-semibold tracking-[0.18em] text-blue-600/70 dark:text-white/60">SERVICE</div>
           </MotionReveal>
           <MotionReveal delay={0.06}>
-            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-[#0B0F16] dark:text-white sm:text-4xl">
+            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-blue-950 dark:text-white sm:text-4xl">
               一站式服务支持
             </h1>
           </MotionReveal>
           <MotionReveal delay={0.12}>
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-zinc-700 dark:text-zinc-300">
+            <p className="mt-4 max-w-3xl text-sm leading-7 text-blue-900/80 dark:text-zinc-300">
               从需求分析、方案设计到制造交付与运维支持，全流程协同，聚焦可靠性、可维护性与长期可用性。
             </p>
           </MotionReveal>
           <MotionReveal delay={0.16}>
-            <div className="mt-8 overflow-hidden rounded-2xl border border-zinc-200/80 bg-white dark:border-white/10 dark:bg-black/30">
+            <div className="mt-8 overflow-hidden rounded-2xl border border-blue-200/80 bg-white dark:border-white/10 dark:bg-black/30 shadow-sm">
               <div className="relative aspect-[16/8]">
                 <Image src="/images/hs/service.svg" alt="服务主视觉占位图" fill className="object-cover" />
               </div>
@@ -76,10 +76,10 @@ export default function ServicePage() {
           </MotionReveal>
           <MotionReveal delay={0.18}>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <ButtonLink href="/contact" variant="accent">
+              <ButtonLink href="/contact" variant="accent" className="bg-[#0B2A4A] text-white hover:bg-[#1a3f66] border-transparent shadow-md hover:shadow-lg">
                 提交售后/需求
               </ButtonLink>
-              <ButtonLink href="/cases" variant="secondary">
+              <ButtonLink href="/cases" variant="secondary" className="bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300">
                 查看案例
               </ButtonLink>
             </div>
@@ -87,7 +87,7 @@ export default function ServicePage() {
         </Container>
       </section>
 
-      <section className="py-14 sm:py-20">
+      <section className="py-14 sm:py-20 bg-white">
         <Container>
           <MotionReveal>
             <SectionHeading
@@ -100,20 +100,20 @@ export default function ServicePage() {
           <div className="mt-10 grid gap-4 lg:grid-cols-3">
             {steps.map((s, idx) => (
               <MotionReveal key={s.title} delay={idx * 0.06}>
-                <div className="rounded-2xl border border-zinc-200/80 bg-white p-7 dark:border-white/10 dark:bg-black/30">
-                  <div className="text-xs font-semibold tracking-[0.18em] text-[#0B2A4A]/70 dark:text-white/60">
+                <div className="group rounded-2xl border border-zinc-100 bg-white p-7 shadow-sm transition-all hover:border-blue-100 hover:shadow-lg dark:border-white/10 dark:bg-black/30">
+                  <div className="text-xs font-semibold tracking-[0.18em] text-blue-600/70 group-hover:text-blue-600 transition-colors dark:text-white/60">
                     STEP {String(idx + 1).padStart(2, '0')}
                   </div>
-                  <div className="mt-3 text-lg font-semibold text-[#0B0F16] dark:text-white">{s.title}</div>
-                  <div className="mt-3 text-sm leading-7 text-zinc-700 dark:text-zinc-300">{s.description}</div>
-                  <div className="mt-5 grid gap-2 text-sm leading-7 text-zinc-700 dark:text-zinc-300">
+                  <div className="mt-3 text-lg font-semibold text-zinc-900 group-hover:text-blue-900 transition-colors dark:text-white">{s.title}</div>
+                  <div className="mt-3 text-sm leading-7 text-zinc-600 dark:text-zinc-300">{s.description}</div>
+                  <div className="mt-5 grid gap-2 text-sm leading-7 text-zinc-600 dark:text-zinc-300">
                     {s.items.map((it) => (
-                      <div key={it} className="rounded-lg bg-zinc-50 px-3 py-2 dark:bg-white/5">
+                      <div key={it} className="rounded-lg bg-zinc-50 px-3 py-2 text-zinc-700 group-hover:bg-blue-50 group-hover:text-blue-900 transition-colors dark:bg-white/5 dark:text-zinc-300">
                         {it}
                       </div>
                     ))}
                   </div>
-                  <div className="mt-6 h-[2px] w-10 rounded-full bg-[#F4B400]" />
+                  <div className="mt-6 h-[2px] w-10 rounded-full bg-[#F4B400] group-hover:w-full transition-all duration-500" />
                 </div>
               </MotionReveal>
             ))}
@@ -121,7 +121,7 @@ export default function ServicePage() {
         </Container>
       </section>
 
-      <section className="border-y border-zinc-200/70 bg-zinc-50 py-14 dark:border-white/10 dark:bg-white/5 sm:py-20">
+      <section className="border-y border-zinc-100 bg-zinc-50 py-14 dark:border-white/10 dark:bg-white/5 sm:py-20">
         <Container>
           <MotionReveal>
             <SectionHeading eyebrow="PROMISE" title="服务承诺" description="以快速响应与预防性维护为基础，支持系统升级与全生命周期管理。"/>
@@ -130,8 +130,8 @@ export default function ServicePage() {
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {promises.map((p, idx) => (
               <MotionReveal key={p} delay={idx * 0.03}>
-                <div className="rounded-2xl border border-zinc-200/80 bg-white p-6 dark:border-white/10 dark:bg-black/30">
-                  <div className="text-sm leading-7 text-zinc-700 dark:text-zinc-300">{p}</div>
+                <div className="group rounded-2xl border border-white bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:border-blue-100 hover:shadow-lg dark:border-white/10 dark:bg-black/30">
+                  <div className="text-sm leading-7 text-zinc-700 font-medium group-hover:text-blue-900 transition-colors dark:text-zinc-300">{p}</div>
                 </div>
               </MotionReveal>
             ))}
@@ -139,7 +139,7 @@ export default function ServicePage() {
         </Container>
       </section>
 
-      <section className="py-14 sm:py-20">
+      <section className="py-14 sm:py-20 bg-white">
         <Container>
           <MotionReveal>
             <SectionHeading eyebrow="FAQ" title="常见问题" description="如需更详细的交付范围与验收标准，可在提交需求后进行方案评审对齐。"/>
@@ -148,16 +148,16 @@ export default function ServicePage() {
           <div className="mt-10 grid gap-4 lg:grid-cols-2">
             {faqs.map((f, idx) => (
               <MotionReveal key={f.q} delay={idx * 0.05}>
-                <div className="rounded-2xl border border-zinc-200/80 bg-white p-7 dark:border-white/10 dark:bg-black/30">
-                  <div className="text-sm font-semibold text-[#0B0F16] dark:text-white">{f.q}</div>
-                  <div className="mt-3 text-sm leading-7 text-zinc-700 dark:text-zinc-300">{f.a}</div>
+                <div className="group rounded-2xl border border-zinc-100 bg-white p-7 transition-all hover:border-blue-200 hover:shadow-lg dark:border-white/10 dark:bg-black/30">
+                  <div className="text-sm font-semibold text-zinc-900 group-hover:text-blue-900 transition-colors dark:text-white">{f.q}</div>
+                  <div className="mt-3 text-sm leading-7 text-zinc-600 dark:text-zinc-300">{f.a}</div>
                 </div>
               </MotionReveal>
             ))}
           </div>
 
-          <div className="mt-10">
-            <ButtonLink href="/contact" variant="accent">
+          <div className="mt-10 flex justify-center">
+            <ButtonLink href="/contact" variant="accent" className="bg-[#0B2A4A] text-white hover:bg-[#1a3f66] border-transparent shadow-md hover:shadow-lg px-8 py-3">
               立即联系
             </ButtonLink>
           </div>

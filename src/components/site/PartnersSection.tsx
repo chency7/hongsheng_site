@@ -21,7 +21,7 @@ export default function PartnersSection() {
   ];
 
   return (
-    <section className="py-14 sm:py-20 bg-white">
+    <section className="py-14 sm:py-20 bg-white dark:bg-white">
       <Container>
         <MotionReveal>
           <div className="text-center mb-12">
@@ -31,10 +31,10 @@ export default function PartnersSection() {
                 Partners
               </span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-display font-bold text-[#0B0F16] dark:text-white mb-4">
+            <h2 className="text-3xl sm:text-4xl font-display font-bold text-[#0B0F16] dark:text-[#0B0F16] mb-4">
               合作伙伴
             </h2>
-            <p className="text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto text-sm sm:text-base">
+            <p className="text-zinc-600 dark:text-zinc-600 max-w-2xl mx-auto text-sm sm:text-base">
               与优秀客户长期协作，与国内外优质品牌共同构建稳定可靠的供应与技术体系，持续提升系统交付能力
             </p>
           </div>
@@ -48,12 +48,12 @@ export default function PartnersSection() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: idx * 0.05 }}
-                className="flex items-center gap-4 rounded-xl border border-zinc-200/80 bg-white p-5 dark:border-white/10 dark:bg-black/30 hover:border-[#F4B400]/50 hover:shadow-lg transition-all duration-300"
+                className="flex items-center gap-4 rounded-xl border border-zinc-200/80 bg-white p-5 dark:border-zinc-200/80 dark:bg-white hover:border-[#F4B400]/50 hover:shadow-lg transition-all duration-300"
               >
                 <div className="relative h-20 w-20 flex-shrink-0">
                   <Image src={c.logo} alt={c.name} fill className="object-contain" />
                 </div>
-                <div className="text-base font-medium text-zinc-700 dark:text-zinc-200">
+                <div className="text-base font-medium text-zinc-700 dark:text-zinc-700">
                   {c.name}
                 </div>
               </motion.div>
