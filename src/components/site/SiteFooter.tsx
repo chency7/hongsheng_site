@@ -81,7 +81,7 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
 
             <Link href="/" className="flex items-center gap-3">
 
-              <div className="relative h-10 w-10 overflow-hidden rounded-lg bg-white/5 p-1">
+              <div className="relative h-14 w-14 overflow-hidden rounded-lg bg-white/5 p-1">
 
                 <Image
 
@@ -99,13 +99,13 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
 
               <div className="leading-tight">
 
-                <div className="text-base font-bold text-white">
+                <div className="text-xl font-bold text-white">
 
                   湖南协力鸿胜机械有限公司
 
                 </div>
 
-                <div className="text-[10px] text-zinc-400">
+                <div className="text-sm text-zinc-400">
 
                   Hunan Xieli Hongsheng Machinery Co.,Ltd.
 
@@ -115,7 +115,7 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
 
             </Link>
 
-            <p className="mt-6 max-w-sm text-sm leading-7 text-zinc-400">
+            <p className="mt-6 max-w-sm text-lg leading-7 text-zinc-400">
 
               立足长沙，专注液压系统与电气控制集成设计，面向复杂工况提供定制化、智能化、一站式系统解决方案。
 
@@ -125,13 +125,13 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
 
                {/* Social placeholders or extra badges could go here */}
 
-               <div className="rounded-full bg-white/5 px-3 py-1 text-xs text-zinc-400 border border-white/10">
+               <div className="rounded-full bg-white/5 px-3 py-1 text-base text-zinc-400 border border-white/10">
 
                  智能液压
 
                </div>
 
-               <div className="rounded-full bg-white/5 px-3 py-1 text-xs text-zinc-400 border border-white/10">
+               <div className="rounded-full bg-white/5 px-3 py-1 text-base text-zinc-400 border border-white/10">
 
                  电控系统
 
@@ -149,7 +149,7 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
 
             <div>
 
-              <h3 className="text-sm font-semibold text-white">业务领域</h3>
+              <h3 className="text-lg font-semibold text-white">业务领域</h3>
 
               <ul className="mt-6 space-y-4">
 
@@ -161,7 +161,7 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
 
                       href={l.href}
 
-                      className="group flex items-center gap-2 text-sm text-zinc-400 transition-colors hover:text-[#F4B400]"
+                      className="group flex items-center gap-2 text-lg text-zinc-400 transition-colors hover:text-[#F4B400]"
 
                     >
 
@@ -181,7 +181,7 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
 
             <div>
 
-              <h3 className="text-sm font-semibold text-white">关于与支持</h3>
+              <h3 className="text-lg font-semibold text-white">关于与支持</h3>
 
               <ul className="mt-6 space-y-4">
 
@@ -193,7 +193,7 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
 
                       href={l.href}
 
-                      className="group flex items-center gap-2 text-sm text-zinc-400 transition-colors hover:text-[#F4B400]"
+                      className="group flex items-center gap-2 text-lg text-zinc-400 transition-colors hover:text-[#F4B400]"
 
                     >
 
@@ -219,7 +219,7 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
 
           <div className="lg:col-span-4">
 
-            <h3 className="text-sm font-semibold text-white">联系方式</h3>
+            <h3 className="text-lg font-semibold text-white">联系方式</h3>
 
             <ul className="mt-6 space-y-6">
 
@@ -231,13 +231,13 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
 
                 </div>
 
-                <div className="text-sm leading-6 text-zinc-400">
+                <div className="text-lg leading-6 text-zinc-400">
 
                   <span className="block text-white">公司地址</span>
 
                   湖南省长沙市宁乡经济开发区车站路
 
-                  <span className="block text-xs opacity-70 mt-1">
+                  <span className="block text-base opacity-70 mt-1">
 
                     Station road, Economy Development Zone, Ningxiang, Changsha
 
@@ -255,7 +255,7 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
 
                 </div>
 
-                <div className="text-sm leading-6 text-zinc-400">
+                <div className="text-lg leading-6 text-zinc-400">
 
                   <span className="block text-white">销售热线</span>
 
@@ -273,7 +273,7 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
 
                 </div>
 
-                <div className="text-sm leading-6 text-zinc-400">
+                <div className="text-lg leading-6 text-zinc-400">
 
                   <span className="block text-white">电子邮箱</span>
 
@@ -293,7 +293,7 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
 
         {showPartners ? (
           <div className="mt-12 border-t border-white/10 pt-8">
-            <div className="text-sm font-semibold text-white">合作伙伴</div>
+            <div className="text-lg font-semibold text-white">合作伙伴</div>
             <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
               {partnerLogos.map((partner) => (
                 <div
@@ -314,7 +314,7 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
           </div>
         ) : null}
 
-        <div className="mt-16 flex flex-col gap-4 border-t border-white/10 pt-8 text-xs text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-16 flex flex-col gap-4 border-t border-white/10 pt-8 text-base text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
 
           <div className="flex flex-col gap-2 sm:flex-row sm:gap-6">
 

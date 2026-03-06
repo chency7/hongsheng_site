@@ -34,11 +34,15 @@ export default function HomeCarouselSection() {
   const [activeIndex, setActiveIndex] = useState(0);
 
   return (
-    <section className="relative overflow-hidden bg-zinc-50 py-16 sm:py-24">
+    <section className="relative overflow-hidden py-16 sm:py-24">
       {/* Background Gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0A1628] via-[#0F1F3C] to-[#0A1628]" />
+      
+      {/* Ambient Light Effects */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 right-0 -mt-20 -mr-20 h-[500px] w-[500px] rounded-full bg-blue-100/50 blur-3xl" />
-        <div className="absolute bottom-0 left-0 -mb-20 -ml-20 h-[500px] w-[500px] rounded-full bg-orange-100/50 blur-3xl" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#F4B400]/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#F4B400]/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-[#F4B400]/5 to-[#F4B400]/5 rounded-full blur-3xl" />
       </div>
 
       <Container className="relative z-10">
@@ -46,7 +50,7 @@ export default function HomeCarouselSection() {
           {/* Left Column: Immersive Factory Scene (Carousel) */}
           <div className="lg:col-span-8">
             <MotionReveal>
-              <div className="relative group rounded-2xl overflow-hidden border border-zinc-200 bg-white shadow-xl">
+              <div className="relative group rounded-2xl overflow-hidden border border-white/10 bg-white/5 shadow-xl">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10 pointer-events-none" />
                 
                 <EquipmentCarousel
@@ -93,19 +97,19 @@ export default function HomeCarouselSection() {
             <MotionReveal delay={0.1}>
               <div className="flex items-center gap-2 mb-4">
                 <div className="h-1.5 w-1.5 rounded-full bg-[#F4B400] animate-pulse" />
-                <span className="text-xs font-bold tracking-[0.2em] text-[#0B2A4A]/70 uppercase">
+                <span className="text-xs font-bold tracking-[0.2em] text-[#F4B400]/80 uppercase">
                   Manufacturing Capability
                 </span>
               </div>
               
-              <h2 className="text-3xl font-display font-bold text-[#0B0F16] sm:text-4xl mb-6 leading-tight">
+              <h2 className="text-3xl font-display font-bold text-white sm:text-4xl mb-6 leading-tight">
                 核心竞争力 <br />
-                <span className="inline-block py-1 text-transparent bg-clip-text bg-gradient-to-r from-[#0B2A4A] to-[#0B2A4A]/70">
+                <span className="inline-block py-1 text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70">
                   现代化生产与检测
                 </span>
               </h2>
               
-              <p className="text-zinc-600 leading-relaxed mb-8 border-l-2 border-[#0B2A4A]/10 pl-4">
+              <p className="text-zinc-300 leading-relaxed mb-8 border-l-2 border-[#F4B400]/20 pl-4">
                 以精密加工、自动化焊接与试验检测为基础，结合精益管理与工艺优化，保障交付一致性并降低运维成本。
               </p>
 
@@ -123,7 +127,7 @@ export default function HomeCarouselSection() {
                         relative group flex flex-col items-center justify-center p-3 rounded-xl border transition-all duration-300
                         ${isActive 
                           ? 'bg-[#F4B400]/10 border-[#F4B400] shadow-[0_0_20px_rgba(244,180,0,0.15)]' 
-                          : 'bg-white border-zinc-200 hover:border-[#F4B400]/50 hover:shadow-lg'
+                          : 'bg-white/5 border-white/10 hover:border-[#F4B400]/50 hover:bg-white/10'
                         }
                       `}
                     >
@@ -133,8 +137,8 @@ export default function HomeCarouselSection() {
                         }`} 
                         strokeWidth={1.5}
                       />
-                      <span className={`text-xs font-medium transition-colors duration-300 ${
-                        isActive ? 'text-[#0B0F16]' : 'text-zinc-500 group-hover:text-zinc-800'
+                      <span className={`text-x font-medium transition-colors duration-300 ${
+                        isActive ? 'text-white' : 'text-zinc-400 group-hover:text-zinc-200'
                       }`}>
                         {slide.name}
                       </span>
@@ -162,7 +166,7 @@ export default function HomeCarouselSection() {
                 <ButtonLink 
                   href="/contact" 
                   variant="secondary"
-                  className="border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300"
+                  className="border-white/20 bg-white/5 text-zinc-300 hover:bg-white/10 hover:border-white/30"
                 >
                   预约工厂参观
                 </ButtonLink>

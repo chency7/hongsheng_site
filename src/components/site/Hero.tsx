@@ -19,7 +19,7 @@ export default function Hero() {
       {
         <div className="hero-bg absolute inset-0 z-5  bg-[rgba(11,15,22,1)] h-full w-full">
           <div
-            className="absolute inset-0 bg-cover bg-center opacity-50"
+            className="absolute inset-0 bg-cover bg-center opacity-70"
             style={{ backgroundImage: "url('images/scsb/生产基地.png')" }}
           />
           <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(11,15,22,0.5),rgba(11,15,22,0.3),rgba(11,15,22,0.5))]" />
@@ -75,7 +75,7 @@ export default function Hero() {
         </MotionReveal>
 
         <MotionReveal delay={0.1}>
-          <h1 className="mx-auto mt-6 max-w-6xl font-display text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
+          <h1 className="mx-auto mt-6 max-w-6xl font-display text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-5xl">
             <span className="block py-2 text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/70">
               智能液压与电控系统
             </span>

@@ -59,7 +59,7 @@ export default function SiteHeader() {
       }`}
     >
       <Container className="flex h-24 items-center justify-between gap-4">
-        <Link href="/" className="group flex items-center gap-4">
+        <Link href="/" className="group flex items-center gap-4 ml-[-60px]">
           <div className="relative h-14 w-14 overflow-hidden rounded-lg">
             <Image src="/images/hs/logo.png" alt="Logo" fill className="object-contain" />
           </div>
@@ -86,7 +86,7 @@ export default function SiteHeader() {
                 href={item.href}
                 suppressHydrationWarning
                 className={[
-                  'relative rounded-md px-3 py-2 text-base font-medium transition-colors',
+                  'relative rounded-md px-3 py-2 text-base font-medium text-[20px]  transition-colors',
                   active
                     ? 'text-white'
                     : 'text-zinc-400 hover:text-white',
