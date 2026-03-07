@@ -14,6 +14,9 @@ module.exports = {
         'chore', // 构建过程或辅助工具的变动
         'revert', // 回退
         'perf', // 性能优化
+        'build', // 构建
+        'ci', // 持续集成
+        'release', // 发布
       ],
     ],
     'type-case': [2, 'always', 'lower-case'],
