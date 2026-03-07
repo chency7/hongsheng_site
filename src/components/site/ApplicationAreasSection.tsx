@@ -81,7 +81,7 @@ export default function ApplicationAreasSection() {
 
   return (
     <section className="relative overflow-hidden py-16 sm:py-24">
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0A1628] via-[#0F1F3C] to-[#0A1628]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0F1F3C] via-[#0A1628] to-[#0B0F16]" />
       
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#F4B400]/10 rounded-full blur-3xl" />

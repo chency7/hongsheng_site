@@ -36,8 +36,7 @@ export default function HomeCarouselSection() {
   return (
     <section className="relative overflow-hidden py-16 sm:py-24">
       {/* Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0A1628] via-[#0F1F3C] to-[#0A1628]" />
-      
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0B0F16] via-[#0A1628] to-[#0F1F3C]" />
       {/* Ambient Light Effects */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#F4B400]/10 rounded-full blur-3xl" />

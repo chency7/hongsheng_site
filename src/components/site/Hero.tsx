@@ -23,6 +23,8 @@ export default function Hero() {
             style={{ backgroundImage: "url('images/scsb/生产基地.png')" }}
           />
           <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(11,15,22,0.5),rgba(11,15,22,0.3),rgba(11,15,22,0.5))]" />
+          {/* Bottom Fade Gradient - Ensures smooth transition to next section */}
+          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#0B0F16] to-transparent pointer-events-none" />
         </div>
       }
 
