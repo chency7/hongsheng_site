@@ -103,7 +103,8 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
                   <span className="hidden sm:inline">湖南协力鸿胜机械有限公司</span>
                 </div>
                 <div className="text-xs text-zinc-400 sm:text-sm">
-                  Hunan Xieli Hongsheng Machinery Co.,Ltd.
+                  <span className="sm:hidden">Hunan Xieli Hongsheng Machinery</span>
+                  <span className="hidden sm:inline">Hunan Xieli Hongsheng Machinery Co.,Ltd.</span>
                 </div>
               </div>
 

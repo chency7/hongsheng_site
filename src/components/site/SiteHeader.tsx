@@ -73,7 +73,8 @@ export default function SiteHeader() {
             <div
               className={`text-xs text-zinc-400 transition-colors sm:text-sm`}
             >
-              Hunan Xieli Hongsheng Machinery Co.,Ltd.
+              <span className="sm:hidden">Hunan Xieli Hongsheng Machinery</span>
+              <span className="hidden sm:inline">Hunan Xieli Hongsheng Machinery Co.,Ltd.</span>
             </div>
           </div>
         </Link>
