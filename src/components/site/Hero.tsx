@@ -63,7 +63,7 @@ export default function Hero() {
           </div>)
       }
 
-      <Container className="relative z-10 py-0 text-center mt-[-10rem]">
+      <Container className="relative z-10 py-0 text-center mt-[0rem]">
         <MotionReveal>
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-semibold tracking-wide text-white backdrop-blur-md transition-colors hover:bg-white/10">
             <span className="flex h-2 w-2">

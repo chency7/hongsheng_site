@@ -98,24 +98,18 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
               </div>
 
               <div className="leading-tight">
-
-                <div className="text-xl font-bold text-white">
-
-                  湖南协力鸿胜机械有限公司
-
+                <div className="text-lg font-bold text-white sm:text-xl">
+                  <span className="sm:hidden">湖南协力鸿胜</span>
+                  <span className="hidden sm:inline">湖南协力鸿胜机械有限公司</span>
                 </div>
-
-                <div className="text-sm text-zinc-400">
-
+                <div className="text-xs text-zinc-400 sm:text-sm">
                   Hunan Xieli Hongsheng Machinery Co.,Ltd.
-
                 </div>
-
               </div>
 
             </Link>
 
-            <p className="mt-6 max-w-sm text-lg leading-7 text-zinc-400">
+            <p className="mt-6 max-w-sm text-base leading-7 text-zinc-400 sm:text-lg">
 
               立足长沙，专注液压系统与电气控制集成设计，面向复杂工况提供定制化、智能化、一站式系统解决方案。
 
@@ -149,7 +143,7 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
 
             <div>
 
-              <h3 className="text-lg font-semibold text-white">业务领域</h3>
+              <h3 className="text-base font-semibold text-white sm:text-lg">业务领域</h3>
 
               <ul className="mt-6 space-y-4">
 
@@ -161,7 +155,7 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
 
                       href={l.href}
 
-                      className="group flex items-center gap-2 text-lg text-zinc-400 transition-colors hover:text-[#F4B400]"
+                      className="group flex items-center gap-2 text-base text-zinc-400 transition-colors hover:text-[#F4B400] sm:text-lg"
 
                     >
 
@@ -181,7 +175,7 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
 
             <div>
 
-              <h3 className="text-lg font-semibold text-white">关于与支持</h3>
+              <h3 className="text-base font-semibold text-white sm:text-lg">关于与支持</h3>
 
               <ul className="mt-6 space-y-4">
 
@@ -193,7 +187,7 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
 
                       href={l.href}
 
-                      className="group flex items-center gap-2 text-lg text-zinc-400 transition-colors hover:text-[#F4B400]"
+                      className="group flex items-center gap-2 text-base text-zinc-400 transition-colors hover:text-[#F4B400] sm:text-lg"
 
                     >
 
@@ -219,7 +213,7 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
 
           <div className="lg:col-span-4">
 
-            <h3 className="text-lg font-semibold text-white">联系方式</h3>
+            <h3 className="text-base font-semibold text-white sm:text-lg">联系方式</h3>
 
             <ul className="mt-6 space-y-6">
 
@@ -231,7 +225,7 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
 
                 </div>
 
-                <div className="text-lg leading-6 text-zinc-400">
+                <div className="text-base leading-6 text-zinc-400 sm:text-lg">
 
                   <span className="block text-white">公司地址</span>
 
@@ -255,7 +249,7 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
 
                 </div>
 
-                <div className="text-lg leading-6 text-zinc-400">
+                <div className="text-base leading-6 text-zinc-400 sm:text-lg">
 
                   <span className="block text-white">销售热线</span>
 
@@ -273,7 +267,7 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
 
                 </div>
 
-                <div className="text-lg leading-6 text-zinc-400">
+                <div className="text-base leading-6 text-zinc-400 sm:text-lg">
 
                   <span className="block text-white">电子邮箱</span>
 
@@ -293,7 +287,7 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
 
         {showPartners ? (
           <div className="mt-12 border-t border-white/10 pt-8">
-            <div className="text-lg font-semibold text-white">合作伙伴</div>
+            <div className="text-base font-semibold text-white sm:text-lg">合作伙伴</div>
             <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
               {partnerLogos.map((partner) => (
                 <div

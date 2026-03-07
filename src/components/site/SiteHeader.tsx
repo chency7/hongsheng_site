@@ -59,18 +59,19 @@ export default function SiteHeader() {
       }`}
     >
       <Container className="flex h-24 items-center justify-between gap-4">
-        <Link href="/" className="group flex items-center gap-4 ml-[-60px]">
+        <Link href="/" className="group flex items-center gap-4 ml-[-10px]">
           <div className="relative h-14 w-14 overflow-hidden rounded-lg">
             <Image src="/images/hs/logo.png" alt="Logo" fill className="object-contain" />
           </div>
           <div className="leading-tight">
             <div
-              className={`text-2xl font-bold  text-white`}
+              className={`text-lg font-bold text-white sm:text-2xl`}
             >
-              湖南协力鸿胜机械有限公司
+              <span className="sm:hidden">湖南协力鸿胜</span>
+              <span className="hidden sm:inline">湖南协力鸿胜机械有限公司</span>
             </div>
             <div
-              className={`text-sm transition-colors text-zinc-400`}
+              className={`text-xs text-zinc-400 transition-colors sm:text-sm`}
             >
               Hunan Xieli Hongsheng Machinery Co.,Ltd.
             </div>
