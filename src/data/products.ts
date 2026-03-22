@@ -16,6 +16,7 @@ export const categoryOptions: CategoryOption[] = [
       { id: 'luffing-jib-tower-crane', name: '动臂塔机液压系统' },
     ],
   },
+  /* 暂时隐藏没有产品的分类
   {
     id: 'railway',
     name: '轨道交通',
@@ -36,6 +37,7 @@ export const categoryOptions: CategoryOption[] = [
     name: '航空航天',
     subCategories: [],
   },
+  */
   {
     id: 'manufacturing',
     name: '工业制造',
