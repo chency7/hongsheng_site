@@ -10,14 +10,14 @@ import ButtonLink from '@/components/site/ButtonLink';
 import { products, categoryOptions, type ProductCategory, type CategoryOption } from '@/data/products';
 
 type ViewMode = 'grid' | 'list';
-type SortOption = 'sales' | 'price_asc' | 'price_desc' | 'newest';
+type SortOption = 'newest';
 
 export default function ProductsClient() {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<SortOption>('sales');
+  const [sortBy, setSortBy] = useState<SortOption>('newest');
 
   // Debounce search
   useEffect(() => {
@@ -86,9 +86,6 @@ export default function ProductsClient() {
     }
 
     result = [...result].sort((a, b) => {
-      if (sortBy === 'sales') return b.sales - a.sales;
-      if (sortBy === 'price_asc') return a.price - b.price;
-      if (sortBy === 'price_desc') return b.price - a.price;
       if (sortBy === 'newest') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       return 0;
     });
@@ -235,9 +232,6 @@ export default function ProductsClient() {
                     onChange={(e) => setSortBy(e.target.value as SortOption)}
                     className="border-none text-sm outline-none bg-transparent cursor-pointer font-medium text-[#333333] hover:text-[#4A90D9]"
                   >
-                    <option value="sales">销量</option>
-                    <option value="price_asc">价格低到高</option>
-                    <option value="price_desc">价格高到低</option>
                     <option value="newest">最新</option>
                   </select>
                 </div>
