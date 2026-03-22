@@ -38,7 +38,10 @@ export const categoryOptions: CategoryOption[] = [
   {
     id: 'manufacturing',
     name: '工业制造',
-    subCategories: [],
+    subCategories: [
+      { id: 'mine-truck', name: '矿卡专用控制阀组' },
+      { id: 'manifold-block', name: '组合阀组' },
+    ],
   },
 ];
 
@@ -233,6 +236,46 @@ export const products: Product[] = [
 ### 包含组件
 - **转向对中举升阀组**
 - **制动阀组**
+        `
+      }
+    ]
+  },
+  {
+    id: 'p-manifold-block',
+    name: '组合阀组',
+    model: 'HS-MANIFOLD',
+    category: 'manifold-block',
+    brand: '其他',
+    price: 0,
+    rating: 5.0,
+    sales: 0,
+    createdAt: '2024-03-22',
+    image: '/images/products/组合阀组/1.png',
+    images: [
+      '/images/products/组合阀组/1.png',
+      '/images/products/组合阀组/2.png',
+      '/images/products/组合阀组/3.png'
+    ],
+    specs: [
+      { label: '系统定位', value: '液压系统集成控制单元' },
+      { label: '流道设计', value: 'CFD软件优化' },
+      { label: '服务模式', value: '量身定制解决方案' },
+    ],
+    description: '作为液压系统中的集成控制单元，旨在提升整体系统控制的集成性、紧凑性，减少管路连接和漏油风险。',
+    features: ['高集成性', 'CFD流道优化', '量身定制', '应用广泛'],
+    detailTabs: [
+      {
+        title: '产品简介',
+        content: `
+### 组合阀组
+
+- 作为液压系统中的集成控制单元，旨在提升整体系统控制的集成性、紧凑性，减少管路连接和漏油风险；
+- 通过CFD软件优化阀块内部流道，减少紊流和压降；
+- 为客户提供量身定制的创新解决方案。
+
+### 应用主机
+- 履带式起重机 / 蜘蛛吊等工程机械设备
+- 高空作业平台等设备
         `
       }
     ]
