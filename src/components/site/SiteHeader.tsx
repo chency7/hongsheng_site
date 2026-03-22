@@ -61,7 +61,7 @@ export default function SiteHeader() {
       <Container className="flex h-24 items-center justify-between gap-4">
         <Link href="/" className="group flex items-center gap-4 ml-[-10px]">
           <div className="relative h-14 w-14 overflow-hidden rounded-lg">
-            <Image src="/images/hs/logo.png" alt="Logo" fill className="object-contain" />
+            <Image src="/images/hs/logo.png" alt="Logo" fill sizes="48px" className="object-contain" />
           </div>
           <div className="leading-tight">
             <div

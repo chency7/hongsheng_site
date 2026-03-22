@@ -152,7 +152,7 @@ export default function ProductsClient() {
                       </button>
                       
                       {/* 默认全部展开子分类 */}
-                      {cat.subCategories && cat.subCategories.length > 0 && (
+                      {cat.subCategories && cat.subCategories.length > 0 ? (
                         <div className="pl-6 space-y-1 pb-2">
                           {cat.subCategories.map(sub => (
                             <button
@@ -167,6 +167,12 @@ export default function ProductsClient() {
                               {sub.name}
                             </button>
                           ))}
+                        </div>
+                      ) : (
+                        <div className="pl-6 pb-2">
+                          <div className="px-4 py-2 text-xs text-gray-400 italic">
+                            暂无产品分类
+                          </div>
                         </div>
                       )}
                     </div>
@@ -276,7 +282,7 @@ export default function ProductsClient() {
                           <div className="absolute inset-0 bg-slate-50" />
                           {/* <Image src={product.image} alt={product.name} fill className="object-contain p-4 transition-transform duration-300 group-hover:scale-105 z-10" /> */}
                           <div className="z-10 w-full h-full relative transition-transform duration-300 group-hover:scale-105">
-                            <Image src="/images/hs/hydraulic.svg" alt={product.name} fill className="object-contain" />
+                            <Image src={product.image || "/images/hs/hydraulic.svg"} alt={product.name} fill className="object-cover" />
                           </div>
                         </div>
                         <div className="p-4 flex flex-col flex-1">
@@ -305,8 +311,7 @@ export default function ProductsClient() {
                       // List Card
                       <Link href={`/products/${product.id}`} className="block group bg-white rounded-[8px] border border-[#E8ECF0] shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:border-[#4A90D9] transition-all duration-300 p-4 flex flex-col sm:flex-row gap-6">
                         <div className="relative w-full sm:w-[200px] h-[150px] shrink-0 bg-slate-50 rounded-md border border-[#E8ECF0] overflow-hidden">
-                           {/* <Image src={product.image} alt={product.name} fill className="object-contain p-2 transition-transform duration-300 group-hover:scale-105" /> */}
-                           <Image src="/images/hs/hydraulic.svg" alt={product.name} fill className="object-contain p-2 transition-transform duration-300 group-hover:scale-105" />
+                           <Image src={product.image || "/images/hs/hydraulic.svg"} alt={product.name} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
                         </div>
                         <div className="flex-1 flex flex-col">
                           <div className="flex justify-between items-start mb-2">
