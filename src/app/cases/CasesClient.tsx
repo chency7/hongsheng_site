@@ -511,20 +511,20 @@ export default function CasesClient() {
                   DELIVERY LOGIC
                 </div>
                 <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-[#0B0F16]">
-                  从案例展示，延伸到交付逻辑
+                  面向高标准项目的交付逻辑
                 </h2>
                 <p className="mt-4 text-sm leading-7 text-slate-600">
-                  更舒服的案例模块，不只是把图片和标题排整齐，而是让浏览者知道这些项目为什么值得信任、系统能力体现在哪里，以及项目最终如何落地。
+                  真正有上限的项目，价值不在于设备体量本身，而在于能否在复杂工况下持续稳定运行，并把方案、制造、调试和运维做成闭环。
                 </p>
                 <div className="mt-8 rounded-[24px] bg-[#0B1F33] p-6 text-white">
                   <div className="flex items-center gap-2 text-sm font-semibold">
                     <ShieldCheck className="h-4 w-4 text-[#F4B400]" />
-                    这个模块现在能表达什么
+                    标杆项目的共性标准
                   </div>
                   <ul className="mt-4 space-y-3 text-sm leading-7 text-white/75">
-                    <li>按行业快速筛选，同时保留代表案例的深度预览。</li>
-                    <li>通过参数、亮点和交付焦点，避免案例只剩“标题 + 图片”。</li>
-                    <li>风格回归整站工业商务气质，但保留足够的视觉记忆点。</li>
+                    <li>不是单点设备拼装，而是液压、电控、结构与控制策略整体协同。</li>
+                    <li>不是只把功能跑通，而是在连续运行、极限工况和维护周期下保持稳定。</li>
+                    <li>不是一次性交付结束，而是把调试、验收、追溯与后续运维一并考虑进去。</li>
                   </ul>
                 </div>
               </div>

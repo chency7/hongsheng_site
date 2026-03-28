@@ -46,13 +46,13 @@ export default function AboutPage() {
       year: '2023', 
       title: '扬帆起航', 
       desc: '公司正式成立，总部落地长沙。组建了核心液压与电控系统集成团队，确立了以技术驱动发展的战略方向。',
-      image: '/images/about/milestone-2023.jpg'
+      image: '/images/banner.jpg'
     },
     { 
       year: '至今', 
       title: '蓬勃发展', 
       desc: '持续完善设备与制造能力，业务已覆盖工程机械、船舶海洋、风力发电等多行业，成功交付多个大型系统与试验检测平台。',
-      image: '/images/about/milestone-now.jpg'
+      image: '/images/about/system-integration.jpg'
     },
   ];
 

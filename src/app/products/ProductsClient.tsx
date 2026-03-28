@@ -328,14 +328,9 @@ export default function ProductsClient() {
                                 <span key={i} className={i > 0 ? "pl-2" : ""}>{spec.label} {spec.value}</span>
                               ))}
                             </div>
-                            <div className="flex gap-2">
-                              <span className="text-[14px] font-medium text-[#333333] border border-[#E8ECF0] bg-white px-4 py-2 rounded hover:bg-[#F5F7FA] transition-colors">
-                                加入对比
-                              </span>
-                              <span className="text-[14px] font-medium text-white bg-[#FF6B35] px-4 py-2 rounded hover:bg-[#e05b29] transition-colors shadow-sm">
-                                加入询价单
-                              </span>
-                            </div>
+                            <span className="text-[14px] font-medium text-white bg-[#4A90D9] px-4 py-2 rounded hover:bg-[#1E3A5F] transition-colors">
+                              查看详情
+                            </span>
                           </div>
                         </div>
                       </Link>

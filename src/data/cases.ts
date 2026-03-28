@@ -127,7 +127,7 @@ export const caseCards: CaseCard[] = [
     systemType: '生产线液压系统',
     scenario: '发泡材料生产',
     highlights: ['产线节拍匹配', '一致性与可追溯', '系统集成交付'],
-    image: '/images/gc/manufacturing.jpg',
+    image: '/images/gc/construction-foaming-line.jpg',
     parameters: [
       { label: '生产节拍', value: '30 s/pc' },
       { label: '定位精度', value: '±0.1 mm' },
@@ -143,7 +143,7 @@ export const caseCards: CaseCard[] = [
     systemType: '生产线液压系统',
     scenario: '起重机制造',
     highlights: ['批量交付一致性', '维护体系完善', '工艺与品控'],
-    image: '/images/gc/manufacturing.jpg',
+    image: '/images/gc/construction-crane-line.jpg',
     parameters: [
       { label: '油箱容积', value: '2000 L' },
       { label: '系统压力', value: '21 MPa' },

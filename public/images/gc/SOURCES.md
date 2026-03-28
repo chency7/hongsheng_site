@@ -14,6 +14,10 @@ Marine case image sources
   Source: https://unsplash.com/photos/bfGbiw5FXK4
 - `construction-distributor-pump.jpg`
   Source: https://unsplash.com/photos/pdpUltYjctc
+- `construction-foaming-line.jpg`
+  Source: https://unsplash.com/photos/MkkKNtS8fYQ
+- `construction-crane-line.jpg`
+  Source: https://unsplash.com/photos/QL2HS1j_N8M
 - `wind-pressure-turbine.jpg`
   Source: https://unsplash.com/photos/fTF4rDl2HvU
 - `wind-fatigue-turbine.jpg`
