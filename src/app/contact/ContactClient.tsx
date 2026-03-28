@@ -17,7 +17,7 @@ type FormState = {
   message: string;
 };
 
-type SubmitStatus = 'idle' | 'submitting' | 'success';
+type SubmitStatus = 'idle' | 'submitting' | 'success' | 'error';
 
 const needTypeOptions: NeedType[] = ['业务咨询', '技术咨询', '售后服务', '合作咨询', '其他'];
 
@@ -35,6 +35,7 @@ export default function ContactClient() {
     message: '',
   });
   const [status, setStatus] = useState<SubmitStatus>('idle');
+  const [submitMessage, setSubmitMessage] = useState('');
 
   const emailError = useMemo(() => {
     if (form.email && !isEmailValid(form.email)) return '邮箱格式不正确';
@@ -55,23 +56,45 @@ export default function ContactClient() {
     e.preventDefault();
     if (!canSubmit) return;
     setStatus('submitting');
+    setSubmitMessage('');
 
-    await new Promise((r) => setTimeout(r, 600));
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
+      });
 
-    setStatus('success');
+      const result = (await response.json().catch(() => null)) as {
+        ok?: boolean;
+        message?: string;
+      } | null;
+
+      if (!response.ok || !result?.ok) {
+        setStatus('error');
+        setSubmitMessage(result?.message || '提交失败，请稍后重试。');
+        return;
+      }
+
+      setStatus('success');
+      setSubmitMessage('');
+    } catch {
+      setStatus('error');
+      setSubmitMessage('提交失败，请检查网络或稍后重试。');
+    }
   };
 
   return (
     <div>
-      <section className="relative overflow-hidden bg-white border-b border-zinc-100 py-12 sm:py-10">
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-blue-50 blur-3xl opacity-60" />
-        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-[#F4B400]/5 blur-3xl opacity-60" />
-        
+      <section className="relative overflow-hidden border-b border-zinc-100 bg-white py-12 sm:py-10">
+        <div className="absolute right-0 top-0 -mr-20 -mt-20 h-96 w-96 rounded-full bg-blue-50 opacity-60 blur-3xl" />
+        <div className="absolute bottom-0 left-0 -mb-20 -ml-20 h-80 w-80 rounded-full bg-[#F4B400]/5 opacity-60 blur-3xl" />
+
         <Container className="relative z-10">
           <MotionReveal>
-            <div className="text-xs font-semibold tracking-[0.18em] text-blue-900/60">
-              CONTACT
-            </div>
+            <div className="text-xs font-semibold tracking-[0.18em] text-blue-900/60">CONTACT</div>
           </MotionReveal>
           <MotionReveal delay={0.06}>
             <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl">
@@ -90,10 +113,18 @@ export default function ContactClient() {
           </MotionReveal>
           <MotionReveal delay={0.18}>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <ButtonLink href="/service" variant="accent" className="bg-[#0B2A4A] text-white hover:bg-[#1a3f66] border-transparent shadow-md hover:shadow-lg">
+              <ButtonLink
+                href="/service"
+                variant="accent"
+                className="border-transparent bg-[#0B2A4A] text-white shadow-md hover:bg-[#1a3f66] hover:shadow-lg"
+              >
                 查看服务支持
               </ButtonLink>
-              <ButtonLink href="/cases" variant="secondary" className="bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300">
+              <ButtonLink
+                href="/cases"
+                variant="secondary"
+                className="border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50"
+              >
                 查看工程案例
               </ButtonLink>
             </div>
@@ -101,7 +132,7 @@ export default function ContactClient() {
         </Container>
       </section>
 
-      <section className="py-14 sm:py-10 bg-white dark:bg-white">
+      <section className="bg-white py-14 dark:bg-white sm:py-10">
         <Container>
           <div className="grid gap-10 lg:grid-cols-12">
             <div className="lg:col-span-5">
@@ -185,6 +216,7 @@ export default function ContactClient() {
                           className="inline-flex items-center justify-center rounded-lg bg-[#0B2A4A] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0B2A4A]/90 dark:bg-[#0B2A4A] dark:text-white dark:hover:bg-[#0B2A4A]/90"
                           onClick={() => {
                             setStatus('idle');
+                            setSubmitMessage('');
                             setForm({
                               name: '',
                               phone: '',
@@ -281,6 +313,13 @@ export default function ContactClient() {
                           placeholder="请详细描述您的需求…"
                         />
                       </label>
+
+                      {status === 'error' && submitMessage ? (
+                        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                          <div className="font-semibold text-red-800">提交失败</div>
+                          <div className="mt-2">{submitMessage}</div>
+                        </div>
+                      ) : null}
 
                       {requiredMissing.length > 0 ? (
                         <div className="rounded-xl border border-zinc-200/80 bg-zinc-50 p-4 text-sm text-zinc-700 dark:border-zinc-200/80 dark:bg-zinc-50 dark:text-zinc-700">
