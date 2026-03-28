@@ -14,6 +14,11 @@ export type CaseCard = {
   scenario: string;
   highlights: string[];
   image: string;
+  gallery?: {
+    src: string;
+    alt: string;
+    tone?: 'wide' | 'detail';
+  }[];
   parameters: { label: string; value: string }[];
   description?: string; // 详细描述
 };
@@ -80,6 +85,28 @@ export const caseCards: CaseCard[] = [
     scenario: '海上打桩作业',
     highlights: ['连续运行稳定性', '环境适应性', '维护便利性'],
     image: '/images/gc/marine-piling-ship-web.jpg',
+    gallery: [
+      {
+        src: '/images/cases/100米打桩船/1.png',
+        alt: '100米打桩船整船实拍',
+        tone: 'wide',
+      },
+      {
+        src: '/images/cases/100米打桩船/2.png',
+        alt: '100米打桩船液压系统细节图一',
+        tone: 'detail',
+      },
+      {
+        src: '/images/cases/100米打桩船/3.png',
+        alt: '100米打桩船液压系统细节图二',
+        tone: 'detail',
+      },
+      {
+        src: '/images/cases/100米打桩船/4.png',
+        alt: '100米打桩船控制部件实拍',
+        tone: 'detail',
+      },
+    ],
     parameters: [
       { label: '系统压力', value: '35 MPa' },
       { label: '最大流量', value: '1200 L/min' },
@@ -96,6 +123,28 @@ export const caseCards: CaseCard[] = [
     scenario: '河道/港口疏浚',
     highlights: ['复杂工况适配', '动力与控制协同', '可靠性设计'],
     image: '/images/gc/marine-dredger-web.jpg',
+    gallery: [
+      {
+        src: '/images/cases/绞吸式挖泥船/1.png',
+        alt: '绞吸式挖泥船整船实拍',
+        tone: 'wide',
+      },
+      {
+        src: '/images/cases/绞吸式挖泥船/2.png',
+        alt: '绞吸式挖泥船液压动力单元实拍',
+        tone: 'detail',
+      },
+      {
+        src: '/images/cases/绞吸式挖泥船/3.png',
+        alt: '绞吸式挖泥船控制台细节',
+        tone: 'detail',
+      },
+      {
+        src: '/images/cases/绞吸式挖泥船/4.png',
+        alt: '绞吸式挖泥船电控柜实拍',
+        tone: 'detail',
+      },
+    ],
     parameters: [
       { label: '绞刀功率', value: '2000 kW' },
       { label: '排距', value: '4000 m' },
@@ -112,6 +161,18 @@ export const caseCards: CaseCard[] = [
     scenario: '船舶设备检测',
     highlights: ['数据可追溯', '测试流程规范化', '联动控制与保护'],
     image: '/images/gc/marine-test-bench.jpg',
+    gallery: [
+      {
+        src: '/images/cases/船用大型综合检测试验台/1.png',
+        alt: '船用大型综合检测试验台系统实拍',
+        tone: 'wide',
+      },
+      {
+        src: '/images/cases/船用大型综合检测试验台/2.png',
+        alt: '船用大型综合检测试验台控制柜实拍',
+        tone: 'detail',
+      },
+    ],
     parameters: [
       { label: '测试压力', value: '60 MPa' },
       { label: '加载力', value: '500 Ton' },
@@ -128,6 +189,28 @@ export const caseCards: CaseCard[] = [
     scenario: '发泡材料生产',
     highlights: ['产线节拍匹配', '一致性与可追溯', '系统集成交付'],
     image: '/images/gc/construction-foaming-line.jpg',
+    gallery: [
+      {
+        src: '/images/cases/大型发泡产线液压及电控系统/1.png',
+        alt: '大型发泡产线整体实拍',
+        tone: 'wide',
+      },
+      {
+        src: '/images/cases/大型发泡产线液压及电控系统/2.png',
+        alt: '大型发泡产线液压站实拍一',
+        tone: 'detail',
+      },
+      {
+        src: '/images/cases/大型发泡产线液压及电控系统/3.png',
+        alt: '大型发泡产线液压站实拍二',
+        tone: 'detail',
+      },
+      {
+        src: '/images/cases/大型发泡产线液压及电控系统/4.png',
+        alt: '大型发泡产线全线视角补充图',
+        tone: 'detail',
+      },
+    ],
     parameters: [
       { label: '生产节拍', value: '30 s/pc' },
       { label: '定位精度', value: '±0.1 mm' },
@@ -144,6 +227,28 @@ export const caseCards: CaseCard[] = [
     scenario: '起重机制造',
     highlights: ['批量交付一致性', '维护体系完善', '工艺与品控'],
     image: '/images/gc/construction-crane-line.jpg',
+    gallery: [
+      {
+        src: '/images/cases/起重机吊臂产线液压站/1.png',
+        alt: '起重机吊臂产线装置实拍',
+        tone: 'wide',
+      },
+      {
+        src: '/images/cases/起重机吊臂产线液压站/2.png',
+        alt: '起重机吊臂产线驱动模块细节',
+        tone: 'detail',
+      },
+      {
+        src: '/images/cases/起重机吊臂产线液压站/3.png',
+        alt: '起重机吊臂产线液压站实拍',
+        tone: 'detail',
+      },
+      {
+        src: '/images/cases/起重机吊臂产线液压站/4.png',
+        alt: '起重机吊臂产线液压站侧视细节',
+        tone: 'detail',
+      },
+    ],
     parameters: [
       { label: '油箱容积', value: '2000 L' },
       { label: '系统压力', value: '21 MPa' },
@@ -160,6 +265,23 @@ export const caseCards: CaseCard[] = [
     scenario: '模具脱模',
     highlights: ['重载稳定输出', '安全保护策略', '可维护性设计'],
     image: '/images/gc/construction-demolding-machine.jpg',
+    gallery: [
+      {
+        src: '/images/cases/300T脱模机液压及电控系统/1).png',
+        alt: '300T脱模机设备整体实拍',
+        tone: 'wide',
+      },
+      {
+        src: '/images/cases/300T脱模机液压及电控系统/2.png',
+        alt: '300T脱模机设备与控制单元实拍',
+        tone: 'detail',
+      },
+      {
+        src: '/images/cases/300T脱模机液压及电控系统/3.png',
+        alt: '300T脱模机液压模块细节',
+        tone: 'detail',
+      },
+    ],
     parameters: [
       { label: '脱模力', value: '300 Ton' },
       { label: '行程', value: '1500 mm' },
@@ -176,6 +298,18 @@ export const caseCards: CaseCard[] = [
     scenario: '混凝土布料',
     highlights: ['多规格适配', '控制可靠性', '现场工况兼容'],
     image: '/images/gc/construction-distributor-pump.jpg',
+    gallery: [
+      {
+        src: '/images/cases/多规格楼面布料机液压及电控系统/1.png',
+        alt: '楼面布料机液压与电控总成实拍',
+        tone: 'wide',
+      },
+      {
+        src: '/images/cases/多规格楼面布料机液压及电控系统/2.png',
+        alt: '楼面布料机电控柜细节实拍',
+        tone: 'detail',
+      },
+    ],
     parameters: [
       { label: '布料半径', value: '28-36 m' },
       { label: '系统压力', value: '28 MPa' },
@@ -192,6 +326,18 @@ export const caseCards: CaseCard[] = [
     scenario: '轨道车辆铰接器检测',
     highlights: ['重复性与一致性', '安全联锁', '报告输出'],
     image: '/images/gc/rail.jpg',
+    gallery: [
+      {
+        src: '/images/cases/轨道交通铰接器试验台/1.png',
+        alt: '轨道交通铰接器试验台系统实拍',
+        tone: 'wide',
+      },
+      {
+        src: '/images/cases/轨道交通铰接器试验台/2.png',
+        alt: '轨道交通铰接器试验台控制终端细节',
+        tone: 'detail',
+      },
+    ],
     parameters: [
       { label: '最大加载', value: '1000 kN' },
       { label: '频率', value: '5 Hz' },
@@ -208,6 +354,18 @@ export const caseCards: CaseCard[] = [
     scenario: '联轴器压力检测',
     highlights: ['指标量化', '数据采集', '流程可追溯'],
     image: '/images/gc/wind-pressure-turbine.jpg',
+    gallery: [
+      {
+        src: '/images/cases/风电联轴器压力测试系统/1.png',
+        alt: '风电联轴器压力测试系统整机实拍',
+        tone: 'wide',
+      },
+      {
+        src: '/images/cases/风电联轴器压力测试系统/2.png',
+        alt: '风电联轴器压力测试系统液压控制单元实拍',
+        tone: 'detail',
+      },
+    ],
     parameters: [
       { label: '测试压力', value: '250 MPa' },
       { label: '保压时间', value: '24 h' },
@@ -224,6 +382,18 @@ export const caseCards: CaseCard[] = [
     scenario: '联轴器疲劳寿命检测',
     highlights: ['长周期稳定运行', '工况可编程', '数据与报告'],
     image: '/images/gc/wind-fatigue-turbine.jpg',
+    gallery: [
+      {
+        src: '/images/cases/风电联轴器疲劳测试系统/1.png',
+        alt: '风电联轴器疲劳测试系统整机实拍',
+        tone: 'wide',
+      },
+      {
+        src: '/images/cases/风电联轴器疲劳测试系统/2.png',
+        alt: '风电联轴器疲劳测试系统波形与数据结果图',
+        tone: 'detail',
+      },
+    ],
     parameters: [
       { label: '最大扭矩', value: '50 kNm' },
       { label: '疲劳次数', value: '10^7' },
@@ -240,6 +410,18 @@ export const caseCards: CaseCard[] = [
     scenario: '制动系统密封检测',
     highlights: ['精密控制', '流程规范化', '可追溯记录'],
     image: '/images/gc/aerospace.jpg',
+    gallery: [
+      {
+        src: '/images/cases/空气制动阀密封件测试试验台/1.png',
+        alt: '空气制动阀密封件测试试验台控制终端实拍',
+        tone: 'wide',
+      },
+      {
+        src: '/images/cases/空气制动阀密封件测试试验台/2.png',
+        alt: '空气制动阀密封件测试工装与台体实拍',
+        tone: 'detail',
+      },
+    ],
     parameters: [
       { label: '气压范围', value: '0-1.0 MPa' },
       { label: '泄漏检测', value: '0.01 mL/min' },

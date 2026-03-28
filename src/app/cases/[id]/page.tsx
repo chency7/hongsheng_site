@@ -137,6 +137,53 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
                 </div>
               </div>
 
+              {c.gallery?.length ? (
+                <div className="rounded-[32px] border border-slate-200 bg-white p-7 shadow-[0_12px_36px_rgba(15,23,42,0.06)]">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-[#0B2A4A]">
+                    <Sparkles className="h-4 w-4 text-[#F4B400]" />
+                    项目实拍与关键部件
+                  </div>
+
+                  <div className="mt-4 grid gap-4 md:grid-cols-2">
+                    {c.gallery.map((item, index) => (
+                      <div
+                        key={item.src}
+                        className={[
+                          'overflow-hidden rounded-[26px] border border-slate-200 bg-slate-50',
+                          index === 0 ? 'md:col-span-2' : '',
+                        ].join(' ')}
+                      >
+                        <div className="flex justify-center bg-slate-100/70 px-4 py-4">
+                          <div
+                            className={[
+                              'relative w-full',
+                              index === 0
+                                ? 'aspect-[16/10] max-w-[520px]'
+                                : 'aspect-[4/5] max-w-[220px]',
+                            ].join(' ')}
+                          >
+                            <Image
+                              src={item.src}
+                              alt={item.alt}
+                              fill
+                              className="object-contain"
+                              sizes={
+                                index === 0
+                                  ? '(min-width: 768px) 520px, 100vw'
+                                  : '(min-width: 768px) 220px, 100vw'
+                              }
+                            />
+                          </div>
+                        </div>
+                        <div className="border-t border-slate-200 px-4 py-3 text-sm text-slate-600">
+                          {item.alt}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
               <div className="rounded-[32px] border border-slate-200 bg-white p-7 shadow-[0_12px_36px_rgba(15,23,42,0.06)]">
                 <div className="flex items-center gap-2 text-sm font-semibold text-[#0B2A4A]">
                   <Layers3 className="h-4 w-4 text-[#F4B400]" />
