@@ -24,6 +24,11 @@ export const metadata: Metadata = {
   icons: {
     shortcut: '/images/hs/logo.png',
   },
+  verification: {
+    other: {
+      'baidu-site-verification': 'codeva-LHvZdrkgpc',
+    },
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
