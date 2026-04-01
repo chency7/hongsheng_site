@@ -20,7 +20,29 @@ import { caseCards } from '@/data/cases';
 import { categoryOptions, products } from '@/data/products';
 
 export const metadata = {
-  title: '技术实力与定制方案',
+  title: '技术实力 - 液压系统设计与制造能力',
+  description:
+    '湖南协力鸿胜技术实力展示：系统定义能力、机电液协同设计、制造与测试闭环、长期交付能力。拥有数控加工中心、深孔镗床、焊接机器人等制造资源，服务工程机械、船舶海洋等行业。',
+  keywords: [
+    '技术实力',
+    '液压系统设计',
+    '机电液集成',
+    '精密制造',
+    '试验检测',
+    '数控加工',
+    '液压制造能力',
+    '焊接机器人',
+    '深孔镗床',
+    '仿真验证',
+  ],
+  openGraph: {
+    title: '技术实力 - 液压系统设计与制造能力 | 湖南协力鸿胜机械',
+    description: '系统定义能力、机电液协同设计、制造与测试闭环、长期交付能力。',
+    url: 'https://www.xl-honsun.com/capability',
+  },
+  alternates: {
+    canonical: 'https://www.xl-honsun.com/capability',
+  },
 };
 
 type CapabilityDimension = {
