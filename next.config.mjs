@@ -1,8 +1,5 @@
 const nextConfig = {
   output: 'standalone',
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   images: {
     domains: [],
     unoptimized: false,
