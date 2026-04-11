@@ -4,9 +4,32 @@ import MotionReveal from '@/components/site/MotionReveal';
 import SectionHeading from '@/components/site/SectionHeading';
 import ButtonLink from '@/components/site/ButtonLink';
 import Image from 'next/image';
+import { BreadcrumbSchema, ServiceSchema } from '@/components/seo/SchemaOrg';
 
 export const metadata = {
-  title: '定制方案',
+  title: '定制方案 - 液压系统解决方案',
+  description:
+    '湖南协力鸿胜提供工程机械、船舶海洋、风力发电、轨道交通等行业液压系统定制解决方案。从需求分析、方案设计、仿真验证到精益制造与运维支持的全流程服务。',
+  keywords: [
+    '液压系统方案',
+    '定制液压解决方案',
+    '工程机械液压方案',
+    '船舶液压系统',
+    '风电液压测试',
+    '轨道交通液压',
+    '液压系统设计',
+    '仿真验证',
+    '工况分析',
+    '液压定制',
+  ],
+  openGraph: {
+    title: '定制方案 - 液压系统解决方案 | 湖南协力鸿胜机械',
+    description: '提供工程机械、船舶海洋、风电等行业液压系统定制解决方案。',
+    url: 'https://www.xl-honsun.com/solutions',
+  },
+  alternates: {
+    canonical: 'https://www.xl-honsun.com/solutions',
+  },
 };
 
 type SolutionPillar = {
@@ -81,142 +104,188 @@ export default function SolutionsPage() {
   const deliverables: { title: string; items: string[] }[] = [
     {
       title: '方案交付清单',
-      items: ['需求与工况确认记录', '系统方案与关键器件选型', '原理图/电气图（按项目）', '仿真验证结论（按项目）', '检测与验收支持'],
+      items: [
+        '需求与工况确认记录',
+        '系统方案与关键器件选型',
+        '原理图/电气图（按项目）',
+        '仿真验证结论（按项目）',
+        '检测与验收支持',
+      ],
     },
     {
       title: '运维交付清单',
-      items: ['使用与维护建议', '预防性维护计划建议', '备件与易损件建议', '升级路径与优化建议（可选）'],
+      items: [
+        '使用与维护建议',
+        '预防性维护计划建议',
+        '备件与易损件建议',
+        '升级路径与优化建议（可选）',
+      ],
     },
   ];
 
   return (
-    <div>
-      <section className="border-b border-zinc-200/70 bg-zinc-50 py-12 dark:border-white/10 dark:bg-white/5 sm:py-16">
-        <Container>
-          <MotionReveal>
-            <div className="text-xs font-semibold tracking-[0.18em] text-[#0B2A4A]/70 dark:text-white/60">SOLUTIONS</div>
-          </MotionReveal>
-          <MotionReveal delay={0.06}>
-            <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-[#0B0F16] dark:text-white sm:text-4xl">
-              需求导向的深度定制
-            </h1>
-          </MotionReveal>
-          <MotionReveal delay={0.12}>
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-zinc-700 dark:text-zinc-300">
-              我们以工况与约束为边界，构建系统方案并通过仿真验证与严格品控实现稳定交付，为复杂场景提供可靠的动力与控制支持。
-            </p>
-          </MotionReveal>
-          <MotionReveal delay={0.16}>
-            <div className="mt-8 overflow-hidden rounded-2xl border border-zinc-200/80 bg-white dark:border-white/10 dark:bg-black/30">
-              <div className="relative aspect-[16/8]">
-                <Image src="/images/hs/hero.svg" alt="定制方案主视觉占位图" fill className="object-cover" />
+    <>
+      <BreadcrumbSchema
+        items={[
+          { name: '首页', url: '/' },
+          { name: '定制方案', url: '/solutions' },
+        ]}
+      />
+      <ServiceSchema
+        name="液压系统定制解决方案"
+        description="从需求分析、方案设计、仿真验证到精益制造与运维支持的全流程服务"
+        serviceType="液压系统设计与集成"
+        areaServed={['工程机械', '船舶海洋', '风力发电', '轨道交通']}
+      />
+      <div>
+        <section className="border-b border-zinc-200/70 bg-zinc-50 py-12 dark:border-white/10 dark:bg-white/5 sm:py-16">
+          <Container>
+            <MotionReveal>
+              <div className="text-xs font-semibold tracking-[0.18em] text-[#0B2A4A]/70 dark:text-white/60">
+                SOLUTIONS
               </div>
-            </div>
-          </MotionReveal>
-          <MotionReveal delay={0.18}>
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <ButtonLink href="/contact" variant="accent">
-                预约方案评审
-              </ButtonLink>
-              <ButtonLink href="/cases" variant="secondary">
-                查看案例验证
-              </ButtonLink>
-            </div>
-          </MotionReveal>
-        </Container>
-      </section>
-
-      <section className="py-14 sm:py-20">
-        <Container>
-          <MotionReveal>
-            <SectionHeading
-              eyebrow="PROCESS"
-              title="方案方法与交付闭环"
-              description="从需求、设计、制造到运维支持的全流程服务，减少不确定性，提高可靠性与交付效率。"
-            />
-          </MotionReveal>
-
-          <div className="mt-10 grid gap-4 lg:grid-cols-2">
-            {pillars.map((p, idx) => (
-              <MotionReveal key={p.title} delay={idx * 0.05}>
-                <div className="rounded-2xl border border-zinc-200/80 bg-white p-7 dark:border-white/10 dark:bg-black/30">
-                  <div className="text-lg font-semibold text-[#0B0F16] dark:text-white">{p.title}</div>
-                  <div className="mt-3 text-sm leading-7 text-zinc-700 dark:text-zinc-300">{p.description}</div>
-                  <ul className="mt-5 grid gap-2 text-sm leading-7 text-zinc-700 dark:text-zinc-300 sm:grid-cols-3">
-                    {p.items.map((i) => (
-                      <li key={i} className="rounded-lg bg-zinc-50 px-3 py-2 dark:bg-white/5">
-                        {i}
-                      </li>
-                    ))}
-                  </ul>
+            </MotionReveal>
+            <MotionReveal delay={0.06}>
+              <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-[#0B0F16] dark:text-white sm:text-4xl">
+                需求导向的深度定制
+              </h1>
+            </MotionReveal>
+            <MotionReveal delay={0.12}>
+              <p className="mt-4 max-w-3xl text-sm leading-7 text-zinc-700 dark:text-zinc-300">
+                我们以工况与约束为边界，构建系统方案并通过仿真验证与严格品控实现稳定交付，为复杂场景提供可靠的动力与控制支持。
+              </p>
+            </MotionReveal>
+            <MotionReveal delay={0.16}>
+              <div className="mt-8 overflow-hidden rounded-2xl border border-zinc-200/80 bg-white dark:border-white/10 dark:bg-black/30">
+                <div className="relative aspect-[16/8]">
+                  <Image
+                    src="/images/hs/hero.svg"
+                    alt="定制方案主视觉占位图"
+                    fill
+                    className="object-cover"
+                  />
                 </div>
-              </MotionReveal>
-            ))}
-          </div>
-        </Container>
-      </section>
+              </div>
+            </MotionReveal>
+            <MotionReveal delay={0.18}>
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <ButtonLink href="/contact" variant="accent">
+                  预约方案评审
+                </ButtonLink>
+                <ButtonLink href="/cases" variant="secondary">
+                  查看案例验证
+                </ButtonLink>
+              </div>
+            </MotionReveal>
+          </Container>
+        </section>
 
-      <section className="border-y border-zinc-200/70 bg-zinc-50 py-14 dark:border-white/10 dark:bg-white/5 sm:py-20">
-        <Container>
-          <MotionReveal>
-            <SectionHeading
-              eyebrow="INDUSTRIES"
-              title="按行业的解决方案"
-              description="覆盖关键行业与工况场景，形成可复用的系统能力与交付经验。"
-            />
-          </MotionReveal>
+        <section className="py-14 sm:py-20">
+          <Container>
+            <MotionReveal>
+              <SectionHeading
+                eyebrow="PROCESS"
+                title="方案方法与交付闭环"
+                description="从需求、设计、制造到运维支持的全流程服务，减少不确定性，提高可靠性与交付效率。"
+              />
+            </MotionReveal>
 
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {industries.map((i, idx) => (
-              <MotionReveal key={i.title} delay={idx * 0.04}>
-                <div className="rounded-2xl border border-zinc-200/80 bg-white p-7 transition-colors hover:bg-zinc-50 dark:border-white/10 dark:bg-black/30 dark:hover:bg-white/5">
-                  <div className="text-lg font-semibold text-[#0B0F16] dark:text-white">{i.title}</div>
-                  <div className="mt-3 text-sm leading-7 text-zinc-700 dark:text-zinc-300">{i.description}</div>
-                  <div className="mt-5 grid gap-2 text-sm leading-7 text-zinc-700 dark:text-zinc-300">
-                    {i.examples.map((e) => (
-                      <div key={e} className="rounded-lg bg-zinc-50 px-3 py-2 dark:bg-white/5">
-                        {e}
-                      </div>
-                    ))}
+            <div className="mt-10 grid gap-4 lg:grid-cols-2">
+              {pillars.map((p, idx) => (
+                <MotionReveal key={p.title} delay={idx * 0.05}>
+                  <div className="rounded-2xl border border-zinc-200/80 bg-white p-7 dark:border-white/10 dark:bg-black/30">
+                    <div className="text-lg font-semibold text-[#0B0F16] dark:text-white">
+                      {p.title}
+                    </div>
+                    <div className="mt-3 text-sm leading-7 text-zinc-700 dark:text-zinc-300">
+                      {p.description}
+                    </div>
+                    <ul className="mt-5 grid gap-2 text-sm leading-7 text-zinc-700 dark:text-zinc-300 sm:grid-cols-3">
+                      {p.items.map((i) => (
+                        <li key={i} className="rounded-lg bg-zinc-50 px-3 py-2 dark:bg-white/5">
+                          {i}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <div className="mt-6 h-[2px] w-10 rounded-full bg-[#F4B400]" />
-                </div>
-              </MotionReveal>
-            ))}
-          </div>
-        </Container>
-      </section>
+                </MotionReveal>
+              ))}
+            </div>
+          </Container>
+        </section>
 
-      <section className="py-14 sm:py-20">
-        <Container>
-          <MotionReveal>
-            <SectionHeading eyebrow="DELIVERABLES" title="交付内容（可对齐验收）" description="以可评审与可追溯为原则组织交付物，便于项目协作与后续维护。"/>
-          </MotionReveal>
+        <section className="border-y border-zinc-200/70 bg-zinc-50 py-14 dark:border-white/10 dark:bg-white/5 sm:py-20">
+          <Container>
+            <MotionReveal>
+              <SectionHeading
+                eyebrow="INDUSTRIES"
+                title="按行业的解决方案"
+                description="覆盖关键行业与工况场景，形成可复用的系统能力与交付经验。"
+              />
+            </MotionReveal>
 
-          <div className="mt-10 grid gap-4 lg:grid-cols-2">
-            {deliverables.map((d, idx) => (
-              <MotionReveal key={d.title} delay={idx * 0.06}>
-                <div className="rounded-2xl border border-zinc-200/80 bg-white p-7 dark:border-white/10 dark:bg-black/30">
-                  <div className="text-lg font-semibold text-[#0B0F16] dark:text-white">{d.title}</div>
-                  <ul className="mt-4 grid gap-2 text-sm leading-7 text-zinc-700 dark:text-zinc-300">
-                    {d.items.map((it) => (
-                      <li key={it} className="rounded-lg bg-zinc-50 px-3 py-2 dark:bg-white/5">
-                        {it}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </MotionReveal>
-            ))}
-          </div>
+            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {industries.map((i, idx) => (
+                <MotionReveal key={i.title} delay={idx * 0.04}>
+                  <div className="rounded-2xl border border-zinc-200/80 bg-white p-7 transition-colors hover:bg-zinc-50 dark:border-white/10 dark:bg-black/30 dark:hover:bg-white/5">
+                    <div className="text-lg font-semibold text-[#0B0F16] dark:text-white">
+                      {i.title}
+                    </div>
+                    <div className="mt-3 text-sm leading-7 text-zinc-700 dark:text-zinc-300">
+                      {i.description}
+                    </div>
+                    <div className="mt-5 grid gap-2 text-sm leading-7 text-zinc-700 dark:text-zinc-300">
+                      {i.examples.map((e) => (
+                        <div key={e} className="rounded-lg bg-zinc-50 px-3 py-2 dark:bg-white/5">
+                          {e}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-6 h-[2px] w-10 rounded-full bg-[#F4B400]" />
+                  </div>
+                </MotionReveal>
+              ))}
+            </div>
+          </Container>
+        </section>
 
-          <div className="mt-10">
-            <ButtonLink href="/contact" variant="accent">
-              提交需求与参数
-            </ButtonLink>
-          </div>
-        </Container>
-      </section>
-    </div>
+        <section className="py-14 sm:py-20">
+          <Container>
+            <MotionReveal>
+              <SectionHeading
+                eyebrow="DELIVERABLES"
+                title="交付内容（可对齐验收）"
+                description="以可评审与可追溯为原则组织交付物，便于项目协作与后续维护。"
+              />
+            </MotionReveal>
+
+            <div className="mt-10 grid gap-4 lg:grid-cols-2">
+              {deliverables.map((d, idx) => (
+                <MotionReveal key={d.title} delay={idx * 0.06}>
+                  <div className="rounded-2xl border border-zinc-200/80 bg-white p-7 dark:border-white/10 dark:bg-black/30">
+                    <div className="text-lg font-semibold text-[#0B0F16] dark:text-white">
+                      {d.title}
+                    </div>
+                    <ul className="mt-4 grid gap-2 text-sm leading-7 text-zinc-700 dark:text-zinc-300">
+                      {d.items.map((it) => (
+                        <li key={it} className="rounded-lg bg-zinc-50 px-3 py-2 dark:bg-white/5">
+                          {it}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </MotionReveal>
+              ))}
+            </div>
+
+            <div className="mt-10">
+              <ButtonLink href="/contact" variant="accent">
+                提交需求与参数
+              </ButtonLink>
+            </div>
+          </Container>
+        </section>
+      </div>
+    </>
   );
 }
