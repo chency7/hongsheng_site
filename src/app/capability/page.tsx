@@ -130,7 +130,7 @@ const industryMatrix: IndustryMatrix[] = [
       '300T脱模机液压及电控系统',
       '多规格楼面布料机液压及电控系统',
     ],
-    products: ['33米布料机液压站', '动臂塔机液压系统'],
+    products: ['布料机液压站', '动臂塔机液压系统'],
   },
   {
     title: '船舶海洋',
