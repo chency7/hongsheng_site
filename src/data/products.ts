@@ -58,9 +58,20 @@ export interface ProductSpec {
 
 export interface ProductDetailTab {
   title: string;
-  content: string; // 可以是 markdown 格式
-  type?: 'markdown' | 'pdf' | 'file'; // 标识 tab 的类型，默认为 markdown
-  fileUrl?: string; // 如果 type 是 file，这里提供文件的路径
+  content: string;
+  type?: 'markdown' | 'pdf' | 'file';
+  fileUrl?: string;
+}
+
+export interface ProductSubCategory {
+  id: string;
+  name: string;
+  model: string;
+  image: string;
+  images: string[];
+  specs: ProductSpec[];
+  hydraulicParams?: string;
+  electricParams?: string;
 }
 
 export interface Product {
@@ -79,30 +90,150 @@ export interface Product {
   description: string;
   features: string[];
   detailTabs?: ProductDetailTab[];
+  subCategories?: ProductSubCategory[];
 }
 
 export const productBrands: ProductBrand[] = ['福艾德', '派克', '力士乐', '贺德克', '其他'];
 
 export const products: Product[] = [
   {
-    id: 'p-33m-placing-boom',
+    id: 'p-concrete-placing-boom',
     name: '布料机液压站',
-    model: 'HS-33M-PB',
+    model: 'HS-17M-PB/HS-33M-PB/HS-36M-PB',
     category: 'concrete-placing-boom',
     brand: '其他',
     price: 0,
     rating: 5.0,
     sales: 0,
     createdAt: '2024-03-22',
-    image: '/images/products/33米布料机液压站/1.jpg',
-    images: Array.from({ length: 17 }, (_, i) => `/images/products/33米布料机液压站/${i + 1}.jpg`),
+    image: '/images/products/布料机液压站/17米布料机泵站/1.jpg',
+    images: Array.from({ length: 9 }, (_, i) => `/images/products/布料机液压站/17米布料机泵站/${i + 1}.jpg`),
     specs: [
-      { label: '适配臂架长度', value: '33米' },
+      { label: '适配臂架长度', value: '17/21米/33米/36米' },
       { label: '系统类型', value: '布料机专用液压站' },
       { label: '应用领域', value: '工程机械、混凝土浇筑' },
     ],
     description: '提供专业的混凝土楼面布料机全系统解决方案，集液压系统、电控系统、液压油缸于一体，完美实现布料机的各项功能。',
     features: ['全套一体化设计', '23年制造经验', '系统专项优化', '智能电控技术', '全环境适应性'],
+    subCategories: [
+      {
+        id: '17m',
+        name: '17米布料机泵站',
+        model: 'HS-17M-PB',
+        image: '/images/products/布料机液压站/17米布料机泵站/1.jpg',
+        images: Array.from({ length: 9 }, (_, i) => `/images/products/布料机液压站/17米布料机泵站/${i + 1}.jpg`),
+        specs: [
+          { label: '适配臂架长度', value: '17/21米' },
+          { label: '系统类型', value: '布料机专用液压站' },
+          { label: '功率', value: '5.5KW' },
+          { label: '系统压力', value: '30Mpa' },
+          { label: '油箱容积', value: '120L' },
+          { label: '系统流量', value: '11L/min' },
+        ],
+        hydraulicParams: `| 型号 | 17/21M-3RM | 17/21M-3RH |
+|------|------------|------------|
+| **电源** | 380V/50Hz/60Hz | 380V/50Hz/60Hz |
+| **功率** | 5.5KW | 5.5KW |
+| **系统压力** | 30Mpa | 30Mpa |
+| **油箱容积** | 120L | 120L |
+| **系统流量** | 11L/min | 11L/min |
+| **风机功率** | 200W | 200W |
+| **主阀品牌** | 力士乐乐卓 | 力士乐乐卓 |
+| **控制阀类型** | 国产电磁阀组 | 进口电磁阀组 |
+| **控制方式** | 开关量控制 | 开关量控制 |`,
+        electricParams: `| 型号 | 17/21M-3RM-DK | 17/21M-3RH-DK |
+|------|---------------|---------------|
+| **主回路电压** | 三相380VAC/50Hz | 三相380VAC/50Hz |
+| **控制回路电压** | 单相220VAC & 24VDC | 单相220VAC & 24VDC |
+| **控制模式** | 面板/有线/无线遥控 | 面板/有线/无线遥控 |
+| **控制方式** | 继电器控制，24VDC/8A | 继电器控制，24VDC/8A |
+| **急停功能** | 有 | 有 |
+| **短路/过载保护** | 有 | 有 |
+| **元器件品牌** | 施耐德/霍尼韦尔 | 施耐德/霍尼韦尔 |
+| **无线遥控品牌** | 禹鼎 | 禹鼎 |
+| **整机尺寸** | 550×750×250mm | 550×750×250mm |
+| **整机重量** | 50Kg | 50Kg |
+| **安装方式** | 壁挂式 | 壁挂式 |`
+      },
+      {
+        id: '33m',
+        name: '33米布料机泵站',
+        model: 'HS-33M-PB',
+        image: '/images/products/布料机液压站/33米布料机泵站/1.jpg',
+        images: Array.from({ length: 19 }, (_, i) => `/images/products/布料机液压站/33米布料机泵站/${i + 1}.jpg`),
+        specs: [
+          { label: '适配臂架长度', value: '33米' },
+          { label: '系统类型', value: '布料机专用液压站' },
+          { label: '功率', value: '18.5KW/22KW' },
+          { label: '系统压力', value: '30Mpa' },
+          { label: '油箱容积', value: '140L/175L' },
+          { label: '系统流量', value: '26L/min/36L/min' },
+        ],
+        hydraulicParams: `| 型号 | 33M-3RM | 33M-4RM | 33M-4RH |
+|------|----------|----------|----------|
+| **电源** | 380V/50Hz/60Hz | 380V/50Hz/60Hz | 380V/50Hz/60Hz |
+| **功率** | 18.5KW | 22KW | 22KW |
+| **系统压力** | 30Mpa | 30Mpa | 30Mpa |
+| **油箱容积** | 140L | 175L | 175L |
+| **系统流量** | 26L/min | 36L/min | 36L/min |
+| **风机功率** | 300W | 300W | 300W |
+| **主阀品牌** | 力度克/海德罗斯 | 力度克/海德罗斯 | 力度克/海德罗斯 |
+| **控制阀类型** | 进口电磁阀组 | 进口电磁阀组 | 进口多路阀 |
+| **控制方式** | 开关量控制 | 比例量控制 | 比例量控制 |`,
+        electricParams: `| 型号 | 33M-3RM-DK | 33M-4RM-DK | 33M-4RH-DK |
+|------|-------------|-------------|-------------|
+| **主回路电压** | 三相380VAC/50Hz | 三相380VAC/50Hz | 三相380VAC/50Hz |
+| **控制回路电压** | 单相220VAC & 24VDC | 单相220VAC & 24VDC | 单相220VAC & 24VDC |
+| **控制模式** | 面板/有线/无线遥控 | 面板/有线/无线遥控 | 面板/无线遥控 |
+| **控制方式** | 继电器控制，24VDC/8A | 继电器控制，24VDC/9A | 控制器+触摸屏 |
+| **急停功能** | 有 | 有 | 有 |
+| **短路/过载保护** | 有 | 有 | 有 |
+| **元器件品牌** | 施耐德/霍尼韦尔 | 施耐德/霍尼韦尔 | 施耐德/霍尼韦尔 |
+| **无线遥控品牌** | 禹鼎 | 禹鼎 | 欧姆 |
+| **整机尺寸** | 550×750×250mm | 550×750×250mm | 550×750×250mm |
+| **整机重量** | 50Kg | 50Kg | 50Kg |
+| **安装方式** | 壁挂式 | 壁挂式 | 壁挂式 |`
+      },
+      {
+        id: '36m',
+        name: '36米布料机泵站',
+        model: 'HS-36M-PB',
+        image: '/images/products/布料机液压站/36米布料机泵站/1.jpg',
+        images: ['/images/products/布料机液压站/36米布料机泵站/1.jpg'],
+        specs: [
+          { label: '适配臂架长度', value: '36米' },
+          { label: '系统类型', value: '布料机专用液压站' },
+          { label: '功率', value: '22KW' },
+          { label: '系统压力', value: '30Mpa' },
+          { label: '油箱容积', value: '175L' },
+          { label: '系统流量', value: '36L/min' },
+        ],
+        hydraulicParams: `| 型号 | 36M-4RH |
+|------|----------|
+| **电源** | 380V/50Hz/60Hz |
+| **功率** | 22KW |
+| **系统压力** | 30Mpa |
+| **油箱容积** | 175L |
+| **系统流量** | 36L/min |
+| **风机功率** | 300W |
+| **主阀品牌** | 力度克/海德罗斯 |
+| **控制阀类型** | 进口多路阀 |
+| **控制方式** | 比例量控制 |`,
+        electricParams: `| 型号 | 36M-4RH-DK |
+|------|-------------|
+| **主回路电压** | 三相380VAC/50Hz |
+| **控制回路电压** | 单相220VAC & 24VDC |
+| **控制模式** | 面板/无线遥控 |
+| **控制方式** | 控制器+触摸屏 |
+| **急停功能** | 有 |
+| **短路/过载保护** | 有 |
+| **元器件品牌** | 施耐德/霍尼韦尔 |
+| **无线遥控品牌** | 欧姆 |
+| **整机尺寸** | 550×750×250mm |
+| **整机重量** | 50Kg |
+| **安装方式** | 壁挂式 |`
+      }
+    ],
     detailTabs: [
       {
         title: '产品概述',
@@ -200,7 +331,7 @@ export const products: Product[] = [
         title: '产品资料',
         content: '产品宣传册、简介与选型指南',
         type: 'file',
-        fileUrl: '/images/products/33米布料机液压站/产品简介.pptx'
+        fileUrl: '/images/products/布料机液压站/产品简介.pptx'
       }
     ]
   },
@@ -259,8 +390,12 @@ export const products: Product[] = [
     image: '/images/products/组合阀组/1.png',
     images: [
       '/images/products/组合阀组/1.png',
-      '/images/products/组合阀组/2.png',
-      '/images/products/组合阀组/3.png'
+      '/images/products/组合阀组/加工.jpg',
+      '/images/products/组合阀组/加工1.jpg',
+      '/images/products/组合阀组/加工2.jpg',
+      '/images/products/组合阀组/三一塔机.jpg',
+      '/images/products/组合阀组/湖南泰德乾.jpg',
+      '/images/products/组合阀组/湖南亚太.jpg'
     ],
     specs: [
       { label: '系统定位', value: '液压系统集成控制单元' },
@@ -390,41 +525,169 @@ export const products: Product[] = [
     rating: 5.0,
     sales: 0,
     createdAt: '2024-03-22',
-    image: '/images/products/试验检测设备/1.png',
+    image: '/images/products/试验检测设备/常规试验台/1.png',
     images: [
-      '/images/products/试验检测设备/1.png',
-      '/images/products/试验检测设备/2.png',
-      '/images/products/试验检测设备/3.png',
-      '/images/products/试验检测设备/4.png',
-      '/images/products/试验检测设备/5.png',
-      '/images/products/试验检测设备/6.png'
+      '/images/products/试验检测设备/常规试验台/1.png',
+      '/images/products/试验检测设备/常规试验台/2.png',
+      '/images/products/试验检测设备/常规试验台/3.png',
+      '/images/products/试验检测设备/常规试验台/4.png',
+      '/images/products/试验检测设备/常规试验台/5.png',
+      '/images/products/试验检测设备/常规试验台/6.png'
     ],
     specs: [
-      { label: '包含设备', value: '座椅疲劳试验台、比例阀测试试验台' },
+      { label: '设备类型', value: '多型号试验检测设备' },
       { label: '控制系统', value: '全自动操作台、智能测试系统' },
-      { label: '动力来源', value: '伺服机器动力源' },
+      { label: '服务模式', value: '量身定制解决方案' },
     ],
-    description: '提供专业的试验检测设备，包括座椅疲劳试验台和比例阀测试试验台，配备全自动操作台与智能测试系统，确保高精度检测。',
-    features: ['疲劳测试', '比例阀检测', '全自动操作', '伺服动力'],
+    description: '提供专业的试验检测设备，包括多种类型的试验台和测试系统，配备全自动操作台与智能测试系统，确保高精度检测。',
+    features: ['多型号试验台', '全自动操作', '智能测试系统', '量身定制'],
+    subCategories: [
+      {
+        id: 'normal',
+        name: '常规试验台',
+        model: 'HS-TEST-NORMAL',
+        image: '/images/products/试验检测设备/常规试验台/1.png',
+        images: [
+          '/images/products/试验检测设备/常规试验台/1.png',
+          '/images/products/试验检测设备/常规试验台/2.png',
+          '/images/products/试验检测设备/常规试验台/3.png',
+          '/images/products/试验检测设备/常规试验台/4.png',
+          '/images/products/试验检测设备/常规试验台/5.png',
+          '/images/products/试验检测设备/常规试验台/6.png'
+        ],
+        specs: [
+          { label: '设备类型', value: '常规试验台' },
+          { label: '控制系统', value: '全自动操作台' },
+          { label: '应用领域', value: '各类液压元件测试' },
+        ]
+      },
+      {
+        id: 'seat',
+        name: '时代新材座椅疲劳试验台',
+        model: 'HS-TEST-SEAT',
+        image: '/images/products/试验检测设备/时代新材座椅疲劳试验台/1.jpg',
+        images: [
+          '/images/products/试验检测设备/时代新材座椅疲劳试验台/1.jpg',
+          '/images/products/试验检测设备/时代新材座椅疲劳试验台/2.jpg'
+        ],
+        specs: [
+          { label: '设备类型', value: '座椅疲劳试验台' },
+          { label: '控制系统', value: '智能疲劳测试系统' },
+          { label: '应用领域', value: '座椅耐久性及疲劳测试' },
+        ]
+      },
+      {
+        id: 'windshield',
+        name: '时代新材风挡疲劳试验台',
+        model: 'HS-TEST-WINDSHIELD',
+        image: '/images/products/试验检测设备/时代新材风挡疲劳试验台/1.jpg',
+        images: [
+          '/images/products/试验检测设备/时代新材风挡疲劳试验台/1.jpg',
+          '/images/products/试验检测设备/时代新材风挡疲劳试验台/2.jpg',
+          '/images/products/试验检测设备/时代新材风挡疲劳试验台/3.jpg',
+          '/images/products/试验检测设备/时代新材风挡疲劳试验台/4.jpg',
+          '/images/products/试验检测设备/时代新材风挡疲劳试验台/5.jpg'
+        ],
+        specs: [
+          { label: '设备类型', value: '风挡疲劳试验台' },
+          { label: '控制系统', value: '智能测试系统' },
+          { label: '应用领域', value: '风挡耐久性及疲劳测试' },
+        ]
+      },
+      {
+        id: 'pcu',
+        name: '时代新材PCU组件密封性能测试台',
+        model: 'HS-TEST-PCU',
+        image: '/images/products/试验检测设备/时代新材PCU组件密封性能测试台/1.jpg',
+        images: [
+          '/images/products/试验检测设备/时代新材PCU组件密封性能测试台/1.jpg',
+          '/images/products/试验检测设备/时代新材PCU组件密封性能测试台/2.jpg',
+          '/images/products/试验检测设备/时代新材PCU组件密封性能测试台/3.jpg',
+          '/images/products/试验检测设备/时代新材PCU组件密封性能测试台/4.jpg'
+        ],
+        specs: [
+          { label: '设备类型', value: 'PCU组件密封性能测试台' },
+          { label: '控制系统', value: '全自动操作台' },
+          { label: '应用领域', value: 'PCU组件密封性能检测' },
+        ]
+      },
+      {
+        id: 'double-cylinder',
+        name: '时代新材双缸加载试验平台',
+        model: 'HS-TEST-DOUBLE',
+        image: '/images/products/试验检测设备/时代新材双缸加载试验平台/1.jpg',
+        images: [
+          '/images/products/试验检测设备/时代新材双缸加载试验平台/1.jpg',
+          '/images/products/试验检测设备/时代新材双缸加载试验平台/2.jpg',
+          '/images/products/试验检测设备/时代新材双缸加载试验平台/3.jpg',
+          '/images/products/试验检测设备/时代新材双缸加载试验平台/4.jpg',
+          '/images/products/试验检测设备/时代新材双缸加载试验平台/5.jpg',
+          '/images/products/试验检测设备/时代新材双缸加载试验平台/6.jpg',
+          '/images/products/试验检测设备/时代新材双缸加载试验平台/7.jpg'
+        ],
+        specs: [
+          { label: '设备类型', value: '双缸加载试验平台' },
+          { label: '控制系统', value: '智能测试系统' },
+          { label: '应用领域', value: '双缸加载性能测试' },
+        ]
+      },
+      {
+        id: 'coupler',
+        name: '时代新材车钩试验装置',
+        model: 'HS-TEST-COUPLER',
+        image: '/images/products/试验检测设备/时代新材车钩试验装置/1.jpg',
+        images: [
+          '/images/products/试验检测设备/时代新材车钩试验装置/1.jpg'
+        ],
+        specs: [
+          { label: '设备类型', value: '车钩试验装置' },
+          { label: '控制系统', value: '全自动操作台' },
+          { label: '应用领域', value: '车钩性能测试' },
+        ]
+      },
+      {
+        id: 'wind-power',
+        name: '时代新材风电弹性支撑补液蓄能器组',
+        model: 'HS-TEST-WIND',
+        image: '/images/products/试验检测设备/时代新材风电弹性支撑补液蓄能器组/1.jpg',
+        images: [
+          '/images/products/试验检测设备/时代新材风电弹性支撑补液蓄能器组/1.jpg'
+        ],
+        specs: [
+          { label: '设备类型', value: '风电弹性支撑补液蓄能器组' },
+          { label: '控制系统', value: '智能测试系统' },
+          { label: '应用领域', value: '风电弹性支撑测试' },
+        ]
+      }
+    ],
     detailTabs: [
       {
         title: '产品简介',
         content: `
 ### 试验检测设备
 
-我们提供高精度、高可靠性的专业试验检测设备，主要包括以下两大类，满足不同工业测试需求：
+我们提供高精度、高可靠性的专业试验检测设备，主要包括以下类型，满足不同工业测试需求：
 
-#### 1. 座椅疲劳试验台
-专为座椅耐久性及疲劳测试设计，配备智能疲劳测试系统。
-- **图1**：座椅疲劳试验台（整体外观）
-- **图2**：座椅疲劳试验台（内部测试结构）
-- **图3**：疲劳测试系统（操作界面，支持静压参数设置、位移/速度监控等功能）
+#### 1. 常规试验台
+标准型试验设备，适用于各类液压元件的基础性能测试。
 
-#### 2. 比例阀测试试验台
-用于液压比例阀的性能检测与精确校准。
-- **图4**：比例阀测试试验台（3D结构设计图）
-- **图5**：全自动操作台（提供直观的控制面板和显示系统）
-- **图6**：伺服机器动力源（提供稳定、高效的液压动力支持）
+#### 2. 时代新材座椅疲劳试验台
+专为座椅耐久性及疲劳测试设计，配备智能疲劳测试系统，支持静压参数设置、位移/速度监控等功能。
+
+#### 3. 时代新材风挡疲劳试验台
+用于风挡总成的耐久性及疲劳测试，配备智能测试系统，确保测试精度。
+
+#### 4. 时代新材PCU组件密封性能测试台
+用于PCU组件的密封性能检测，配备全自动操作台和高精度传感器。
+
+#### 5. 时代新材双缸加载试验平台
+用于双缸加载性能测试，支持多种加载模式和实时数据采集。
+
+#### 6. 时代新材车钩试验装置
+用于车钩的性能测试与分析。
+
+#### 7. 时代新材风电弹性支撑补液蓄能器组
+专为风电设备设计的弹性支撑补液蓄能系统测试设备。
         `
       }
     ]
