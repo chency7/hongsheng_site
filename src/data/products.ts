@@ -63,7 +63,6 @@ export const categoryOptions: CategoryOption[] = [
       { id: 'mine-truck', name: '矿卡专用控制阀组' },
       { id: 'manifold-block', name: '组合阀组' },
       { id: 'hydraulic-pile-hammer', name: '高频液压振动打桩锤' },
-      { id: 'hydraulic-pump-station', name: '液压泵站' },
       { id: 'testing-equipment', name: '试验检测设备' },
     ],
   },

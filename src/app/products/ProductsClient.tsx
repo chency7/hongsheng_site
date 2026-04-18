@@ -115,7 +115,7 @@ export default function ProductsClient() {
       <Container className="py-8">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Left Sidebar - Filters */}
-          <aside className="w-full lg:w-[240px] shrink-0 space-y-6">
+          <aside className="w-full lg:w-[280px] shrink-0 space-y-6">
             <div className="bg-white rounded-[8px] border border-[#E8ECF0] shadow-[0_2px_8px_rgba(0,0,0,0.04)] overflow-hidden">
               <div className="p-4 border-b border-[#E8ECF0]">
                 <h3 className="font-semibold text-[#1E3A5F] text-[14px]">产品分类</h3>
