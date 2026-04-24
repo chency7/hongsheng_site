@@ -22,13 +22,13 @@ export default function MapLibreMap({ className }: MapLibreMapProps) {
           'raster-tiles': {
             type: 'raster',
             tiles: [
-              'https://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}',
-              'https://webrd02.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}',
-              'https://webrd03.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}',
-              'https://webrd04.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}',
+              'https://p0.map.gtimg.com/tile/?z={z}&x={x}&y={y}',
+              'https://p1.map.gtimg.com/tile/?z={z}&x={x}&y={y}',
+              'https://p2.map.gtimg.com/tile/?z={z}&x={x}&y={y}',
+              'https://p3.map.gtimg.com/tile/?z={z}&x={x}&y={y}',
             ],
             tileSize: 256,
-            attribution: '高德地图',
+            attribution: '腾讯地图',
           },
         },
         layers: [

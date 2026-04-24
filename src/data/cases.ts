@@ -2,6 +2,7 @@ export type CaseCategory =
   | '全部'
   | '船舶海洋'
   | '工程机械'
+  | '工业制造'
   | '轨道交通'
   | '风力发电'
   | '航空航天/其他';
@@ -27,6 +28,7 @@ export const categories: CaseCategory[] = [
   '全部',
   '船舶海洋',
   '工程机械',
+  '工业制造',
   '轨道交通',
   '风力发电',
   '航空航天/其他',
@@ -46,6 +48,10 @@ export const caseCategoryMeta: Record<
   工程机械: {
     description: '覆盖产线装备与重型设备，关注节拍匹配、重载输出与维护效率。',
     focus: '机电液集成',
+  },
+  工业制造: {
+    description: '面向工业制造领域，关注自动化产线、精密加工与高效生产。',
+    focus: '自动化与精密控制',
   },
   轨道交通: {
     description: '围绕关键零部件测试与验证，突出重复性、安全联锁与测试规范化。',
@@ -218,6 +224,29 @@ export const caseCards: CaseCard[] = [
     ],
     description:
       '应用于大型发泡材料生产线的液压与电控集成系统。通过高精度的位置与压力控制，确保了发泡成型过程的一致性。系统支持高速生产节拍，满足大规模连续生产需求。',
+  },
+  {
+    id: 'manufacturing-automation-line',
+    category: '工业制造',
+    title: '自动化产线液压集成系统',
+    systemType: '生产线液压系统',
+    scenario: '自动化制造',
+    highlights: ['高精度控制', '自动化集成', '生产效率提升'],
+    image: '/images/gc/manufacturing.jpg',
+    gallery: [
+      {
+        src: '/images/gc/manufacturing.jpg',
+        alt: '自动化产线液压集成系统实拍',
+        tone: 'wide',
+      },
+    ],
+    parameters: [
+      { label: '系统压力', value: '21 MPa' },
+      { label: '控制精度', value: '±0.05 mm' },
+      { label: '生产节拍', value: '15 s/pc' },
+    ],
+    description:
+      '面向工业制造领域的自动化产线液压集成系统。通过高精度的位置与压力控制，实现了产线各工位的精确协同。系统支持快速换型与柔性生产，大幅提升生产效率与产品质量。',
   },
   {
     id: 'construction-crane-line',

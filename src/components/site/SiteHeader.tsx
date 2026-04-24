@@ -49,32 +49,30 @@ export default function SiteHeader() {
     []
   );
 
-  
-
   return (
     <header
       suppressHydrationWarning
-      className={`sticky top-0 z-50 transition-all duration-300 ${
-           'border-b border-white/10 bg-[#0B0F16]/90 shadow-sm backdrop-blur'
-      }`}
+      className={`sticky top-0 z-50 transition-all duration-300 ${'border-b border-white/10 bg-[#0B0F16]/90 shadow-sm backdrop-blur'}`}
     >
       <Container className="flex h-24 items-center justify-between gap-4">
-        <Link href="/" className="group flex items-center gap-4 ml-[-10px]">
+        <Link href="/" className="group ml-[-10px] flex items-center gap-4">
           <div className="relative h-14 w-14 overflow-hidden rounded-lg">
-            <Image src="/images/hs/logo.png" alt="Logo" fill sizes="48px" className="object-contain" />
+            <Image
+              src="/images/hs/logo.png"
+              alt="Logo"
+              fill
+              sizes="48px"
+              className="object-contain"
+            />
           </div>
           <div className="leading-tight">
-            <div
-              className={`text-lg font-bold text-white sm:text-2xl`}
-            >
+            <div className={`text-lg font-bold text-white sm:text-2xl`}>
               <span className="sm:hidden">湖南协力鸿胜</span>
               <span className="hidden sm:inline">湖南协力鸿胜机械有限公司</span>
             </div>
-            <div
-              className={`text-xs text-zinc-400 transition-colors sm:text-sm`}
-            >
+            <div className={`text-xs text-zinc-400 transition-colors sm:text-sm`}>
               <span className="sm:hidden">Hunan Xieli Hongsheng Machinery</span>
-              <span className="hidden sm:inline">Hunan Xieli Hongsheng Machinery Co.,Ltd.</span>
+              <span className="hidden sm:inline">Hunan XL-Honsun Machinery</span>
             </div>
           </div>
         </Link>
@@ -88,10 +86,8 @@ export default function SiteHeader() {
                 href={item.href}
                 suppressHydrationWarning
                 className={[
-                  'relative rounded-md px-3 py-2 text-base font-medium text-[20px]  transition-colors',
-                  active
-                    ? 'text-white'
-                    : 'text-zinc-400 hover:text-white',
+                  'relative rounded-md px-3 py-2 text-[20px] text-base font-medium  transition-colors',
+                  active ? 'text-white' : 'text-zinc-400 hover:text-white',
                 ].join(' ')}
               >
                 {item.label}
@@ -111,7 +107,7 @@ export default function SiteHeader() {
 
         <button
           type="button"
-          className={`inline-flex h-12 w-12 items-center justify-center rounded-lg border text-sm transition-colors xl:hidden border-white/20 text-white hover:bg-white/10`}
+          className={`inline-flex h-12 w-12 items-center justify-center rounded-lg border border-white/20 text-sm text-white transition-colors hover:bg-white/10 xl:hidden`}
           aria-label="打开菜单"
           onClick={() => setMobileOpen((v) => !v)}
         >

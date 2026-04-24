@@ -13,6 +13,8 @@ type FormState = {
   name: string;
   phone: string;
   email: string;
+  company: string;
+  position: string;
   needType: NeedType;
   message: string;
 };
@@ -31,6 +33,8 @@ export default function ContactClient() {
     name: '',
     phone: '',
     email: '',
+    company: '',
+    position: '',
     needType: '业务咨询',
     message: '',
   });
@@ -103,7 +107,7 @@ export default function ContactClient() {
           </MotionReveal>
           <MotionReveal delay={0.09}>
             <div className="mt-2 text-sm text-zinc-600">
-              湖南协力鸿胜机械有限公司 · Hunan Xieli Hongsheng Machinery Co.,Ltd.
+              湖南协力鸿胜机械有限公司 · Hunan XL-Honsun Machinery
             </div>
           </MotionReveal>
           <MotionReveal delay={0.12}>
@@ -182,7 +186,7 @@ export default function ContactClient() {
                           电子邮箱
                         </div>
                         <div className="mt-1 text-sm leading-6 text-zinc-600 dark:text-zinc-600">
-                          william_tung@163.com
+                          13574880391@163.com
                         </div>
                       </div>
                     </div>
@@ -221,6 +225,8 @@ export default function ContactClient() {
                               name: '',
                               phone: '',
                               email: '',
+                              company: '',
+                              position: '',
                               needType: '业务咨询',
                               message: '',
                             });
@@ -300,6 +306,30 @@ export default function ContactClient() {
                             </option>
                           ))}
                         </select>
+                      </label>
+
+                      <label className="grid gap-2">
+                        <span className="text-sm font-semibold text-[#0B0F16] dark:text-[#0B0F16]">
+                          公司名称（选填）
+                        </span>
+                        <input
+                          value={form.company}
+                          onChange={(e) => setForm((v) => ({ ...v, company: e.target.value }))}
+                          className="h-11 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none transition-colors focus:border-[#F4B400] dark:border-zinc-200 dark:bg-white dark:text-zinc-900"
+                          placeholder="请输入您的公司名称"
+                        />
+                      </label>
+
+                      <label className="grid gap-2">
+                        <span className="text-sm font-semibold text-[#0B0F16] dark:text-[#0B0F16]">
+                          职务（选填）
+                        </span>
+                        <input
+                          value={form.position}
+                          onChange={(e) => setForm((v) => ({ ...v, position: e.target.value }))}
+                          className="h-11 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none transition-colors focus:border-[#F4B400] dark:border-zinc-200 dark:bg-white dark:text-zinc-900"
+                          placeholder="请输入您的职务"
+                        />
                       </label>
 
                       <label className="grid gap-2">

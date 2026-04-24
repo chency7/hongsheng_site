@@ -8,7 +8,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Container from '@/components/site/Container';
 import MotionReveal from '@/components/site/MotionReveal';
 import ButtonLink from '@/components/site/ButtonLink';
-import { type Product, type ProductSubCategory, products } from '@/data/products';
+import { type Product, type ProductSubCategory } from '@/data/products';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -24,8 +24,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
   const activeSubCategory = useMemo(() => {
     if (!product.subCategories || product.subCategories.length === 0) return null;
-    return product.subCategories[0];
-  }, [product.subCategories]);
+    return product.subCategories.find((subCategory) => subCategory.name === product.name) ?? product.subCategories[0];
+  }, [product.name, product.subCategories]);
 
   const [selectedSubCategory, setSelectedSubCategory] = useState<ProductSubCategory | null>(
     activeSubCategory

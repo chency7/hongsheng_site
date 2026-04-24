@@ -3,20 +3,40 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Search, Grid, List, X, ChevronDown, ChevronRight, Star, ShoppingCart } from 'lucide-react';
+import { Search, Grid, List, X, ChevronRight } from 'lucide-react';
 import Container from '@/components/site/Container';
 import MotionReveal from '@/components/site/MotionReveal';
-import ButtonLink from '@/components/site/ButtonLink';
-import { products, categoryOptions, type ProductCategory, type CategoryOption } from '@/data/products';
+import { products, categoryOptions } from '@/data/products';
 
 type ViewMode = 'grid' | 'list';
 type SortOption = 'newest';
+
+const findSubCategoryById = (subCategoryId: string) =>
+  categoryOptions.flatMap((category) => category.subCategories ?? []).find((sub) => sub.id === subCategoryId);
+
+const getCategoryDisplayName = (categoryId: string) =>
+  findSubCategoryById(categoryId)?.name ?? categoryId;
+
+const getDefaultProductId = (subCategoryId: string) => {
+  const subCategory = findSubCategoryById(subCategoryId);
+
+  if (!subCategory?.products?.length) {
+    return null;
+  }
+
+  return (
+    subCategory.products.find((product) => product.name === subCategory.name)?.productId ??
+    subCategory.products[0]?.productId ??
+    null
+  );
+};
 
 export default function ProductsClient() {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>('newest');
 
   // Debounce search
@@ -31,42 +51,50 @@ export default function ProductsClient() {
   const toggleCategory = (catId: string) => {
     if (catId === '全部') {
       setSelectedCategories([]);
+      setSelectedProductId(null);
       return;
     }
-    
+
     // 如果点击的是一级分类，则选中/取消选中该分类下的所有二级分类
     const topCategory = categoryOptions.find(c => c.id === catId);
     if (topCategory && topCategory.subCategories) {
       const subIds = topCategory.subCategories.map(sub => sub.id);
       const isAllSelected = subIds.every(id => selectedCategories.includes(id));
-      
+
       if (isAllSelected) {
-        // 取消全选
         setSelectedCategories(prev => prev.filter(id => !subIds.includes(id)));
       } else {
-        // 全选
-        setSelectedCategories(prev => {
-          const newSet = new Set([...prev, ...subIds]);
-          return Array.from(newSet);
-        });
+        setSelectedCategories(subIds);
       }
+
+      setSelectedProductId(null);
       return;
     }
 
-    // 单击二级分类
-    setSelectedCategories((prev) =>
-      prev.includes(catId) ? prev.filter((c) => c !== catId) : [...prev, catId]
-    );
+    const isCurrentSelection = selectedCategories.length === 1 && selectedCategories[0] === catId;
+
+    if (isCurrentSelection) {
+      setSelectedCategories([]);
+      setSelectedProductId(null);
+      return;
+    }
+
+    setSelectedCategories([catId]);
+    setSelectedProductId(getDefaultProductId(catId));
   };
 
   const clearFilters = () => {
     setSelectedCategories([]);
+    setSelectedProductId(null);
     setSearchQuery('');
     setDebouncedQuery('');
   };
 
   const removeFilter = (type: 'category', value: string) => {
-    if (type === 'category') setSelectedCategories(prev => prev.filter(c => c !== value));
+    if (type === 'category') {
+      setSelectedCategories(prev => prev.filter(c => c !== value));
+      setSelectedProductId(null);
+    }
   };
 
   // Filter and Sort
@@ -81,7 +109,9 @@ export default function ProductsClient() {
       );
     }
 
-    if (selectedCategories.length > 0) {
+    if (selectedProductId) {
+      result = result.filter((p) => p.id === selectedProductId);
+    } else if (selectedCategories.length > 0) {
       result = result.filter((p) => selectedCategories.includes(p.category));
     }
 
@@ -91,7 +121,7 @@ export default function ProductsClient() {
     });
 
     return result;
-  }, [debouncedQuery, selectedCategories, sortBy]);
+  }, [debouncedQuery, selectedCategories, selectedProductId, sortBy]);
 
   return (
     <div className="min-h-screen bg-[#F5F7FA] text-[#333333]">
@@ -105,7 +135,7 @@ export default function ProductsClient() {
             {selectedCategories.length === 1 && (
               <>
                 <ChevronRight className="w-4 h-4 mx-2" />
-                <span className="text-[#4A90D9]">{selectedCategories[0]}</span>
+                <span className="text-[#4A90D9]">{getCategoryDisplayName(selectedCategories[0])}</span>
               </>
             )}
           </div>
@@ -187,16 +217,9 @@ export default function ProductsClient() {
               <div className="flex flex-wrap items-center gap-2 mb-4">
                 <span className="text-sm text-[#666666]">已选条件：</span>
                 {selectedCategories.map(catId => {
-                  let catName = catId;
-                  // 尝试查找二级分类的名称
-                  categoryOptions.forEach(cat => {
-                    const sub = cat.subCategories?.find(s => s.id === catId);
-                    if (sub) catName = sub.name;
-                  });
-                  
                   return (
                     <span key={catId} className="inline-flex items-center gap-1 bg-white border border-[#4A90D9] text-[#4A90D9] px-2 py-1 rounded text-xs">
-                      {catName}
+                      {getCategoryDisplayName(catId)}
                       <X className="w-3 h-3 cursor-pointer hover:text-red-500" onClick={() => removeFilter('category', catId)} />
                     </span>
                   );

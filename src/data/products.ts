@@ -1,69 +1,167 @@
 export type ProductCategory = string;
 export type ProductBrand = '福艾德' | '派克' | '力士乐' | '贺德克' | '其他';
 
+export interface ProductMenuItem {
+  id: string;
+  name: string;
+  productId: string;
+}
+
+export interface CategorySubOption {
+  id: string;
+  name: string;
+  products?: ProductMenuItem[];
+}
+
 export interface CategoryOption {
   id: string;
   name: string;
-  subCategories?: { id: string; name: string }[];
+  subCategories?: CategorySubOption[];
 }
 
-export const categoryOptions: CategoryOption[] = [
+const baseCategoryOptions: CategoryOption[] = [
   {
-    id: 'engineering',
-    name: '工程机械',
+    id: 'hydraulic-components',
+    name: '液压元件',
     subCategories: [
-      { id: 'concrete-placing-boom', name: '布料机液压站' },
-      { id: 'luffing-jib-tower-crane', name: '动臂塔机液压系统' },
+      {
+        id: 'hydraulic-valve-group',
+        name: '液压阀组',
+        products: [
+          { id: 'mine-truck', name: '矿卡专用控制阀组', productId: 'p-mine-truck-valve' },
+          { id: 'manifold-block', name: '组合阀组', productId: 'p-manifold-block' },
+        ],
+      },
+      { id: 'hydraulic-cylinder', name: '液压油缸' },
+      { id: 'radiator', name: '散热器' },
+      { id: 'hydraulic-filter', name: '液压过滤器' },
     ],
   },
   {
-    id: 'hydraulic-station',
-    name: '液压站',
+    id: 'electro-hydraulic-system',
+    name: '电液系统',
     subCategories: [
-      { id: 'zhonglian-zhebi', name: '重庆中联折臂吊吊臂组装调试液压站' },
-      { id: 'feiyi-fangbao', name: '飞翼股份防爆液压站' },
-      { id: 'hedun-shuili', name: '河盾水利液压站' },
-      { id: 'hunan-yatai', name: '湖南亚太实业大型发泡产线液压及电控系统' },
-      { id: 'jiaerhua-dongbi', name: '佳尔华动臂塔机液压站' },
-      { id: 'qita-yeyazhan', name: '其他液压站' },
-      { id: 'sanyi-sytb500', name: '三一SYTB500液压站' },
-      { id: 'sanyi-txl63', name: '三一TXL63顶升泵站' },
-      { id: 'sanyi-bianfu', name: '三一变幅塔机液压站' },
-      { id: 'sileng-yaozhu', name: '四棱数控300T压铸机' },
-      { id: 'yuqian-yeya', name: '宇乾智能液压泵站' },
-      { id: 'zhonglian-zhonglian', name: '中联智慧产业城液压泵站' },
+      { id: 'wind-power-monitor', name: '风电液体复合弹簧监控及补液装置' },
+      {
+        id: 'concrete-distributor',
+        name: '布料机电液系统',
+        products: [{ id: 'concrete-placing-boom', name: '布料机液压站', productId: 'p-concrete-placing-boom' }],
+      },
+      {
+        id: 'luffing-jib-tower-crane',
+        name: '动臂塔机液压系统',
+        products: [
+          { id: 'luffing-jib-tower-crane', name: '动臂塔机液压系统', productId: 'p-luffing-jib-tower-crane' },
+          { id: 'jiaerhua-dongbi', name: '佳尔华动臂塔机液压站', productId: 'p-jiaerhua-dongbi' },
+          { id: 'sanyi-bianfu', name: '三一变幅塔机液压站', productId: 'p-sanyi-bianfu' },
+        ],
+      },
+      {
+        id: 'dual-cylinder-die-casting',
+        name: '双缸同步压铸系统',
+        products: [{ id: 'sileng-yaozhu', name: '四棱数控300T压铸机', productId: 'p-sileng-yaozhu' }],
+      },
+      { id: 'four-leg-leveling', name: '四腿调平液压系统' },
+      {
+        id: 'folding-arm-crane',
+        name: '折臂吊组装调试系统',
+        products: [{ id: 'zhonglian-zhebi', name: '重庆中联折臂吊吊臂组装调试液压站', productId: 'p-zhonglian-zhebi' }],
+      },
+      {
+        id: 'large-foaming-line',
+        name: '大型发泡产线电液系统',
+        products: [{ id: 'hunan-yatai', name: '湖南亚太实业大型发泡产线液压及电控系统', productId: 'p-hunan-yatai' }],
+      },
+      {
+        id: 'industrial-automation',
+        name: '工业自动化产线液压系统',
+        products: [
+          { id: 'yuqian-yeya', name: '宇乾智能液压泵站', productId: 'p-yuqian-yeya' },
+          { id: 'zhonglian-zhonglian', name: '中联智慧产业城液压泵站', productId: 'p-zhonglian-zhonglian' },
+        ],
+      },
     ],
   },
-  /* 暂时隐藏没有产品的分类
   {
-    id: 'railway',
-    name: '轨道交通',
-    subCategories: [],
-  },
-  {
-    id: 'marine',
-    name: '船舶海洋',
-    subCategories: [],
-  },
-  {
-    id: 'wind',
-    name: '风力发电',
-    subCategories: [],
-  },
-  {
-    id: 'aerospace',
-    name: '航空航天',
-    subCategories: [],
-  },
-  */
-  {
-    id: 'manufacturing',
-    name: '工业制造',
+    id: 'testing-system',
+    name: '测试系统',
     subCategories: [
-      { id: 'mine-truck', name: '矿卡专用控制阀组' },
-      { id: 'manifold-block', name: '组合阀组' },
-      { id: 'hydraulic-pile-hammer', name: '高频液压振动打桩锤' },
-      { id: 'testing-equipment', name: '试验检测设备' },
+      {
+        id: 'testing-equipment',
+        name: '试验检测设备',
+        products: [{ id: 'testing-equipment', name: '试验检测设备', productId: 'p-testing-equipment' }],
+      },
+      { id: 'component-performance-test', name: '液压元件性能测试台' },
+      { id: 'seat-fatigue-test', name: '座椅疲劳测试机' },
+      { id: 'windshield-test', name: '风挡环境及疲劳测试台' },
+      { id: 'pcu-seal-test', name: 'PCU组件密封测试台' },
+      { id: 'xyz-fatigue-test', name: 'X、Y、Z三向疲劳加载测试平台' },
+      { id: 'torque-limiter-calibration', name: '扭矩限制器疲劳标定测试台' },
+      { id: 'diaphragm-fatigue-test', name: '弹性膜片疲劳测试台' },
+      { id: 'articulation-test', name: '机车铰接装置测试标定试验台' },
+    ],
+  },
+  {
+    id: 'customized',
+    name: '非标定制',
+    subCategories: [
+      { id: 'chain-positioner', name: '链式变位机液压系统' },
+      { id: 'c-type-flipped', name: 'C型翻转机液压系统' },
+      { id: 'assembly-trolley', name: '组装小车液压系统' },
+      {
+        id: 'water-gate-sync',
+        name: '水利闸门双缸同步系统',
+        products: [{ id: 'hedun-shuili', name: '河盾水利液压站', productId: 'p-hedun-shuili' }],
+      },
+      {
+        id: 'lifting-station',
+        name: '顶升泵站',
+        products: [{ id: 'sanyi-txl63', name: '三一TXL63顶升泵站', productId: 'p-sanyi-txl63' }],
+      },
+      {
+        id: 'explosion-proof',
+        name: '防爆泵站',
+        products: [{ id: 'feiyi-fangbao', name: '飞翼股份防爆液压站', productId: 'p-feiyi-fangbao' }],
+      },
+      { id: 'train-gangway-clamp', name: '机车贯通道夹钳' },
+      { id: 'articulation-damping', name: '铰接阻尼装置' },
+      {
+        id: 'hydraulic-pump-station',
+        name: '液压泵站',
+        products: [{ id: 'hydraulic-pump-station', name: '液压泵站', productId: 'p-hydraulic-pump-station' }],
+      },
+      {
+        id: 'qita-yeyazhan',
+        name: '其他液压站',
+        products: [{ id: 'qita-yeyazhan', name: '其他液压站', productId: 'p-qita-yeyazhan' }],
+      },
+      {
+        id: 'sanyi-sytb500',
+        name: '三一SYTB500液压站',
+        products: [{ id: 'sanyi-sytb500', name: '三一SYTB500液压站', productId: 'p-sanyi-sytb500' }],
+      },
+    ],
+  },
+  {
+    id: 'main-equipment',
+    name: '主机设备',
+    subCategories: [
+      {
+        id: 'hydraulic-vibration-hammer',
+        name: '高频液压振动锤',
+        products: [{ id: 'hydraulic-pile-hammer', name: '高频液压振动打桩锤', productId: 'p-hydraulic-pile-hammer' }],
+      },
+      { id: 'stump-grinder', name: '履带式树桩粉碎机' },
+      { id: 'cartridge-valve', name: '螺纹插装阀' },
+    ],
+  },
+  {
+    id: 'agency-products',
+    name: '代理产品',
+    subCategories: [
+      { id: 'magnetostrictive-sensor', name: '磁致伸缩位移传感器' },
+      { id: 'quick-coupler', name: '快换接头' },
+      { id: 'new-train-sander', name: '新一代机车撒砂器' },
     ],
   },
 ];
@@ -117,7 +215,7 @@ export const products: Product[] = [
     id: 'p-concrete-placing-boom',
     name: '布料机液压站',
     model: 'HS-17M-PB/HS-33M-PB/HS-36M-PB',
-    category: 'concrete-placing-boom',
+    category: 'concrete-distributor',
     brand: '其他',
     price: 0,
     rating: 5.0,
@@ -395,7 +493,7 @@ export const products: Product[] = [
     id: 'p-manifold-block',
     name: '组合阀组',
     model: 'HS-MANIFOLD',
-    category: 'manifold-block',
+    category: 'hydraulic-valve-group',
     brand: '其他',
     price: 0,
     rating: 5.0,
@@ -1057,6 +1155,20 @@ export const products: Product[] = [
     ]
   }
 ];
+
+export const categoryOptions: CategoryOption[] = baseCategoryOptions.map((category) => ({
+  ...category,
+  subCategories: category.subCategories?.map((subCategory) => ({
+    ...subCategory,
+    products: products
+      .filter((product) => product.category === subCategory.id)
+      .map((product) => ({
+        id: `${subCategory.id}-${product.id}`,
+        name: product.name,
+        productId: product.id,
+      })),
+  })),
+}));
 
 // ### 动臂塔机液压系统
 
