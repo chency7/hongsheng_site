@@ -38,6 +38,7 @@ const industryCategories = categories.filter(
 const industryIcons: Record<Exclude<CaseCategory, '全部'>, LucideIcon> = {
   船舶海洋: Anchor,
   工程机械: Factory,
+  工业制造: Layers3,
   轨道交通: TrainFront,
   风力发电: Wind,
   '航空航天/其他': Rocket,
