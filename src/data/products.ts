@@ -454,7 +454,7 @@ export const products: Product[] = [
     id: 'p-mine-truck-valve',
     name: '矿卡专用控制阀组',
     model: 'HS-MT-VALVE',
-    category: 'mine-truck',
+    category: 'hydraulic-valve-group',
     brand: '其他',
     price: 0,
     rating: 5.0,
