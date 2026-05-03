@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import ProductsClient from './ProductsClient';
 import { BreadcrumbSchema, WebPageSchema } from '@/components/seo/SchemaOrg';
 
@@ -42,7 +42,9 @@ export default function ProductsPage() {
         description="液压泵站系列与试验检测设备系列产品展示"
         url="https://www.xl-honsun.com/products"
       />
-      <ProductsClient />
+      <Suspense fallback={<div className="min-h-screen" />}>
+        <ProductsClient />
+      </Suspense>
     </>
   );
 }

@@ -4,9 +4,11 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import Container from '@/components/site/Container';
 import ButtonLink from '@/components/site/ButtonLink';
+import { categoryOptions } from '@/data/products';
+import { ChevronDown } from 'lucide-react';
 
 type NavItem = {
   href: string;
@@ -23,6 +25,9 @@ export default function SiteHeader() {
   const reducedMotion = useReducedMotion();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [productsOpen, setProductsOpen] = useState(false);
+  const productsRef = useRef<HTMLDivElement>(null);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -34,6 +39,22 @@ export default function SiteHeader() {
 
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+
+
+  const handleProductsMouseEnter = () => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+    setProductsOpen(true);
+  };
+
+  const handleProductsMouseLeave = () => {
+    closeTimerRef.current = setTimeout(() => {
+      setProductsOpen(false);
+    }, 200);
+  };
 
   const navItems = useMemo<NavItem[]>(
     () => [
@@ -80,6 +101,36 @@ export default function SiteHeader() {
         <nav className="hidden items-center gap-2 xl:flex">
           {navItems.map((item) => {
             const active = isActivePath(pathname, item.href);
+
+            if (item.href === '/products') {
+              return (
+                <div
+                  key={item.href}
+                  ref={productsRef}
+                  className="relative"
+                  onMouseEnter={handleProductsMouseEnter}
+                  onMouseLeave={handleProductsMouseLeave}
+                >
+                  <Link
+                    href={item.href}
+                    suppressHydrationWarning
+                    className={[
+                      'relative flex cursor-pointer items-center gap-1 rounded-md px-3 py-2 text-[20px] text-base font-medium transition-colors',
+                      active ? 'text-white' : 'text-zinc-400 hover:text-white',
+                    ].join(' ')}
+                  >
+                    {item.label}
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform duration-200 ${productsOpen ? 'rotate-180' : ''}`}
+                    />
+                    {active ? (
+                      <span className="absolute inset-x-3 -bottom-[9px] h-[3px] rounded-full bg-[#F4B400]" />
+                    ) : null}
+                  </Link>
+                </div>
+              );
+            }
+
             return (
               <Link
                 key={item.href}
@@ -119,6 +170,63 @@ export default function SiteHeader() {
           <span className="sr-only">菜单</span>
         </button>
       </Container>
+
+      <AnimatePresence>
+        {productsOpen ? (
+          <motion.div
+            initial={reducedMotion ? undefined : { opacity: 0, y: -4 }}
+            animate={reducedMotion ? undefined : { opacity: 1, y: 0 }}
+            exit={reducedMotion ? undefined : { opacity: 0, y: -4 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            onMouseEnter={handleProductsMouseEnter}
+            onMouseLeave={handleProductsMouseLeave}
+            className="absolute left-0 right-0 top-full z-40 border-b border-gray-200 bg-white shadow-[0_8px_32px_rgba(0,0,0,0.12)]"
+          >
+            <Container>
+              <div className="py-8">
+                <div className="grid grid-cols-6 gap-8">
+                  {categoryOptions.map((cat) => (
+                    <div key={cat.id}>
+                      <Link
+                        href="/products"
+                        onClick={() => setProductsOpen(false)}
+                        className="mb-3 inline-block text-[14px] font-semibold text-[#1E3A5F] transition-colors hover:text-[#4A90D9]"
+                      >
+                        {cat.name}
+                      </Link>
+                      {cat.subCategories && cat.subCategories.length > 0 ? (
+                        <ul className="space-y-2">
+                          {cat.subCategories.map((sub) => (
+                            <li key={sub.id}>
+                              <Link
+                                href={`/products?category=${encodeURIComponent(sub.id)}`}
+                                onClick={() => setProductsOpen(false)}
+                                className="text-[13px] text-[#666666] transition-colors hover:text-[#4A90D9]"
+                              >
+                                {sub.name}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-6 border-t border-gray-100 pt-5">
+                  <Link
+                    href="/products"
+                    onClick={() => setProductsOpen(false)}
+                    className="inline-flex items-center gap-1 text-[13px] font-semibold text-[#4A90D9] transition-colors hover:text-[#1E3A5F]"
+                  >
+                    查看全部产品
+                    <ChevronDown className="h-3.5 w-3.5 -rotate-90" />
+                  </Link>
+                </div>
+              </div>
+            </Container>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
 
       <AnimatePresence>
         {mobileOpen ? (

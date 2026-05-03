@@ -3,7 +3,8 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Search, Grid, List, X, ChevronRight } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { Search, Grid, List, X, ChevronRight, ChevronDown } from 'lucide-react';
 import Container from '@/components/site/Container';
 import MotionReveal from '@/components/site/MotionReveal';
 import { products, categoryOptions } from '@/data/products';
@@ -34,12 +35,36 @@ const getDefaultProductId = (subCategoryId: string) => {
 };
 
 export default function ProductsClient() {
+  const searchParams = useSearchParams();
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>('newest');
+  const [expandedTopCategories, setExpandedTopCategories] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    const catParam = searchParams.get('category');
+    const prodParam = searchParams.get('product');
+
+    if (catParam) {
+      setSelectedCategories([catParam]);
+
+      const topCat = categoryOptions.find((c) =>
+        c.subCategories?.some((sub) => sub.id === catParam)
+      );
+      if (topCat) {
+        setExpandedTopCategories(new Set([topCat.id]));
+      }
+    }
+
+    if (prodParam) {
+      setSelectedProductId(prodParam);
+    } else {
+      setSelectedProductId(null);
+    }
+  }, [searchParams]);
 
   // Debounce search
   useEffect(() => {
@@ -57,32 +82,38 @@ export default function ProductsClient() {
       return;
     }
 
-    // 如果点击的是一级分类，则选中/取消选中该分类下的所有二级分类
     const topCategory = categoryOptions.find((c) => c.id === catId);
     if (topCategory && topCategory.subCategories) {
-      const subIds = topCategory.subCategories.map((sub) => sub.id);
-      const isAllSelected = subIds.every((id) => selectedCategories.includes(id));
+      const subIds = topCategory.subCategories
+        .filter((sub) => sub.products && sub.products.length > 0)
+        .map((sub) => sub.id);
+      const allSubIds = topCategory.subCategories.map((sub) => sub.id);
+      const isAllSelected = allSubIds.length > 0 && allSubIds.every((id) => selectedCategories.includes(id));
 
       if (isAllSelected) {
-        setSelectedCategories((prev) => prev.filter((id) => !subIds.includes(id)));
+        setSelectedCategories([]);
       } else {
-        setSelectedCategories(subIds);
+        setSelectedCategories(subIds.length > 0 ? subIds : allSubIds);
       }
 
       setSelectedProductId(null);
       return;
     }
 
-    const isCurrentSelection = selectedCategories.includes(catId);
-
-    if (isCurrentSelection) {
-      setSelectedCategories((prev) => prev.filter((id) => id !== catId));
-      setSelectedProductId(null);
-      return;
-    }
-
-    setSelectedCategories((prev) => [...prev, catId]);
+    setSelectedCategories([catId]);
     setSelectedProductId(null);
+  };
+
+  const toggleTopCategoryExpand = (catId: string) => {
+    setExpandedTopCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(catId)) {
+        next.delete(catId);
+      } else {
+        next.add(catId);
+      }
+      return next;
+    });
   };
 
   const clearFilters = () => {
@@ -172,42 +203,56 @@ export default function ProductsClient() {
                   const subIds = cat.subCategories?.map((sub) => sub.id) || [];
                   const isAllSubSelected =
                     subIds.length > 0 && subIds.every((id) => selectedCategories.includes(id));
+                  const isExpanded = expandedTopCategories.has(cat.id);
+                  const hasSub = cat.subCategories && cat.subCategories.length > 0;
 
                   return (
-                    <div key={cat.id} className="space-y-1">
+                    <div key={cat.id} className="space-y-0.5">
                       <button
-                        onClick={() => toggleCategory(cat.id)}
-                        className={`flex w-full items-center justify-between rounded-md px-4 py-2.5 text-left text-sm font-medium transition-colors ${
+                        onClick={() => {
+                          if (hasSub) {
+                            toggleTopCategoryExpand(cat.id);
+                          } else {
+                            toggleCategory(cat.id);
+                          }
+                        }}
+                        className={`flex w-full items-center gap-2 rounded-md px-4 py-2.5 text-left text-sm font-medium transition-colors ${
                           isAllSubSelected
                             ? 'border-l-4 border-[#4A90D9] bg-[#F0F5FA] text-[#1E3A5F]'
                             : 'border-l-4 border-transparent text-[#333333] hover:bg-[#F5F7FA]'
                         }`}
                       >
-                        {cat.name}
+                        <span className="flex-1 truncate">{cat.name}</span>
+                        {hasSub ? (
+                          <ChevronDown
+                            className={`h-4 w-4 shrink-0 text-[#999999] transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                          />
+                        ) : null}
                       </button>
 
-                      {/* 默认全部展开子分类 */}
-                      {cat.subCategories && cat.subCategories.length > 0 ? (
-                        <div className="space-y-1 pb-2 pl-6">
-                          {cat.subCategories.map((sub) => (
-                            <button
-                              key={sub.id}
-                              onClick={() => toggleCategory(sub.id)}
-                              className={`w-full rounded-md px-4 py-2 text-left text-sm transition-colors ${
-                                selectedCategories.includes(sub.id)
-                                  ? 'bg-[#F0F5FA] font-medium text-[#4A90D9]'
-                                  : 'text-[#666666] hover:bg-[#F5F7FA]'
-                              }`}
-                            >
-                              {sub.name}
-                            </button>
-                          ))}
+                      {hasSub ? (
+                        <div
+                          className={`overflow-hidden transition-all duration-200 ${
+                            isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+                          }`}
+                        >
+                          <div className="space-y-0.5 px-0 pb-1 pl-6">
+                            {cat.subCategories!.map((sub) => (
+                              <button
+                                key={sub.id}
+                                onClick={() => toggleCategory(sub.id)}
+                                className={`w-full rounded-md px-4 py-2 text-left text-sm transition-colors ${
+                                  selectedCategories.includes(sub.id)
+                                    ? 'bg-[#F0F5FA] font-medium text-[#4A90D9]'
+                                    : 'text-[#666666] hover:bg-[#F5F7FA]'
+                                }`}
+                              >
+                                {sub.name}
+                              </button>
+                            ))}
+                          </div>
                         </div>
-                      ) : (
-                        <div className="pb-2 pl-6">
-                          <div className="px-4 py-2 text-xs italic text-gray-400">暂无产品分类</div>
-                        </div>
-                      )}
+                      ) : null}
                     </div>
                   );
                 })}
