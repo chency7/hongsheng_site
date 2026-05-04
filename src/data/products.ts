@@ -173,7 +173,7 @@ export interface ProductSpec {
 
 export interface ProductDetailTab {
   title: string;
-  content: string;
+  content?: string;
   type?: 'markdown' | 'pdf' | 'file';
   fileUrl?: string;
 }
@@ -1153,7 +1153,74 @@ export const products: Product[] = [
         ]
       }
     ]
-  }
+  },
+  {
+    id: 'p-new-train-sander',
+    name: '新一代机车撒砂器',
+    model: '',
+    category: 'new-train-sander',
+    brand: '其他',
+    price: 0,
+    rating: 5.0,
+    sales: 0,
+    createdAt: '2025-01-15',
+    image: '/images/products/新一代机车撒砂器/1.png',
+    images: [
+      '/images/products/新一代机车撒砂器/1.png',
+      '/images/products/新一代机车撒砂器/2.png',
+      '/images/products/新一代机车撒砂器/3.png',
+      '/images/products/新一代机车撒砂器/4.png',
+      '/images/products/新一代机车撒砂器/5.png',
+      '/images/products/新一代机车撒砂器/6.png',
+      '/images/products/新一代机车撒砂器/7.png',
+    ],
+    specs: [
+      { label: '类型', value: '气流压差式撒砂器' },
+      { label: '适用机型', value: '和谐型机车' },
+      { label: '安装方式', value: '与原撒砂器保持一致接口尺寸' },
+    ],
+    description: '针对和谐型机车原压差式撒砂器易堵实、撒砂不良等缺陷，改进设计的新型撒砂器，双风口设计配合U型加热器干燥砂粒，撒砂量控制更精确。',
+    features: [
+      '维护维修、清理杂物较更方便',
+      '砂粒类型要求不高，经济性更好',
+      '采用新型复合材料，耐磨性更好，使用寿命延长30%以上',
+      '可适时调整出砂量，适应性更佳',
+      '砂箱密封性未增加特殊要求、适应面更广'
+    ],
+    detailTabs: [
+      {
+        title: '产品简介',
+        content: `
+### 新一代机车撒砂器
+
+原和谐型机车压差式撒砂器在机车运行过程中存在许多质量问题，特别是一些机务段使用小砂粒或不合标准的砂粒，容易导致透气板堵实即"板结"等问题导致撒砂不良，甚至出现较多的不撒砂现象，每次清理费时费力。
+
+针对这些问题和现状，湖南协力通过对各个机务段进行撒砂器故障情况调研后，总结各型号撒砂器存在的缺陷，有针对性的对撒砂器进行了提质的改进设计，以满足和谐型机车撒砂的要求。新的撒砂器经过试验装置反复试验和上机试验，已证明了其有效性，并已申报了专利。
+
+### 工作原理
+
+砂粒进入撒砂器内部腔体，在需要撒砂的情况下，通过吹砂风口和内部结构将压缩气体送往撒砂器风嘴，只要供风的压力在给定的范围内，气流将吹起腔体内的砂子并从出砂口将其排出，而腔体内的砂子不断流入补充，从而达到撒砂的目的。
+
+撒砂器中吹砂风口分两路风嘴，分别能将进入腔体内的砂粒进行搅动和吹出。另一常风口风嘴有较小风量排出，风压很小，能吹入砂堆中并渗透至砂粒间，防止砂粒板结，其与撒砂装置上的加热装置配合使用，可将撒砂装置上表面和腔体内部受潮砂粒进行烘干，防止板结。
+
+![工作原理示意图](/images/products/新一代机车撒砂器/工作原理示意图.png)
+
+### 产品优势
+
+- 维护维修、清理杂物较更方便
+- 砂粒类型要求不高，经济性更好
+- 采用新型复合材料，耐磨性更好，使用寿命延长30%以上
+- 可适时调整出砂量，适应性更佳
+- 砂箱密封性未增加特殊要求、适应面更广
+        `
+      },
+      {
+        title: '产品资料',
+        type: 'file',
+        fileUrl: '/images/products/新一代机车撒砂器/和谐型机车改进型压力式撒砂器产品介绍.pdf'
+      }
+    ]
+  },
 ];
 
 export const categoryOptions: CategoryOption[] = baseCategoryOptions.map((category) => ({

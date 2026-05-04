@@ -108,9 +108,11 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           {/* Right: Info (40%) */}
           <div className="flex flex-col lg:w-[40%]">
             <h1 className="mb-2 text-[24px] font-bold text-[#333333]">{product.name}</h1>
-            <p className="mb-6 border-b border-[#E8ECF0] pb-6 text-[16px] text-[#666666]">
-              型号：{product.model}
-            </p>
+            {product.model && (
+              <p className="mb-6 border-b border-[#E8ECF0] pb-6 text-[16px] text-[#666666]">
+                型号：{product.model}
+              </p>
+            )}
 
             {/* Sub-category Switcher */}
             {product.subCategories && product.subCategories.length > 0 && (
@@ -226,15 +228,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                                 点击下载
                               </a>
                             </div>
-                            {tab.fileUrl.endsWith('.pdf') && (
-                              <div className="h-[800px] w-full flex-1 overflow-hidden rounded-lg border border-[#E8ECF0] bg-gray-100">
-                                <iframe
-                                  src={`${tab.fileUrl}#view=FitH`}
-                                  className="h-full w-full border-none"
-                                  title={tab.title}
-                                />
-                              </div>
-                            )}
+
                           </div>
                         ) : (
                           <div className="prose max-w-none text-[#666666] prose-headings:text-[#333333] prose-h3:mb-4 prose-h3:text-[18px] prose-h3:font-bold prose-p:mb-6 prose-p:text-[14px] prose-p:leading-relaxed prose-ul:mb-6 prose-ul:text-[14px] prose-li:my-1 prose-table:w-full prose-table:border-collapse prose-table:text-left prose-table:text-[14px] prose-tr:hover:bg-[#F5F7FA] prose-th:border-b prose-th:border-[#E8ECF0] prose-th:bg-[#F9FAFB] prose-th:px-4 prose-th:py-3 prose-th:font-medium prose-th:text-[#333333] prose-td:border-b prose-td:border-[#E8ECF0] prose-td:px-4 prose-td:py-3">
