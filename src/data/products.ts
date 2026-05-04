@@ -537,7 +537,7 @@ export const products: Product[] = [
     id: 'p-hydraulic-pile-hammer',
     name: '高频液压振动打桩锤',
     model: 'HS-350~550',
-    category: 'hydraulic-pile-hammer',
+    category: 'hydraulic-vibration-hammer',
     brand: '其他',
     price: 0,
     rating: 5.0,

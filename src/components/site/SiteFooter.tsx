@@ -161,7 +161,7 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
 
                 <div className="text-base leading-6 text-zinc-400 sm:text-lg">
                   <span className="block text-white">销售热线</span>
-                  董先生 13574880391 / 陈先生 13419668797
+                  董先生 13574880391 / 程先生 13419668797
                 </div>
               </li>
 

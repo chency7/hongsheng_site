@@ -169,7 +169,7 @@ export default function ContactClient() {
                           联系电话
                         </div>
                         <div className="mt-1 text-sm leading-6 text-zinc-600 dark:text-zinc-600">
-                          董先生 13574880391 / 陈先生 13419668797
+                          董先生 13574880391 / 程先生 13419668797
                           <div className="text-xs text-zinc-500 dark:text-zinc-500">
                             周一至周五 9:00 - 18:00
                           </div>
