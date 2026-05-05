@@ -1,5 +1,5 @@
 import React from 'react';
-import CasesClient from '@/app/cases/CasesClient';
+import CasesClient from './CasesClient';
 
 export const metadata = {
   title: '工程案例 - 液压系统项目案例',

@@ -1,7 +1,6 @@
 import './global.css';
 import { Metadata } from 'next';
 import { inter, pacifico, lxgwWenKai, calSans } from '@/utils/fonts';
-import ClientLayout from '@/components/layout/ClientLayout';
 import { OrganizationSchema, LocalBusinessSchema } from '@/components/seo/SchemaOrg';
 
 export const metadata: Metadata = {
@@ -96,7 +95,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <LocalBusinessSchema />
       </head>
       <body>
-        <ClientLayout>{children}</ClientLayout>
+        {children}
       </body>
     </html>
   );

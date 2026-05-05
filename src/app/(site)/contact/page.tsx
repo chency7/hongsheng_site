@@ -1,5 +1,5 @@
 import React from 'react';
-import ContactClient from '@/app/contact/ContactClient';
+import ContactClient from './ContactClient';
 
 export const metadata = {
   title: '联系我们 - 湖南协力鸿胜机械有限公司',
