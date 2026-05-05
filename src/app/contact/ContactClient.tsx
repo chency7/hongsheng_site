@@ -5,7 +5,7 @@ import Container from '@/components/site/Container';
 import MotionReveal from '@/components/site/MotionReveal';
 import ButtonLink from '@/components/site/ButtonLink';
 import { Mail, MapPin, Phone, Send } from 'lucide-react';
-import MapLibreMap from '@/components/site/MapLibreMap';
+import Image from 'next/image';
 
 type NeedType = '业务咨询' | '技术咨询' | '售后服务' | '合作咨询' | '其他';
 
@@ -139,7 +139,7 @@ export default function ContactClient() {
       <section className="bg-white py-14 dark:bg-white sm:py-10">
         <Container>
           <div className="grid gap-10 lg:grid-cols-12">
-            <div className="lg:col-span-5">
+            <div className="lg:col-span-6">
               <MotionReveal>
                 <div className="rounded-2xl border border-zinc-200/80 bg-white p-7 shadow-sm dark:border-zinc-200/80 dark:bg-white">
                   <div className="text-lg font-semibold text-[#0B0F16] dark:text-[#0B0F16]">
@@ -196,14 +196,20 @@ export default function ContactClient() {
 
               <MotionReveal delay={0.08}>
                 <div className="mt-6 overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-sm dark:border-zinc-200/80 dark:bg-white">
-                  <div className="h-[470px] w-full">
-                    <MapLibreMap className="h-full w-full" />
+                  <div className="relative h-[470px] w-full">
+                    <Image
+                      src="/images/地图成品.png"
+                      alt="公司地址地图"
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 1024px) 100vw, 40vw"
+                    />
                   </div>
                 </div>
               </MotionReveal>
             </div>
 
-            <div className="lg:col-span-7">
+            <div className="lg:col-span-6">
               <MotionReveal>
                 <div className="rounded-2xl border border-zinc-200/80 bg-white p-7 dark:border-zinc-200/80 dark:bg-white">
                   {status === 'success' ? (
