@@ -33,8 +33,8 @@ export default function AdminSidebar() {
     setMobileOpen(false);
   }, [pathname]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('admin_authenticated');
+  const handleLogout = async () => {
+    await fetch('/api/admin/logout', { method: 'POST' }).catch(() => null);
     router.push('/admin/login');
   };
 

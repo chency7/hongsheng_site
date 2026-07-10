@@ -27,13 +27,20 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setError('');
     setLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    if (account === 'admin' && password === 'admin123') {
-      localStorage.setItem('admin_authenticated', 'true');
+
+    const response = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: account, password }),
+    }).catch(() => null);
+
+    if (response?.ok) {
       router.push('/admin/dashboard');
     } else {
-      setError('账号或密码错误，请重试');
+      const data = response ? await response.json().catch(() => null) : null;
+      setError(data?.message || '登录失败，请检查配置后重试');
     }
+
     setLoading(false);
   };
 
@@ -235,12 +242,11 @@ export default function AdminLoginPage() {
               </div>
             </form>
 
-            {/* Demo Account Hint */}
+            {/* Account Hint */}
             <div className="mt-6 rounded-xl border border-white/[0.05] bg-white/[0.02] px-4 py-3 text-center backdrop-blur-sm">
               <p className="text-xs tracking-wide text-[#4B6485]">
-                演示账号 <span className="mx-1 rounded bg-white/[0.05] px-2 py-0.5 font-mono text-[#4A90D9]">admin</span>
-                <span className="mx-2 text-white/10">|</span>
-                密码 <span className="mx-1 rounded bg-white/[0.05] px-2 py-0.5 font-mono text-[#4A90D9]">admin123</span>
+                登录账号由部署环境变量 <span className="mx-1 rounded bg-white/[0.05] px-2 py-0.5 font-mono text-[#4A90D9]">ADMIN_USERNAME</span>
+                和 <span className="mx-1 rounded bg-white/[0.05] px-2 py-0.5 font-mono text-[#4A90D9]">ADMIN_PASSWORD</span> 控制
               </p>
             </div>
           </div>

@@ -11,6 +11,17 @@ services:
       - NODE_ENV=production
       - NEXT_TELEMETRY_DISABLED=1
       - PORT=3000
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-465}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASS=${SMTP_PASS:-}
+      - CONTACT_SENDER_EMAIL=${CONTACT_SENDER_EMAIL:-}
+      - CONTACT_RECEIVER_EMAIL=${CONTACT_RECEIVER_EMAIL:-}
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-change-me}
+      - ADMIN_SESSION_SECRET=${ADMIN_SESSION_SECRET:-change-me-session-secret}
+      - SUPABASE_URL=${SUPABASE_URL:-}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY:-}
     restart: unless-stopped
     networks:
       - app-network

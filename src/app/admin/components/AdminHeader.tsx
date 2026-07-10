@@ -7,8 +7,8 @@ import { User, LogOut, Bell } from 'lucide-react';
 export default function AdminHeader() {
   const router = useRouter();
 
-  const handleLogout = () => {
-    localStorage.removeItem('admin_authenticated');
+  const handleLogout = async () => {
+    await fetch('/api/admin/logout', { method: 'POST' }).catch(() => null);
     router.push('/admin/login');
   };
 
