@@ -4,6 +4,8 @@ import { useState, useCallback, useEffect } from 'react';
 import {
   buildInitialAdminCatalog,
   generateAdminId,
+  generateProductSlug,
+  uniqueProductSlug,
   type AdminCatalog,
   type AdminCategory,
   type AdminDetailTab,
@@ -13,6 +15,7 @@ import {
   type AdminSubCategory,
   type AdminSubProduct,
 } from '@/lib/admin-catalog';
+import { fetchAdminCatalog, saveAdminCatalog } from '@/lib/admin/catalog-client';
 
 export type {
   AdminCatalog,
@@ -35,11 +38,71 @@ let globalCategories: AdminCategory[] = initialCatalog.categories;
 let globalSubCategories: AdminSubCategory[] = initialCatalog.subCategories;
 let globalProducts: AdminProduct[] = initialCatalog.products;
 let syncStarted = false;
+let catalogLoaded = false;
+let catalogVersion = 0;
+let derivedVersion = -1;
+
+let cachedCategories: AdminCategory[] = [];
+let cachedSubCategories: AdminSubCategory[] = [];
+let cachedProducts: AdminProduct[] = [];
+let cachedCategoryById = new Map<string, AdminCategory>();
+let cachedSubCategoryById = new Map<string, AdminSubCategory>();
+let cachedProductById = new Map<string, AdminProduct>();
+let cachedStats = {
+  totalCategories: 0,
+  totalSubCategories: 0,
+  totalProducts: 0,
+  activeProducts: 0,
+  totalImages: 0,
+};
 
 const listeners = new Set<() => void>();
 
 function notify() {
   listeners.forEach((fn) => fn());
+}
+
+function markCatalogChanged() {
+  catalogVersion += 1;
+}
+
+function getDerivedCatalog() {
+  if (derivedVersion === catalogVersion) {
+    return {
+      categories: cachedCategories,
+      subCategories: cachedSubCategories,
+      products: cachedProducts,
+      categoryById: cachedCategoryById,
+      subCategoryById: cachedSubCategoryById,
+      productById: cachedProductById,
+      stats: cachedStats,
+    };
+  }
+
+  cachedCategories = [...globalCategories].sort((a, b) => a.sortOrder - b.sortOrder);
+  cachedSubCategories = [...globalSubCategories].sort((a, b) => a.sortOrder - b.sortOrder);
+  cachedProducts = [...globalProducts].sort((a, b) => a.sortOrder - b.sortOrder);
+  cachedCategoryById = new Map(globalCategories.map((category) => [category.id, category]));
+  cachedSubCategoryById = new Map(globalSubCategories.map((subCategory) => [subCategory.id, subCategory]));
+  cachedProductById = new Map(globalProducts.map((product) => [product.id, product]));
+  cachedStats = {
+    totalCategories: globalCategories.length,
+    totalSubCategories: globalSubCategories.length,
+    totalProducts: globalProducts.length,
+    activeProducts: globalProducts.reduce((count, product) => count + (product.isActive ? 1 : 0), 0),
+    totalImages: globalProducts.reduce((sum, product) => sum + product.images.length, 0),
+  };
+  derivedVersion = catalogVersion;
+
+  return {
+    categories: cachedCategories,
+    subCategories: cachedSubCategories,
+    products: cachedProducts,
+    categoryById: cachedCategoryById,
+    subCategoryById: cachedSubCategoryById,
+    productById: cachedProductById,
+    stats: cachedStats,
+  };
 }
 
 function getCatalogSnapshot(): AdminCatalog {
@@ -50,33 +113,46 @@ function getCatalogSnapshot(): AdminCatalog {
   };
 }
 
-function setCatalogSnapshot(catalog: AdminCatalog) {
+function setCatalogSnapshot(catalog: AdminCatalog, shouldNotify = true) {
   globalCategories = catalog.categories || [];
   globalSubCategories = catalog.subCategories || [];
   globalProducts = catalog.products || [];
-  notify();
+  markCatalogChanged();
+  if (shouldNotify) notify();
 }
 
 async function loadCatalog() {
-  const response = await fetch('/api/admin/catalog', { cache: 'no-store' });
-  if (!response.ok) return;
-  const data = await response.json();
+  const data = await fetchAdminCatalog().catch((error) => {
+    console.error(error);
+    return null;
+  });
+
   if (data?.catalog) {
-    setCatalogSnapshot(data.catalog);
+    setCatalogSnapshot(data.catalog, false);
   }
+  catalogLoaded = true;
+  notify();
 }
 
 async function persistCatalog() {
-  await fetch('/api/admin/catalog', {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(getCatalogSnapshot()),
-  });
+  const result = await saveAdminCatalog(getCatalogSnapshot());
+  if (!result.persisted) {
+    throw new Error('Supabase 未配置，产品目录没有持久化');
+  }
 }
 
 function persistAndNotify() {
+  markCatalogChanged();
   notify();
-  void persistCatalog();
+  void persistCatalog().catch((error) => {
+    console.error(error);
+  });
+}
+
+export function preloadAdminCatalog() {
+  if (syncStarted) return;
+  syncStarted = true;
+  void loadCatalog();
 }
 
 export function useAdminStore() {
@@ -86,10 +162,7 @@ export function useAdminStore() {
     const fn = () => setTick((t) => t + 1);
     listeners.add(fn);
 
-    if (!syncStarted) {
-      syncStarted = true;
-      void loadCatalog();
-    }
+    preloadAdminCatalog();
 
     return () => {
       listeners.delete(fn);
@@ -100,14 +173,16 @@ export function useAdminStore() {
     setTick((t) => t + 1);
   }, []);
 
+  const isCatalogLoading = !catalogLoaded;
+
   const getCategories = useCallback(() => {
     void tick;
-    return [...globalCategories].sort((a, b) => a.sortOrder - b.sortOrder);
+    return getDerivedCatalog().categories;
   }, [tick]);
 
   const getCategoryById = useCallback((id: string) => {
     void tick;
-    return globalCategories.find((c) => c.id === id);
+    return getDerivedCatalog().categoryById.get(id);
   }, [tick]);
 
   const createCategory = useCallback((data: Omit<AdminCategory, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -134,12 +209,12 @@ export function useAdminStore() {
 
   const getSubCategories = useCallback(() => {
     void tick;
-    return [...globalSubCategories].sort((a, b) => a.sortOrder - b.sortOrder);
+    return getDerivedCatalog().subCategories;
   }, [tick]);
 
   const getSubCategoryById = useCallback((id: string) => {
     void tick;
-    return globalSubCategories.find((s) => s.id === id);
+    return getDerivedCatalog().subCategoryById.get(id);
   }, [tick]);
 
   const createSubCategory = useCallback((data: Omit<AdminSubCategory, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -164,18 +239,21 @@ export function useAdminStore() {
 
   const getProducts = useCallback(() => {
     void tick;
-    return [...globalProducts].sort((a, b) => a.sortOrder - b.sortOrder);
+    return getDerivedCatalog().products;
   }, [tick]);
 
   const getProductById = useCallback((id: string) => {
     void tick;
-    return globalProducts.find((p) => p.id === id);
+    return getDerivedCatalog().productById.get(id);
   }, [tick]);
 
-  const createProduct = useCallback((data: Omit<AdminProduct, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const createProduct = useCallback(async (data: Omit<AdminProduct, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const previousCatalog = getCatalogSnapshot();
+    const slug = uniqueProductSlug(data.slug || generateProductSlug(data.name), globalProducts);
     const newProd: AdminProduct = {
       ...data,
-      id: data.slug || `p-${generateAdminId()}`,
+      slug,
+      id: slug,
       createdAt: now(),
       updatedAt: now(),
     };
@@ -188,11 +266,19 @@ export function useAdminStore() {
           : s
       );
     }
-    persistAndNotify();
+    try {
+      markCatalogChanged();
+      await persistCatalog();
+      notify();
+    } catch (error) {
+      setCatalogSnapshot(previousCatalog);
+      throw error;
+    }
     return newProd;
   }, []);
 
-  const updateProduct = useCallback((id: string, data: Partial<AdminProduct>) => {
+  const updateProduct = useCallback(async (id: string, data: Partial<AdminProduct>) => {
+    const previousCatalog = getCatalogSnapshot();
     const previous = globalProducts.find((p) => p.id === id);
     globalProducts = globalProducts.map((p) => (p.id === id ? { ...p, ...data, updatedAt: now() } : p));
 
@@ -208,30 +294,40 @@ export function useAdminStore() {
       });
     }
 
-    persistAndNotify();
+    try {
+      markCatalogChanged();
+      await persistCatalog();
+      notify();
+    } catch (error) {
+      setCatalogSnapshot(previousCatalog);
+      throw error;
+    }
   }, []);
 
-  const deleteProduct = useCallback((id: string) => {
+  const deleteProduct = useCallback(async (id: string) => {
+    const previousCatalog = getCatalogSnapshot();
     globalProducts = globalProducts.filter((p) => p.id !== id);
     globalSubCategories = globalSubCategories.map((s) => ({
       ...s,
       productIds: s.productIds.filter((productId) => productId !== id),
     }));
-    persistAndNotify();
+    try {
+      markCatalogChanged();
+      await persistCatalog();
+      notify();
+    } catch (error) {
+      setCatalogSnapshot(previousCatalog);
+      throw error;
+    }
   }, []);
 
   const getStats = useCallback(() => {
     void tick;
-    return {
-      totalCategories: globalCategories.length,
-      totalSubCategories: globalSubCategories.length,
-      totalProducts: globalProducts.length,
-      activeProducts: globalProducts.filter((p) => p.isActive).length,
-      totalImages: globalProducts.reduce((sum, p) => sum + p.images.length, 0),
-    };
+    return getDerivedCatalog().stats;
   }, [tick]);
 
   return {
+    isCatalogLoading,
     getCategories,
     getCategoryById,
     createCategory,

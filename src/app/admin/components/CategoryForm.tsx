@@ -48,7 +48,7 @@ export default function CategoryForm({ initialData, onSave, onClose }: Props) {
               value={name}
               onChange={(e) => { setName(e.target.value); handleSlugFromName(e.target.value); }}
               placeholder="例如：液压元件"
-              className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+              className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
               required
             />
           </div>
@@ -59,7 +59,7 @@ export default function CategoryForm({ initialData, onSave, onClose }: Props) {
               value={slug}
               onChange={(e) => setSlug(e.target.value)}
               placeholder="例如：hydraulic-components"
-              className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm font-mono outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+              className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm font-mono outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -69,7 +69,7 @@ export default function CategoryForm({ initialData, onSave, onClose }: Props) {
                 type="number"
                 value={sortOrder}
                 onChange={(e) => setSortOrder(Number(e.target.value))}
-                className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+                className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
               />
             </div>
             <div>
@@ -90,7 +90,7 @@ export default function CategoryForm({ initialData, onSave, onClose }: Props) {
             </button>
             <button
               type="submit"
-              className="rounded-lg bg-[#1E3A5F] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-[#162A45]"
+              className="rounded-lg bg-[#1E3A5F] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors duration-150 hover:bg-[#162A45]"
             >
               保存
             </button>

@@ -1,6 +1,13 @@
 import React, { Suspense } from 'react';
 import ProductsClient from './ProductsClient';
 import { BreadcrumbSchema, WebPageSchema } from '@/components/seo/SchemaOrg';
+import {
+  adminCatalogToCategoryOptions,
+  adminCatalogToProducts,
+  getAdminCatalogForSite,
+} from '@/lib/admin/catalog-repository';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: '产品中心 - 液压泵站与试验检测设备',
@@ -28,7 +35,11 @@ export const metadata = {
   },
 };
 
-export default function ProductsPage() {
+export default async function ProductsPage() {
+  const catalog = await getAdminCatalogForSite();
+  const products = adminCatalogToProducts(catalog);
+  const categoryOptions = adminCatalogToCategoryOptions(catalog);
+
   return (
     <>
       <BreadcrumbSchema
@@ -43,7 +54,7 @@ export default function ProductsPage() {
         url="https://www.xl-honsun.com/products"
       />
       <Suspense fallback={<div className="min-h-screen" />}>
-        <ProductsClient />
+        <ProductsClient products={products} categoryOptions={categoryOptions} />
       </Suspense>
     </>
   );

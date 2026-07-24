@@ -17,10 +17,13 @@
     "docker:rebuild": "docker compose --progress plain build --no-cache",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
-    "docker:logs": "docker compose logs -f app"
+    "docker:logs": "docker compose logs -f app",
+    "supabase:sync-product-media": "node scripts/sync-product-media-to-storage.mjs",
+    "supabase:sync-product-thumbnails": "node scripts/sync-product-thumbnails.mjs"
   },
   "dependencies": {
     "@next/mdx": "^16.1.6",
+    "@radix-ui/react-select": "2.3.3",
     "@radix-ui/react-switch": "^1.2.6",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
@@ -55,6 +58,7 @@
     "remark-math": "^6.0.0",
     "remark-toc": "^9.0.0",
     "rimraf": "^6.0.1",
+    "sharp": "0.34.5",
     "swr": "^2.3.2",
     "tailwindcss-debug-screens": "^2.2.1",
     "three": "^0.183.1",
@@ -71,6 +75,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/three": "^0.185.1",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "eslint": "^8.57.1",

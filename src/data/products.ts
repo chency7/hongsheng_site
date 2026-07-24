@@ -16,6 +16,7 @@ export interface CategorySubOption {
 export interface CategoryOption {
   id: string;
   name: string;
+  products?: ProductMenuItem[];
   subCategories?: CategorySubOption[];
 }
 
@@ -176,6 +177,9 @@ export interface ProductDetailTab {
   content?: string;
   type?: 'markdown' | 'pdf' | 'file';
   fileUrl?: string;
+  fileName?: string;
+  fileType?: string;
+  fileSize?: number;
 }
 
 export interface ProductSubCategory {
@@ -1217,7 +1221,7 @@ export const products: Product[] = [
       {
         title: '产品资料',
         type: 'file',
-        fileUrl: '/images/products/新一代机车撒砂器/和谐型机车改进型压力式撒砂器产品介绍.pdf'
+        fileUrl: '/images/products/新一代机车撒砂器/和谐型机车改进型压力式撒砂器产品介绍.pptx'
       }
     ]
   },

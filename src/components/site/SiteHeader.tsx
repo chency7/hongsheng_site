@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation';
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import Container from '@/components/site/Container';
 import ButtonLink from '@/components/site/ButtonLink';
-import { categoryOptions } from '@/data/products';
+import type { CategoryOption } from '@/data/products';
 import { ChevronDown } from 'lucide-react';
 
 type NavItem = {
@@ -20,7 +20,7 @@ function isActivePath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(href + '/');
 }
 
-export default function SiteHeader() {
+export default function SiteHeader({ categoryOptions }: { categoryOptions: CategoryOption[] }) {
   const pathname = usePathname();
   const reducedMotion = useReducedMotion();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -188,7 +188,7 @@ export default function SiteHeader() {
                   {categoryOptions.map((cat) => (
                     <div key={cat.id}>
                       <Link
-                        href="/products"
+                        href={`/products?category=${encodeURIComponent(cat.id)}`}
                         onClick={() => setProductsOpen(false)}
                         className="mb-3 inline-block text-[14px] font-semibold text-[#1E3A5F] transition-colors hover:text-[#4A90D9]"
                       >

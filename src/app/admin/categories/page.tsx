@@ -132,7 +132,7 @@ export default function AdminCategoriesPage() {
               setFormMode('subCategory');
               setShowForm(true);
             }}
-            className="inline-flex items-center gap-2 rounded-lg border border-[#E8ECF0] bg-white px-4 py-2.5 text-sm font-medium text-[#666666] shadow-sm transition-all hover:bg-[#F5F7FA] hover:text-[#1E3A5F]"
+            className="inline-flex items-center gap-2 rounded-lg border border-[#E8ECF0] bg-white px-4 py-2.5 text-sm font-medium text-[#666666] shadow-sm transition-colors duration-150 hover:bg-[#F5F7FA] hover:text-[#1E3A5F]"
           >
             <Plus className="h-4 w-4" />
             新增子分类
@@ -143,7 +143,7 @@ export default function AdminCategoriesPage() {
               setFormMode('category');
               setShowForm(true);
             }}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#1E3A5F] px-5 py-2.5 text-sm font-medium text-white shadow-md shadow-[#1E3A5F]/10 transition-all hover:bg-[#162A45] hover:-translate-y-[1px]"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#1E3A5F] px-5 py-2.5 text-sm font-medium text-white shadow-md shadow-[#1E3A5F]/10 transition-[background-color,transform] duration-150 hover:-translate-y-[1px] hover:bg-[#162A45]"
           >
             <Plus className="h-4 w-4" />
             新增顶级分类
@@ -159,7 +159,7 @@ export default function AdminCategoriesPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="搜索分类或子分类..."
-            className="w-full rounded-lg border border-[#E8ECF0] py-2.5 pl-10 pr-4 text-sm outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+            className="w-full rounded-lg border border-[#E8ECF0] py-2.5 pl-10 pr-4 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
           />
         </div>
       </div>
@@ -246,12 +246,9 @@ export default function AdminCategoriesPage() {
                   </div>
 
                   {/* Child Sub-Category Rows */}
-                  <div
-                    className={`overflow-hidden transition-all duration-200 ${
-                      isExpanded ? 'max-h-[3000px] opacity-100' : 'max-h-0 opacity-0'
-                    }`}
-                  >
-                    {hasChildren ? (
+                  {isExpanded ? (
+                    <div>
+                      {hasChildren ? (
                       node.children.map((sub) => (
                         <div
                           key={sub.id}
@@ -313,22 +310,23 @@ export default function AdminCategoriesPage() {
                           </div>
                         </div>
                       ))
-                    ) : (
-                      <div className="border-b border-dashed border-[#E8ECF0] px-5 py-6 pl-16 text-center text-sm text-[#CCCCCC]">
-                        该分类下暂无子分类
-                        <button
-                          onClick={() => {
-                            setEditingSub(null);
-                            setFormMode('subCategory');
-                            setShowForm(true);
-                          }}
-                          className="ml-2 text-[#4A90D9] hover:underline"
-                        >
-                          添加一个
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                      ) : (
+                        <div className="border-b border-dashed border-[#E8ECF0] px-5 py-6 pl-16 text-center text-sm text-[#CCCCCC]">
+                          该分类下暂无子分类
+                          <button
+                            onClick={() => {
+                              setEditingSub(null);
+                              setFormMode('subCategory');
+                              setShowForm(true);
+                            }}
+                            className="ml-2 text-[#4A90D9] hover:underline"
+                          >
+                            添加一个
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ) : null}
                 </div>
               );
             })}

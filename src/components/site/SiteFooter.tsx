@@ -60,7 +60,7 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
           <div className="lg:col-span-4">
             <Link href="/" className="flex items-center gap-3">
               <div className="relative h-14 w-14 overflow-hidden rounded-lg bg-white/5 p-1">
-                <Image src="/images/hs/logo.png" alt="Logo" fill className="object-contain" />
+                <Image src="/images/hs/logo.png" alt="Logo" fill sizes="56px" className="object-contain" />
               </div>
 
               <div className="leading-tight">

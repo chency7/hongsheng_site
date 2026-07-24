@@ -8,8 +8,16 @@ import ProductForm from '../../../components/ProductForm';
 export default function EditProductPage() {
   const params = useParams();
   const router = useRouter();
-  const { getProductById } = useAdminStore();
+  const { isCatalogLoading, getProductById } = useAdminStore();
   const product = getProductById(params.id as string);
+
+  if (isCatalogLoading) {
+    return (
+      <div className="flex min-h-[320px] items-center justify-center text-sm text-[#999999]">
+        正在读取产品目录...
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -25,5 +33,5 @@ export default function EditProductPage() {
     );
   }
 
-  return <ProductForm initialProduct={product} />;
+  return <ProductForm key={`${product.id}-${product.updatedAt}`} initialProduct={product} />;
 }

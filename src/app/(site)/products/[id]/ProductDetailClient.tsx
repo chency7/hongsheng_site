@@ -11,12 +11,33 @@ import ButtonLink from '@/components/site/ButtonLink';
 import { type Product, type ProductSubCategory } from '@/data/products';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import {
+  canonicalProductDetailTab,
+  findProductDetailTab,
+  productDetailTabTitles,
+} from '@/lib/product-detail-tabs';
 
 type Tab = string;
 
+function formatFileSize(bytes?: number) {
+  if (!bytes) return '';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function EmptyDetailState({ title, download = false }: { title: string; download?: boolean }) {
+  return (
+    <div className="flex min-h-60 flex-col items-center justify-center rounded-lg border border-dashed border-[#DCE5EE] bg-[#F9FAFB] px-6 text-center">
+      {download ? <Download className="h-8 w-8 text-[#9ABCE0]" /> : null}
+      <h3 className={`${download ? 'mt-3' : ''} text-[16px] font-medium text-[#333333]`}>暂无{title}</h3>
+      <p className="mt-2 text-[13px] text-[#999999]">内容将在产品资料完善后展示。</p>
+    </div>
+  );
+}
+
 export default function ProductDetailClient({ product }: { product: Product }) {
-  const defaultTabs = ['产品简介', '技术参数', '外形尺寸', '应用案例', '相关下载'];
-  const tabs = product.detailTabs ? product.detailTabs.map((t) => t.title) : defaultTabs;
+  const tabs = productDetailTabTitles(product.detailTabs);
 
   const [activeTab, setActiveTab] = useState<Tab>(tabs[0]);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -33,6 +54,13 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
   const currentImages = selectedSubCategory?.images || product.images;
   const currentSpecs = selectedSubCategory?.specs || product.specs;
+  const visibleActiveTab = tabs.includes(activeTab) ? activeTab : tabs[0];
+  const activeDetailTab = findProductDetailTab(product.detailTabs, visibleActiveTab);
+  const activeStandardTab = canonicalProductDetailTab(visibleActiveTab);
+  const activeDetailTabIsFile = activeDetailTab?.type === 'file' || activeDetailTab?.type === 'pdf';
+  const shouldRenderActiveDetailTab = Boolean(
+    activeDetailTab && (activeDetailTabIsFile || activeDetailTab.content?.trim()),
+  );
 
   const handleSubCategoryChange = (subCat: ProductSubCategory) => {
     setSelectedSubCategory(subCat);
@@ -73,6 +101,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 fill
                 sizes="(max-width: 1024px) 100vw, 60vw"
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
+                loading="eager"
               />
               <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/10">
                 <div className="flex h-12 w-12 scale-90 transform items-center justify-center rounded-full bg-white/80 text-gray-800 opacity-0 shadow-lg backdrop-blur-sm transition-opacity group-hover:scale-100 group-hover:opacity-100">
@@ -182,13 +211,13 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={`relative whitespace-nowrap px-8 py-4 text-[16px] font-medium transition-colors ${
-                    activeTab === tab
+                    visibleActiveTab === tab
                       ? 'bg-white text-[#1E3A5F]'
                       : 'text-[#666666] hover:text-[#4A90D9]'
                   }`}
                 >
                   {tab}
-                  {activeTab === tab && (
+                  {visibleActiveTab === tab && (
                     <div className="absolute left-0 right-0 top-0 h-1 bg-[#4A90D9]" />
                   )}
                 </button>
@@ -196,12 +225,9 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             </div>
 
             <div className="min-h-[400px] p-8">
-              {product.detailTabs ? (
-                product.detailTabs.map(
-                  (tab) =>
-                    activeTab === tab.title && (
-                      <MotionReveal key={tab.title}>
-                        {tab.type === 'file' && tab.fileUrl ? (
+              {shouldRenderActiveDetailTab && activeDetailTab ? (
+                <MotionReveal key={activeDetailTab.title}>
+                  {activeDetailTabIsFile && activeDetailTab.fileUrl ? (
                           <div className="flex flex-col gap-6">
                             <div className="flex items-center justify-between rounded-lg border border-[#E8ECF0] bg-[#F9FAFB] p-6">
                               <div className="flex items-center gap-4">
@@ -210,15 +236,16 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                                 </div>
                                 <div>
                                   <h3 className="mb-1 text-[16px] font-medium text-[#333333]">
-                                    {tab.content || '产品文档'}
+                                    {activeDetailTab.fileName || activeDetailTab.content || '产品文档'}
                                   </h3>
                                   <p className="text-[13px] text-[#999999]">
-                                    {tab.fileUrl.split('.').pop()?.toUpperCase()} 文档
+                                    {(activeDetailTab.fileType || activeDetailTab.fileUrl.split('.').pop())?.toUpperCase()} 文档
+                                    {activeDetailTab.fileSize ? ` · ${formatFileSize(activeDetailTab.fileSize)}` : ''}
                                   </p>
                                 </div>
                               </div>
                               <a
-                                href={tab.fileUrl}
+                                href={activeDetailTab.fileUrl}
                                 download
                                 target="_blank"
                                 rel="noreferrer"
@@ -230,28 +257,27 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                             </div>
 
                           </div>
-                        ) : (
+                  ) : activeDetailTabIsFile ? (
+                    <EmptyDetailState title={activeStandardTab || activeDetailTab.title} download />
+                  ) : activeDetailTab.content?.trim() ? (
                           <div className="prose max-w-none text-[#666666] prose-headings:text-[#333333] prose-h3:mb-4 prose-h3:text-[18px] prose-h3:font-bold prose-p:mb-6 prose-p:text-[14px] prose-p:leading-relaxed prose-ul:mb-6 prose-ul:text-[14px] prose-li:my-1 prose-table:w-full prose-table:border-collapse prose-table:text-left prose-table:text-[14px] prose-tr:hover:bg-[#F5F7FA] prose-th:border-b prose-th:border-[#E8ECF0] prose-th:bg-[#F9FAFB] prose-th:px-4 prose-th:py-3 prose-th:font-medium prose-th:text-[#333333] prose-td:border-b prose-td:border-[#E8ECF0] prose-td:px-4 prose-td:py-3">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{tab.content}</ReactMarkdown>
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{activeDetailTab.content}</ReactMarkdown>
                           </div>
-                        )}
-                      </MotionReveal>
-                    )
-                )
+                  ) : (
+                    <EmptyDetailState title={activeStandardTab || activeDetailTab.title} />
+                  )}
+                </MotionReveal>
               ) : (
                 <>
-                  {activeTab === '产品简介' && (
+                  {activeStandardTab === '产品简介' && (
                     <MotionReveal>
                       <h3 className="mb-4 text-[18px] font-bold text-[#333333]">产品概述</h3>
                       <p className="mb-6 text-[14px] leading-relaxed text-[#666666]">
                         {product.description}
                       </p>
-                      <p className="text-[14px] leading-relaxed text-[#666666]">
-                        本产品系列采用高品质材料制造，结合先进的制造工艺，确保在恶劣工况下依然保持卓越的性能和可靠性。通过严格的质量控制体系，每一件出厂产品均经过100%的性能测试，满足国际标准要求。
-                      </p>
                     </MotionReveal>
                   )}
-                  {activeTab === '技术参数' && (
+                  {activeStandardTab === '技术参数' && (
                     <MotionReveal>
                       <table className="w-full border-collapse text-left text-[14px] text-[#666666]">
                         <tbody>
@@ -263,58 +289,23 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                               <td className="px-4 py-3">{spec.value}</td>
                             </tr>
                           ))}
-                          <tr className="border-b border-[#E8ECF0] hover:bg-[#F5F7FA]">
-                            <th className="w-1/3 bg-[#F9FAFB] px-4 py-3 font-medium text-[#333333]">
-                              工作温度
-                            </th>
-                            <td className="px-4 py-3">-20℃ ~ +80℃</td>
-                          </tr>
-                          <tr className="border-b border-[#E8ECF0] hover:bg-[#F5F7FA]">
-                            <th className="w-1/3 bg-[#F9FAFB] px-4 py-3 font-medium text-[#333333]">
-                              防护等级
-                            </th>
-                            <td className="px-4 py-3">IP65</td>
-                          </tr>
                         </tbody>
                       </table>
                     </MotionReveal>
                   )}
-                  {activeTab === '相关下载' && (
+                  {(activeStandardTab === '外形尺寸' || activeStandardTab === '应用案例') && (
                     <MotionReveal>
-                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div className="group flex items-center justify-between rounded-[8px] border border-[#E8ECF0] p-4 transition-colors hover:border-[#4A90D9]">
-                          <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded bg-[#F0F5FA] text-[#4A90D9]">
-                              <Download className="h-5 w-5" />
-                            </div>
-                            <div>
-                              <div className="text-[14px] font-medium text-[#333333] group-hover:text-[#4A90D9]">
-                                产品选型手册
-                              </div>
-                              <div className="text-[12px] text-[#999999]">PDF · 2.4 MB</div>
-                            </div>
-                          </div>
-                          <button className="text-[14px] text-[#4A90D9] hover:underline">
-                            下载
-                          </button>
-                        </div>
-                        <div className="group flex items-center justify-between rounded-[8px] border border-[#E8ECF0] p-4 transition-colors hover:border-[#4A90D9]">
-                          <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded bg-[#F0F5FA] text-[#4A90D9]">
-                              <Download className="h-5 w-5" />
-                            </div>
-                            <div>
-                              <div className="text-[14px] font-medium text-[#333333] group-hover:text-[#4A90D9]">
-                                安装使用说明书
-                              </div>
-                              <div className="text-[12px] text-[#999999]">PDF · 1.8 MB</div>
-                            </div>
-                          </div>
-                          <button className="text-[14px] text-[#4A90D9] hover:underline">
-                            下载
-                          </button>
-                        </div>
-                      </div>
+                      <EmptyDetailState title={`${activeStandardTab}内容`} />
+                    </MotionReveal>
+                  )}
+                  {activeStandardTab === '相关下载' && (
+                    <MotionReveal>
+                      <EmptyDetailState title="相关下载" download />
+                    </MotionReveal>
+                  )}
+                  {!activeStandardTab && (
+                    <MotionReveal>
+                      <EmptyDetailState title={`${visibleActiveTab}内容`} />
                     </MotionReveal>
                   )}
                 </>

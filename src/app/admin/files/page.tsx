@@ -11,7 +11,29 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { useAdminStore } from '@/lib/admin-store';
+import { deleteAdminProductDocument } from '@/lib/admin/media-client';
+import { displayFilePath } from '@/lib/display-file-path';
 import DeleteConfirmDialog from '../components/DeleteConfirmDialog';
+
+type ManagedFile = {
+  productId: string;
+  productName: string;
+  detailTabId?: string;
+  fileName: string;
+  displayPath: string;
+  url: string;
+  type: string;
+  fileSize: number;
+  isDocument: boolean;
+};
+
+const PAGE_SIZE = 25;
+const imageExtensions = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']);
+const typeIcons = {
+  image: ImageIcon,
+  pptx: FileText,
+  pdf: FileText,
+};
 
 export default function AdminFilesPage() {
   const { getProducts, updateProduct } = useAdminStore();
@@ -19,57 +41,75 @@ export default function AdminFilesPage() {
 
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'pptx' | 'pdf' | 'image'>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [deleteTarget, setDeleteTarget] = useState<ManagedFile | null>(null);
+  const [error, setError] = useState('');
 
   const allFiles = useMemo(() => {
-    const result: { productId: string; productName: string; fileName: string; url: string; type: string }[] = [];
+    const result: ManagedFile[] = [];
 
     products.forEach((product) => {
-      // Images
-      product.images.forEach((img) => {
-        if (img) {
-          const ext = img.split('.').pop()?.toLowerCase() || 'unknown';
-          result.push({
-            productId: product.id,
-            productName: product.name,
-            fileName: img.split('/').pop() || img,
-            url: img,
-            type: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext) ? 'image' : ext,
-          });
+      const addImage = (url: string, productName = product.name) => {
+        if (!url) return;
+        const fileName = fileNameFromUrl(url);
+        const ext = fileName.split('.').pop()?.toLowerCase() || 'unknown';
+        result.push({
+          productId: product.id,
+          productName,
+          fileName,
+          displayPath: displayFilePath(url),
+          url,
+          type: imageExtensions.has(ext) ? 'image' : ext,
+          fileSize: 0,
+          isDocument: false,
+        });
+      };
+
+      addImage(product.coverImage);
+      product.images.forEach((image) => addImage(image));
+
+      product.detailTabs.forEach((tab) => {
+        if (tab.type !== 'markdown') return;
+        for (const match of Array.from(tab.content.matchAll(/!\[[^\]]*\]\(([^\s)]+)\)/g))) {
+          addImage(match[1]);
         }
       });
 
-      // Detail tab files
-      product.detailTabs.forEach((tab) => {
-        if (tab.type === 'file' && tab.content) {
-          const ext = tab.content.split('.').pop()?.toLowerCase() || 'unknown';
-          result.push({
-            productId: product.id,
-            productName: product.name,
-            fileName: tab.title || tab.content.split('/').pop() || 'unknown',
-            url: tab.content,
-            type: ext,
-          });
-        }
+      product.files.forEach((file) => {
+        result.push({
+          productId: product.id,
+          productName: product.name,
+          detailTabId: file.detailTabId,
+          fileName: file.name,
+          displayPath: displayFilePath(file.url),
+          url: file.url,
+          type: file.fileType || file.url.split('.').pop()?.toLowerCase() || 'file',
+          fileSize: file.fileSize,
+          isDocument: true,
+        });
       });
 
       // Sub-product images
       product.subProducts.forEach((sp) => {
-        sp.images.forEach((img) => {
-          if (img) {
-            const ext = img.split('.').pop()?.toLowerCase() || 'unknown';
-            result.push({
-              productId: product.id,
-              productName: `${product.name} / ${sp.name}`,
-              fileName: img.split('/').pop() || img,
-              url: img,
-              type: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext) ? 'image' : ext,
-            });
-          }
-        });
+        const subProductName = `${product.name} / ${sp.name}`;
+        addImage(sp.coverImage, subProductName);
+        sp.images.forEach((image) => addImage(image, subProductName));
       });
     });
 
-    return result;
+    const uniqueByUrl = new Map<string, ManagedFile>();
+    result.forEach((file) => {
+      const existing = uniqueByUrl.get(file.url);
+      if (!existing) {
+        uniqueByUrl.set(file.url, file);
+        return;
+      }
+
+      const productNames = Array.from(new Set([existing.productName, file.productName]));
+      uniqueByUrl.set(file.url, { ...existing, productName: productNames.join('、') });
+    });
+
+    return Array.from(uniqueByUrl.values());
   }, [products]);
 
   const filtered = useMemo(() => {
@@ -84,6 +124,13 @@ export default function AdminFilesPage() {
     return result;
   }, [allFiles, search, typeFilter]);
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const visibleFiles = useMemo(
+    () => filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE),
+    [filtered, safePage],
+  );
+
   const typeCounts = useMemo(() => {
     const counts: Record<string, number> = { all: allFiles.length };
     allFiles.forEach((f) => {
@@ -92,31 +139,58 @@ export default function AdminFilesPage() {
     return counts;
   }, [allFiles]);
 
-  const getTypeIcon = (type: string) => {
-    if (type === 'image') return ImageIcon;
-    if (type === 'pptx') return FileText;
-    if (type === 'pdf') return FileText;
-    return File;
+  const deleteDocument = async (file: ManagedFile) => {
+    const product = products.find((item) => item.id === file.productId);
+    if (!product || !file.detailTabId) return;
+
+    setError('');
+    try {
+      await updateProduct(product.id, {
+        detailTabs: product.detailTabs.map((tab) =>
+          tab.id === file.detailTabId
+            ? {
+                ...tab,
+                fileId: undefined,
+                fileName: undefined,
+                fileUrl: undefined,
+                fileType: undefined,
+                fileSize: undefined,
+                storageObjectPath: undefined,
+              }
+            : tab,
+        ),
+        files: product.files.filter((item) => item.detailTabId !== file.detailTabId),
+      });
+      await deleteAdminProductDocument(file.url);
+    } catch (deleteError) {
+      setError(deleteError instanceof Error ? deleteError.message : '产品资料删除失败');
+    }
   };
 
   return (
     <div>
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-[22px] font-bold text-[#1E3A5F]">文件管理</h1>
+          <h1 className="text-[22px] font-bold text-[#1E3A5F]">文件资产</h1>
           <p className="mt-1 text-sm text-[#999999]">
-            共 {allFiles.length} 个文件资源
+            共 {allFiles.length} 项文件资产
           </p>
         </div>
       </div>
+
+      {error && (
+        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+          {error}
+        </div>
+      )}
 
       {/* Type Filter Tabs */}
       <div className="mb-4 flex flex-wrap gap-2">
         {(['all', 'image', 'pptx', 'pdf'] as const).map((type) => (
           <button
             key={type}
-            onClick={() => setTypeFilter(type)}
-            className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+            onClick={() => { setTypeFilter(type); setCurrentPage(1); }}
+            className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors duration-150 ${
               typeFilter === type
                 ? 'bg-[#1E3A5F] text-white shadow-sm'
                 : 'border border-[#E8ECF0] bg-white text-[#666666] hover:border-[#4A90D9] hover:text-[#4A90D9]'
@@ -130,9 +204,9 @@ export default function AdminFilesPage() {
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
             placeholder="搜索文件..."
-            className="w-full rounded-lg border border-[#E8ECF0] py-2.5 pl-10 pr-4 text-sm outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+            className="w-full rounded-lg border border-[#E8ECF0] py-2.5 pl-10 pr-4 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
           />
         </div>
       </div>
@@ -158,10 +232,10 @@ export default function AdminFilesPage() {
                   </td>
                 </tr>
               ) : (
-                filtered.map((file, idx) => {
-                  const Icon = getTypeIcon(file.type);
+                visibleFiles.map((file, idx) => {
+                  const Icon = typeIcons[file.type as keyof typeof typeIcons] || File;
                   return (
-                    <tr key={idx} className="border-b border-[#E8ECF0] transition-colors hover:bg-[#F9FAFB]">
+                    <tr key={`${file.url}-${(safePage - 1) * PAGE_SIZE + idx}`} className="border-b border-[#E8ECF0] transition-colors hover:bg-[#F9FAFB]">
                       <td className="px-4 py-3">
                         <div className="flex h-8 w-8 items-center justify-center rounded bg-[#F0F5FA]">
                           <Icon className="h-4 w-4 text-[#4A90D9]" />
@@ -169,12 +243,17 @@ export default function AdminFilesPage() {
                       </td>
                       <td className="px-4 py-3">
                         <p className="font-medium text-[#333333] max-w-[200px] truncate">{file.fileName}</p>
-                        <p className="text-xs text-[#999999] uppercase">{file.type}</p>
+                        <p className="text-xs text-[#999999] uppercase">
+                          {file.type}{file.fileSize ? ` · ${formatFileSize(file.fileSize)}` : ''}
+                        </p>
                       </td>
                       <td className="px-4 py-3 text-[#666666]">{file.productName}</td>
                       <td className="px-4 py-3">
-                        <code className="max-w-[300px] truncate block rounded bg-[#F5F7FA] px-2 py-1 text-xs text-[#666666]">
-                          {file.url}
+                        <code
+                          title={file.displayPath}
+                          className="block max-w-[300px] truncate rounded bg-[#F5F7FA] px-2 py-1 text-xs text-[#666666]"
+                        >
+                          {file.displayPath}
                         </code>
                       </td>
                       <td className="px-4 py-3">
@@ -190,6 +269,26 @@ export default function AdminFilesPage() {
                               <ExternalLink className="h-4 w-4" />
                             </a>
                           )}
+                          {file.isDocument && (
+                            <a
+                              href={file.url}
+                              download
+                              className="rounded p-1.5 text-[#999999] hover:bg-[#F0F5FA] hover:text-[#28A745] transition-colors"
+                              title="下载"
+                            >
+                              <Download className="h-4 w-4" />
+                            </a>
+                          )}
+                          {file.isDocument && (
+                            <button
+                              type="button"
+                              onClick={() => setDeleteTarget(file)}
+                              className="rounded p-1.5 text-[#999999] hover:bg-red-50 hover:text-red-500 transition-colors"
+                              title="移除"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -199,11 +298,49 @@ export default function AdminFilesPage() {
             </tbody>
           </table>
         </div>
+        {filtered.length > PAGE_SIZE ? (
+          <div className="flex items-center justify-between border-t border-[#E8ECF0] px-4 py-3 text-sm text-[#666666]">
+            <span>
+              第 {safePage} / {totalPages} 页，共 {filtered.length} 项
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                disabled={safePage === 1}
+                className="rounded border border-[#E8ECF0] bg-white px-3 py-1.5 transition-colors hover:bg-[#F5F7FA] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                上一页
+              </button>
+              <button
+                type="button"
+                onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                disabled={safePage === totalPages}
+                className="rounded border border-[#E8ECF0] bg-white px-3 py-1.5 transition-colors hover:bg-[#F5F7FA] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                下一页
+              </button>
+            </div>
+          </div>
+        ) : null}
       </div>
+
+      {deleteTarget && (
+        <DeleteConfirmDialog
+          title="移除产品资料"
+          message={`确定要从「${deleteTarget.productName}」移除「${deleteTarget.fileName}」吗？保存引用后会同时删除 Supabase Storage 文件。`}
+          onConfirm={() => {
+            const file = deleteTarget;
+            setDeleteTarget(null);
+            void deleteDocument(file);
+          }}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
 
       {/* Summary */}
       <div className="mt-6 rounded-xl border border-[#E8ECF0] bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-        <h3 className="mb-3 text-sm font-semibold text-[#1E3A5F]">文件统计</h3>
+        <h3 className="mb-3 text-sm font-semibold text-[#1E3A5F]">资产统计</h3>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <div className="rounded-lg bg-[#F0F5FA] p-3 text-center">
             <p className="text-[24px] font-bold text-[#4A90D9]">{typeCounts.image || 0}</p>
@@ -225,4 +362,19 @@ export default function AdminFilesPage() {
       </div>
     </div>
   );
+}
+
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function fileNameFromUrl(value: string) {
+  try {
+    const pathname = value.startsWith('http') ? new URL(value).pathname : value;
+    return decodeURIComponent(pathname.split('/').pop() || value);
+  } catch {
+    return value.split('/').pop() || value;
+  }
 }

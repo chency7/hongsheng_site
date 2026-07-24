@@ -64,7 +64,7 @@ export default function SubCategoryForm({ categories, initialData, onSave, onClo
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+              className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
               required
             >
               <option value="">请选择父分类</option>
@@ -80,7 +80,7 @@ export default function SubCategoryForm({ categories, initialData, onSave, onClo
               value={name}
               onChange={(e) => { setName(e.target.value); handleSlugFromName(e.target.value); }}
               placeholder="例如：液压阀组"
-              className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+              className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
               required
             />
           </div>
@@ -91,7 +91,7 @@ export default function SubCategoryForm({ categories, initialData, onSave, onClo
               value={slug}
               onChange={(e) => setSlug(e.target.value)}
               placeholder="例如：hydraulic-valve-group"
-              className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm font-mono outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+              className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm font-mono outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -101,7 +101,7 @@ export default function SubCategoryForm({ categories, initialData, onSave, onClo
                 type="number"
                 value={sortOrder}
                 onChange={(e) => setSortOrder(Number(e.target.value))}
-                className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+                className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
               />
             </div>
             <div>
@@ -116,7 +116,7 @@ export default function SubCategoryForm({ categories, initialData, onSave, onClo
             <button type="button" onClick={onClose} className="rounded-lg border border-[#E8ECF0] px-5 py-2.5 text-sm font-medium text-[#666666] hover:bg-[#F5F7FA] transition-colors">
               取消
             </button>
-            <button type="submit" className="rounded-lg bg-[#1E3A5F] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-[#162A45]">
+            <button type="submit" className="rounded-lg bg-[#1E3A5F] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors duration-150 hover:bg-[#162A45]">
               保存
             </button>
           </div>

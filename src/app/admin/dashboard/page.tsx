@@ -33,7 +33,7 @@ export default function AdminDashboardPage() {
           return (
             <div
               key={card.label}
-              className="rounded-xl border border-[#E8ECF0] bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all hover:-translate-y-[2px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]"
+              className="rounded-xl border border-[#E8ECF0] bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-transform duration-150 hover:-translate-y-[1px]"
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -56,7 +56,7 @@ export default function AdminDashboardPage() {
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Link
           href="/admin/products/new"
-          className="flex items-center justify-between rounded-xl border border-[#E8ECF0] bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all hover:-translate-y-[2px] hover:border-[#4A90D9] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]"
+          className="flex items-center justify-between rounded-xl border border-[#E8ECF0] bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-[border-color,transform] duration-150 hover:-translate-y-[1px] hover:border-[#4A90D9]"
         >
           <div>
             <p className="text-sm font-medium text-[#333333]">新增产品</p>
@@ -66,7 +66,7 @@ export default function AdminDashboardPage() {
         </Link>
         <Link
           href="/admin/categories"
-          className="flex items-center justify-between rounded-xl border border-[#E8ECF0] bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all hover:-translate-y-[2px] hover:border-[#28A745] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]"
+          className="flex items-center justify-between rounded-xl border border-[#E8ECF0] bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-[border-color,transform] duration-150 hover:-translate-y-[1px] hover:border-[#28A745]"
         >
           <div>
             <p className="text-sm font-medium text-[#333333]">管理分类</p>
@@ -76,11 +76,11 @@ export default function AdminDashboardPage() {
         </Link>
         <Link
           href="/admin/files"
-          className="flex items-center justify-between rounded-xl border border-[#E8ECF0] bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all hover:-translate-y-[2px] hover:border-[#9B59B6] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]"
+          className="flex items-center justify-between rounded-xl border border-[#E8ECF0] bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-[border-color,transform] duration-150 hover:-translate-y-[1px] hover:border-[#9B59B6]"
         >
           <div>
-            <p className="text-sm font-medium text-[#333333]">文件管理</p>
-            <p className="mt-1 text-xs text-[#999999]">管理上传的文件资源</p>
+            <p className="text-sm font-medium text-[#333333]">文件资产</p>
+            <p className="mt-1 text-xs text-[#999999]">管理上传的文件资产</p>
           </div>
           <ArrowRight className="h-5 w-5 text-[#9B59B6]" />
         </Link>
@@ -100,7 +100,6 @@ export default function AdminDashboardPage() {
               <tr>
                 <th className="px-6 py-3 text-xs font-medium text-[#999999] uppercase">产品名称</th>
                 <th className="px-6 py-3 text-xs font-medium text-[#999999] uppercase">型号</th>
-                <th className="px-6 py-3 text-xs font-medium text-[#999999] uppercase">品牌</th>
                 <th className="px-6 py-3 text-xs font-medium text-[#999999] uppercase">状态</th>
                 <th className="px-6 py-3 text-xs font-medium text-[#999999] uppercase">操作</th>
               </tr>
@@ -110,7 +109,6 @@ export default function AdminDashboardPage() {
                 <tr key={product.id} className="border-b border-[#E8ECF0] transition-colors hover:bg-[#F9FAFB]">
                   <td className="px-6 py-3 font-medium text-[#333333]">{product.name}</td>
                   <td className="px-6 py-3 text-[#666666]">{product.model}</td>
-                  <td className="px-6 py-3 text-[#666666]">{product.brand}</td>
                   <td className="px-6 py-3">
                     <span
                       className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${

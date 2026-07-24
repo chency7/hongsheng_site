@@ -1,7 +1,16 @@
 const nextConfig = {
   output: 'standalone',
+  allowedDevOrigins: ['127.0.0.1', 'localhost'],
   images: {
     domains: [],
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: '124.221.2.206',
+        port: '8000',
+        pathname: '/storage/v1/object/public/files/**',
+      },
+    ],
     unoptimized: false,
   },
   compress: true,

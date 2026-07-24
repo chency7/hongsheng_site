@@ -1,31 +1,68 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
+  type LucideIcon,
   LayoutDashboard,
   FolderTree,
   Package,
   FileText,
+  Users,
   LogOut,
   Menu,
-  X,
   ChevronLeft,
-  User,
 } from 'lucide-react';
 
 const menuItems = [
   { href: '/admin/dashboard', label: '仪表盘', icon: LayoutDashboard },
   { href: '/admin/categories', label: '分类管理', icon: FolderTree },
   { href: '/admin/products', label: '产品管理', icon: Package },
-  { href: '/admin/files', label: '文件管理', icon: FileText },
+  { href: '/admin/files', label: '文件资产', icon: FileText },
+  { href: '/admin/users', label: '账号权限', icon: Users },
 ];
 
-export default function AdminSidebar() {
-  const pathname = usePathname();
+type AdminSidebarProps = {
+  collapsed: boolean;
+  pathname: string;
+  onToggleCollapsed: () => void;
+};
+
+type SidebarMenuItemProps = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  active: boolean;
+  collapsed: boolean;
+};
+
+const SidebarMenuItem = memo(function SidebarMenuItem({
+  href,
+  label,
+  icon: Icon,
+  active,
+  collapsed,
+}: SidebarMenuItemProps) {
+  return (
+    <Link
+      href={href}
+      prefetch
+      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-150 ${
+        active
+          ? 'bg-[#4A90D9] text-white shadow-md'
+          : 'text-white/70 hover:bg-white/10 hover:text-white'
+      } ${collapsed ? 'justify-center px-2' : ''}`}
+      title={collapsed ? label : undefined}
+    >
+      <Icon className="h-5 w-5 shrink-0" />
+      {!collapsed && <span>{label}</span>}
+    </Link>
+  );
+});
+
+function AdminSidebar({ collapsed, pathname, onToggleCollapsed }: AdminSidebarProps) {
   const router = useRouter();
-  const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
@@ -33,10 +70,18 @@ export default function AdminSidebar() {
     setMobileOpen(false);
   }, [pathname]);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     await fetch('/api/admin/logout', { method: 'POST' }).catch(() => null);
     router.push('/admin/login');
-  };
+  }, [router]);
+
+  const activeItems = useMemo(
+    () => menuItems.map((item) => ({
+      ...item,
+      active: pathname === item.href || pathname.startsWith(item.href + '/'),
+    })),
+    [pathname],
+  );
 
   const sidebarContent = (
     <div className="flex h-full flex-col bg-[#1E3A5F] text-white">
@@ -47,39 +92,32 @@ export default function AdminSidebar() {
           </Link>
         )}
         <button
-          onClick={() => { setCollapsed(!collapsed); setMobileOpen(false); }}
-          className="rounded p-1.5 text-white/60 hover:bg-white/10 hover:text-white transition-colors"
+          onClick={() => { onToggleCollapsed(); setMobileOpen(false); }}
+          className="rounded p-1.5 text-white/60 transition-colors duration-150 hover:bg-white/10 hover:text-white"
+          aria-label={collapsed ? '展开侧边栏' : '收起侧边栏'}
+          title={collapsed ? '展开侧边栏' : '收起侧边栏'}
         >
           {collapsed ? <Menu className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
         </button>
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
-                isActive
-                  ? 'bg-[#4A90D9] text-white shadow-md'
-                  : 'text-white/70 hover:bg-white/10 hover:text-white'
-              } ${collapsed ? 'justify-center px-2' : ''}`}
-              title={collapsed ? item.label : undefined}
-            >
-              <Icon className="h-5 w-5 shrink-0" />
-              {!collapsed && <span>{item.label}</span>}
-            </Link>
-          );
-        })}
+        {activeItems.map((item) => (
+          <SidebarMenuItem
+            key={item.href}
+            href={item.href}
+            label={item.label}
+            icon={item.icon}
+            active={item.active}
+            collapsed={collapsed}
+          />
+        ))}
       </nav>
 
       <div className="border-t border-white/10 p-3">
         <button
           onClick={handleLogout}
-          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 transition-all hover:bg-red-500/20 hover:text-red-300 ${
+          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 transition-colors duration-150 hover:bg-red-500/20 hover:text-red-300 ${
             collapsed ? 'justify-center px-2' : ''
           }`}
           title={collapsed ? '退出登录' : undefined}
@@ -95,7 +133,7 @@ export default function AdminSidebar() {
     <>
       {/* Mobile header */}
       <div className="fixed left-0 right-0 top-0 z-40 flex h-14 items-center justify-between border-b border-[#E8ECF0] bg-[#1E3A5F] px-4 lg:hidden">
-        <button onClick={() => setMobileOpen(true)} className="rounded p-1.5 text-white">
+        <button onClick={() => setMobileOpen(true)} className="rounded p-1.5 text-white" aria-label="打开侧边栏">
           <Menu className="h-5 w-5" />
         </button>
         <span className="text-sm font-bold text-white">HS 后台管理</span>
@@ -114,7 +152,7 @@ export default function AdminSidebar() {
 
       {/* Desktop sidebar */}
       <aside
-        className={`fixed bottom-0 left-0 top-0 z-40 hidden transition-all duration-300 lg:block ${
+        className={`fixed bottom-0 left-0 top-0 z-40 hidden transition-[width] duration-200 ease-out motion-reduce:transition-none lg:block ${
           collapsed ? 'w-[64px]' : 'w-[240px]'
         }`}
       >
@@ -123,3 +161,5 @@ export default function AdminSidebar() {
     </>
   );
 }
+
+export default memo(AdminSidebar);

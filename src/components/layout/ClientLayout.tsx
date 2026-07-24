@@ -7,8 +7,15 @@ import { I18nProvider } from '@/components/providers/i18n-provider';
 import SiteHeader from '@/components/site/SiteHeader';
 import SiteFooter from '@/components/site/SiteFooter';
 import ScrollToTop from '@/components/site/ScrollToTop';
+import type { CategoryOption } from '@/data/products';
 
-export default function ClientLayout({ children }: { children: React.ReactNode }) {
+export default function ClientLayout({
+  children,
+  categoryOptions,
+}: {
+  children: React.ReactNode;
+  categoryOptions: CategoryOption[];
+}) {
   const pathname = usePathname();
 
   useEffect(() => {
@@ -20,7 +27,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       <React.Suspense fallback={<div className="p-4 text-sm text-zinc-500">Loading...</div>}>
         <I18nProvider>
           <div className="min-h-screen bg-white text-[#0B0F16] dark:bg-black dark:text-white">
-            <SiteHeader />
+            <SiteHeader categoryOptions={categoryOptions} />
             <main>{children}</main>
             <SiteFooter showPartners={pathname === '/'} />
             <ScrollToTop />

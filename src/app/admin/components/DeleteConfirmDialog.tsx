@@ -31,7 +31,7 @@ export default function DeleteConfirmDialog({ title, message, onConfirm, onCance
             </button>
             <button
               onClick={onConfirm}
-              className="rounded-lg bg-red-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-red-600"
+              className="rounded-lg bg-red-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors duration-150 hover:bg-red-600"
             >
               确认删除
             </button>

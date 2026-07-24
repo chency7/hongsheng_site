@@ -1,47 +1,81 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { LoaderCircle } from 'lucide-react';
+import { AdminSessionProvider, type AdminSessionUser } from './AdminSessionContext';
 
-export default function AuthGuard({ children }: { children: React.ReactNode }) {
+const SESSION_CHECK_TIMEOUT_MS = 10000;
+
+type SessionResponse = {
+  authenticated?: boolean;
+  user?: AdminSessionUser | null;
+};
+
+export default function AuthGuard({
+  children,
+  isLoginPage,
+}: {
+  children: React.ReactNode;
+  isLoginPage: boolean;
+}) {
   const router = useRouter();
-  const pathname = usePathname();
-  const [ready, setReady] = useState(false);
+  const [sessionReady, setSessionReady] = useState(isLoginPage);
+  const [user, setUser] = useState<AdminSessionUser | null>(null);
 
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), SESSION_CHECK_TIMEOUT_MS);
 
     async function checkSession() {
-      const response = await fetch('/api/admin/session', { cache: 'no-store' }).catch(() => null);
-      const data = response?.ok ? await response.json() : { authenticated: false };
+      const response = await fetch('/api/admin/session', {
+        cache: 'no-store',
+        signal: controller.signal,
+      }).catch(() => null);
+      const data = response?.ok
+        ? await response.json().catch(() => null) as SessionResponse | null
+        : null;
       const authenticated = Boolean(data?.authenticated);
 
       if (cancelled) return;
 
-      if (pathname !== '/admin/login' && !authenticated) {
-        router.replace('/admin/login');
+      if (isLoginPage) {
+        setSessionReady(true);
+        if (authenticated) {
+          router.replace('/admin/dashboard');
+        }
         return;
       }
 
-      if (pathname === '/admin/login' && authenticated) {
-        router.replace('/admin/dashboard');
+      if (!authenticated) {
+        window.location.replace('/admin/login');
         return;
       }
 
-      setReady(true);
+      setUser(data?.user || null);
+      setSessionReady(true);
     }
 
-    queueMicrotask(() => {
-      if (!cancelled) setReady(false);
-    });
     void checkSession();
 
     return () => {
       cancelled = true;
+      controller.abort();
+      window.clearTimeout(timeout);
     };
-  }, [pathname, router]);
+  }, [isLoginPage, router]);
 
-  if (!ready) return null;
+  if (!isLoginPage && !sessionReady) {
+    return (
+      <div className="flex min-h-[100dvh] items-center justify-center bg-[#f4f7fa] text-[#5f7486]">
+        <div className="flex items-center gap-2 text-sm" role="status">
+          <LoaderCircle className="h-4 w-4 animate-spin text-[#176fa6]" aria-hidden="true" />
+          正在验证会话
+        </div>
+      </div>
+    );
+  }
 
-  return <>{children}</>;
+  return <AdminSessionProvider user={user}>{children}</AdminSessionProvider>;
 }

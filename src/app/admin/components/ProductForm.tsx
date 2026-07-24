@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -15,10 +15,40 @@ import {
   ChevronUp,
   Eye,
   Package,
+  Upload,
+  ExternalLink,
+  X,
+  ArrowUp,
+  ArrowDown,
+  LoaderCircle,
+  LayoutTemplate,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { useAdminStore } from '@/lib/admin-store';
-import type { AdminProduct, AdminProductSpec, AdminSubProduct, AdminDetailTab } from '@/lib/admin-store';
+import { generateProductSlug, uniqueProductSlug } from '@/lib/admin-catalog';
+import { adminProductToProduct } from '@/lib/admin/product-view';
+import {
+  canonicalProductDetailTab,
+  findProductDetailTab,
+  type StandardProductDetailTab,
+} from '@/lib/product-detail-tabs';
+import ProductDetailClient from '@/app/(site)/products/[id]/ProductDetailClient';
+import type {
+  AdminProduct,
+  AdminProductFile,
+  AdminProductSpec,
+  AdminSubProduct,
+  AdminDetailTab,
+} from '@/lib/admin-store';
+import {
+  deleteAdminProductDocument,
+  deleteAdminProductMedia,
+  uploadAdminProductImage,
+  uploadAdminProductDocument,
+} from '@/lib/admin/media-client';
+import { thumbnailUrlFromProductImageUrl } from '@/lib/admin/product-thumbnails';
 import SubCategorySelect from '../components/SubCategorySelect';
+import VisualProductEditor from '../components/VisualProductEditor';
 import { Switch } from '@/components/ui/switch';
 
 interface Props {
@@ -42,7 +72,7 @@ function SectionHeader({
     <button
       type="button"
       onClick={() => onToggle(section)}
-      className="flex w-full items-center justify-between rounded-xl border border-[#E8ECF0] bg-white px-6 py-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all hover:border-[#4A90D9]"
+      className="flex w-full items-center justify-between rounded-xl border border-[#E8ECF0] bg-white px-6 py-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-colors duration-150 hover:border-[#4A90D9]"
     >
       <div className="flex items-center gap-3">
         <Icon className="h-5 w-5 text-[#4A90D9]" />
@@ -61,29 +91,76 @@ function generateId(): string {
   return Math.random().toString(36).substring(2, 11);
 }
 
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+function detailTabEditorType(tab: AdminDetailTab): AdminDetailTab['type'] {
+  const standardTitle = canonicalProductDetailTab(tab.title);
+  if (standardTitle === '技术参数') return 'markdown';
+  if (standardTitle === '应用案例') return 'file';
+  return tab.type;
+}
+
+function isFixedDetailTabType(tab: AdminDetailTab) {
+  const standardTitle = canonicalProductDetailTab(tab.title);
+  return standardTitle === '技术参数' || standardTitle === '应用案例';
+}
+
+function detailTabUsesFileEditor(tab: AdminDetailTab) {
+  const standardTitle = canonicalProductDetailTab(tab.title);
+  if (standardTitle === '技术参数') return false;
+  return standardTitle === '应用案例' || tab.type === 'file' || tab.type === 'pdf';
+}
+
+function detailTabDocumentKind(tab: AdminDetailTab): 'general' | 'presentation' {
+  const standardTitle = canonicalProductDetailTab(tab.title);
+  return standardTitle === '应用案例' || standardTitle === '外形尺寸'
+    ? 'presentation'
+    : 'general';
+}
+
+function detailTabFileAccept(tab: AdminDetailTab) {
+  return detailTabDocumentKind(tab) === 'presentation'
+    ? '.pdf,.pptx'
+    : '.pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx,.zip';
+}
+
+function detailTabUploadLabel(tab: AdminDetailTab) {
+  const standardTitle = canonicalProductDetailTab(tab.title);
+  if (standardTitle === '应用案例') return '选择应用案例 PDF / PPTX';
+  if (standardTitle === '外形尺寸') return '选择外形尺寸 PDF / PPTX';
+  return '选择产品资料';
+}
+
 export default function ProductForm({ initialProduct }: Props) {
   const {
     getSubCategories,
     getCategories,
+    getProducts,
     createProduct,
     updateProduct,
   } = useAdminStore();
 
   const subCategories = getSubCategories();
   const categories = getCategories();
+  const products = getProducts();
   const isEdit = !!initialProduct;
+  const [draftProductId] = useState(() => initialProduct?.id || `draft-${generateId()}`);
 
   // Basic info
   const [name, setName] = useState(initialProduct?.name || '');
-  const [slug, setSlug] = useState(initialProduct?.slug || '');
+  const [lockedSlug, setLockedSlug] = useState(initialProduct?.slug || '');
   const [model, setModel] = useState(initialProduct?.model || '');
-  const [brand, setBrand] = useState(initialProduct?.brand || '其他');
   const [subCategoryId, setSubCategoryId] = useState(initialProduct?.subCategoryId || '');
   const [description, setDescription] = useState(initialProduct?.description || '');
-  const [coverImage, setCoverImage] = useState(initialProduct?.coverImage || '');
   const [sortOrder, setSortOrder] = useState(initialProduct?.sortOrder ?? 0);
   const [isActive, setIsActive] = useState(initialProduct?.isActive ?? true);
-  const [images, setImages] = useState<string[]>(initialProduct?.images || []);
+  const [images, setImages] = useState<string[]>(() =>
+    Array.from(new Set([initialProduct?.coverImage, ...(initialProduct?.images || [])].filter(Boolean) as string[])),
+  );
 
   // Specs
   const [specs, setSpecs] = useState<AdminProductSpec[]>(
@@ -102,11 +179,31 @@ export default function ProductForm({ initialProduct }: Props) {
   const [detailTabs, setDetailTabs] = useState<AdminDetailTab[]>(
     initialProduct?.detailTabs || []
   );
+  const [productFiles, setProductFiles] = useState<AdminProductFile[]>(initialProduct?.files || []);
+  const [pendingDocumentDeletes, setPendingDocumentDeletes] = useState<string[]>([]);
+  const [pendingImageDeletes, setPendingImageDeletes] = useState<string[]>([]);
+  const [uploadingTabId, setUploadingTabId] = useState('');
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [uploadingSubProductId, setUploadingSubProductId] = useState('');
+  const [imageNotice, setImageNotice] = useState('');
+  const documentInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const productImageInputRef = useRef<HTMLInputElement | null>(null);
+  const subProductImageInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const uploadedMediaUrlsRef = useRef(new Set<string>());
+  const thumbnailByImageUrlRef = useRef(new Map<string, string>());
 
   // UI state
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
+  const [previewDraft, setPreviewDraft] = useState<AdminProduct | null>(null);
+  const [editorMode, setEditorMode] = useState<'visual' | 'fields'>('visual');
+
+  useEffect(() => () => {
+    uploadedMediaUrlsRef.current.forEach((url) => {
+      void deleteAdminProductMedia(url).catch(() => undefined);
+    });
+  }, []);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     basic: true,
     specs: true,
@@ -142,10 +239,78 @@ export default function ProductForm({ initialProduct }: Props) {
     setFeatures(features.filter((_, i) => i !== idx));
   };
 
-  // Images handlers
-  const addImage = () => setImages([...images, '']);
-  const updateImage = (idx: number, val: string) => setImages(images.map((img, i) => (i === idx ? val : img)));
-  const removeImage = (idx: number) => setImages(images.filter((_, i) => i !== idx));
+  const categoryContext = useMemo(() => {
+    const subCategory = subCategories.find((item) => item.id === subCategoryId);
+    return subCategory
+      ? { categoryId: subCategory.categoryId, storageSubCategoryId: subCategory.id }
+      : null;
+  }, [subCategories, subCategoryId]);
+
+  const generatedSlug = lockedSlug || uniqueProductSlug(generateProductSlug(name), products);
+
+  const storageProductId = initialProduct?.id || generatedSlug;
+
+  const queueImageDelete = (url: string) => {
+    if (!url) return;
+    setPendingImageDeletes((urls) => Array.from(new Set([...urls, url])));
+  };
+
+  const thumbnailForImage = (url: string, fallback?: string) => (
+    thumbnailByImageUrlRef.current.get(url) ||
+    fallback ||
+    thumbnailUrlFromProductImageUrl(url) ||
+    ''
+  );
+
+  const removeImage = (idx: number) => {
+    const image = images[idx];
+    queueImageDelete(image);
+    setImages((current) => current.filter((_, imageIndex) => imageIndex !== idx));
+  };
+
+  const moveImage = (idx: number, direction: -1 | 1) => {
+    const target = idx + direction;
+    if (target < 0 || target >= images.length) return;
+    setImages((current) => {
+      const next = [...current];
+      [next[idx], next[target]] = [next[target], next[idx]];
+      const nextThumbnail = thumbnailForImage(next[0] || '');
+      setPreviewDraft((draft) => draft ? { ...draft, coverThumbnail: nextThumbnail } : draft);
+      return next;
+    });
+  };
+
+  const uploadImages = async (files: File[]) => {
+    if (!categoryContext || !name.trim()) {
+      setError('请先填写产品名称并选择所属二级分类');
+      return;
+    }
+    setError('');
+    setImageNotice('');
+    setUploadingImages(true);
+    setLockedSlug(generatedSlug);
+    try {
+      const uploaded = await Promise.all(
+        files.map((file) => uploadAdminProductImage({
+          file,
+          categoryId: categoryContext.categoryId,
+          subCategoryId: categoryContext.storageSubCategoryId,
+          productId: storageProductId,
+        })),
+      );
+      uploaded.forEach((image) => {
+        uploadedMediaUrlsRef.current.add(image.url);
+        thumbnailByImageUrlRef.current.set(image.url, image.thumbnailUrl);
+      });
+      setImages((current) => Array.from(new Set([...current, ...uploaded.map((image) => image.url)])));
+      setImageNotice(`已上传 ${uploaded.length} 张图片，原图与缩略图都已生成，列表加载会更轻快。`);
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : '产品图片上传失败，请重试');
+    } finally {
+      setUploadingImages(false);
+      if (productImageInputRef.current) productImageInputRef.current.value = '';
+    }
+  };
 
   // Sub-product handlers
   const addSubProduct = () => {
@@ -167,6 +332,9 @@ export default function ProductForm({ initialProduct }: Props) {
     setSubProducts(subProducts.map((sp) => (sp.id === id ? { ...sp, [field]: val } : sp)));
   };
   const removeSubProduct = (id: string) => {
+    const removed = subProducts.find((subProduct) => subProduct.id === id);
+    removed?.images.forEach(queueImageDelete);
+    if (removed?.coverImage && !removed.images.includes(removed.coverImage)) queueImageDelete(removed.coverImage);
     setSubProducts(subProducts.filter((sp) => sp.id !== id));
   };
   const addSubProductSpec = (subId: string) => {
@@ -196,26 +364,60 @@ export default function ProductForm({ initialProduct }: Props) {
       )
     );
   };
-  const addSubProductImage = (subId: string) => {
-    setSubProducts(
-      subProducts.map((sp) =>
-        sp.id === subId ? { ...sp, images: [...sp.images, ''] } : sp
-      )
-    );
-  };
-  const updateSubProductImage = (subId: string, idx: number, val: string) => {
-    setSubProducts(
-      subProducts.map((sp) =>
-        sp.id === subId ? { ...sp, images: sp.images.map((img, i) => (i === idx ? val : img)) } : sp
-      )
-    );
-  };
   const removeSubProductImage = (subId: string, idx: number) => {
+    const removedImage = subProducts.find((sp) => sp.id === subId)?.images[idx];
+    if (removedImage) queueImageDelete(removedImage);
     setSubProducts(
       subProducts.map((sp) =>
-        sp.id === subId ? { ...sp, images: sp.images.filter((_, i) => i !== idx) } : sp
+        sp.id === subId
+          ? {
+              ...sp,
+              images: sp.images.filter((_, i) => i !== idx),
+              coverImage: sp.images.filter((_, i) => i !== idx)[0] || '',
+            }
+          : sp
       )
     );
+  };
+
+  const uploadSubProductImages = async (subProduct: AdminSubProduct, files: File[]) => {
+    if (!categoryContext || !name.trim()) {
+      setError('请先填写产品名称并选择所属二级分类');
+      return;
+    }
+    setError('');
+    setUploadingSubProductId(subProduct.id);
+    setLockedSlug(generatedSlug);
+    try {
+      const uploaded = await Promise.all(
+        files.map((file) => uploadAdminProductImage({
+          file,
+          categoryId: categoryContext.categoryId,
+          subCategoryId: categoryContext.storageSubCategoryId,
+          productId: `${storageProductId}-${subProduct.id}`,
+        })),
+      );
+      uploaded.forEach((image) => {
+        uploadedMediaUrlsRef.current.add(image.url);
+        thumbnailByImageUrlRef.current.set(image.url, image.thumbnailUrl);
+      });
+      setSubProducts((current) => current.map((item) => {
+        if (item.id !== subProduct.id) return item;
+        const nextImages = Array.from(new Set([...item.images, ...uploaded.map((image) => image.url)]));
+        return {
+          ...item,
+          images: nextImages,
+          coverImage: nextImages[0] || '',
+          coverThumbnail: thumbnailForImage(nextImages[0] || '', item.coverThumbnail),
+        };
+      }));
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : '子产品图片上传失败，请重试');
+    } finally {
+      setUploadingSubProductId('');
+      const input = subProductImageInputRefs.current[subProduct.id];
+      if (input) input.value = '';
+    }
   };
 
   // Detail tabs handlers
@@ -229,69 +431,298 @@ export default function ProductForm({ initialProduct }: Props) {
     };
     setDetailTabs([...detailTabs, dt]);
   };
-  const updateDetailTab = (id: string, field: string, val: string) => {
+  const updateDetailTab = (id: string, field: string, val: string | number) => {
     setDetailTabs(detailTabs.map((dt) => (dt.id === id ? { ...dt, [field]: val } : dt)));
   };
   const removeDetailTab = (id: string) => {
+    const tab = detailTabs.find((item) => item.id === id);
+    if (tab?.fileUrl) {
+      setPendingDocumentDeletes((urls) => Array.from(new Set([...urls, tab.fileUrl!])));
+    }
+    setProductFiles((files) => files.filter((file) => file.detailTabId !== id));
     setDetailTabs(detailTabs.filter((dt) => dt.id !== id));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const updateDetailTabType = (id: string, type: AdminDetailTab['type']) => {
+    const tab = detailTabs.find((item) => item.id === id);
+    if (type === 'markdown' && tab?.fileUrl) {
+      setPendingDocumentDeletes((urls) => Array.from(new Set([...urls, tab.fileUrl!])));
+      setProductFiles((files) => files.filter((file) => file.detailTabId !== id));
+    }
+    setDetailTabs((tabs) =>
+      tabs.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              type,
+              ...(type === 'markdown'
+                ? {
+                    fileId: undefined,
+                    fileName: undefined,
+                    fileUrl: undefined,
+                    fileType: undefined,
+                    fileSize: undefined,
+                    storageObjectPath: undefined,
+                  }
+                : {}),
+            }
+          : item,
+      ),
+    );
+  };
+
+  const uploadDocument = async (
+    tab: AdminDetailTab,
+    file: File,
+    documentKind: 'general' | 'presentation' = 'general',
+  ) => {
+    if (!categoryContext || !name.trim()) {
+      setError('请先填写产品名称并选择所属二级分类');
+      return;
+    }
+
     setError('');
-    setSaving(true);
+    setUploadingTabId(tab.id);
+    setLockedSlug(generatedSlug);
+    try {
+      const storedFile = await uploadAdminProductDocument({
+        file,
+        categoryId: categoryContext.categoryId,
+        subCategoryId: categoryContext.storageSubCategoryId,
+        productId: storageProductId,
+        detailTabId: tab.id,
+        documentKind,
+      });
+      uploadedMediaUrlsRef.current.add(storedFile.url);
+      if (tab.fileUrl && tab.fileUrl !== storedFile.url) {
+        setPendingDocumentDeletes((urls) => Array.from(new Set([...urls, tab.fileUrl!])));
+      }
+      setProductFiles((files) => [
+        ...files.filter((item) => item.detailTabId !== tab.id),
+        storedFile,
+      ]);
+      setDetailTabs((tabs) =>
+        tabs.map((item) =>
+          item.id === tab.id
+            ? {
+                ...item,
+                type: 'file',
+                fileId: storedFile.id,
+                fileName: storedFile.name,
+                fileUrl: storedFile.url,
+                fileType: storedFile.fileType,
+                fileSize: storedFile.fileSize,
+                storageObjectPath: storedFile.storageObjectPath,
+              }
+            : item,
+        ),
+      );
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : '产品资料上传失败');
+    } finally {
+      setUploadingTabId('');
+      const input = documentInputRefs.current[tab.id];
+      if (input) input.value = '';
+    }
+  };
 
-    if (!name.trim()) {
-      setError('请输入产品名称');
-      setSaving(false);
+  const removeDocument = (tab: AdminDetailTab) => {
+    if (tab.fileUrl) {
+      setPendingDocumentDeletes((urls) => Array.from(new Set([...urls, tab.fileUrl!])));
+    }
+    setProductFiles((files) => files.filter((file) => file.detailTabId !== tab.id));
+    setDetailTabs((tabs) =>
+      tabs.map((item) =>
+        item.id === tab.id
+          ? {
+              ...item,
+              fileId: undefined,
+              fileName: undefined,
+              fileUrl: undefined,
+              fileType: undefined,
+              fileSize: undefined,
+              storageObjectPath: undefined,
+            }
+          : item,
+      ),
+    );
+  };
+
+  const upsertStandardDetailTab = (
+    title: StandardProductDetailTab,
+    patch: { content?: string; type?: AdminDetailTab['type'] },
+  ) => {
+    setDetailTabs((tabs) => {
+      const existingTab = findProductDetailTab(tabs, title);
+      if (existingTab) {
+        return tabs.map((tab) => (tab.id === existingTab.id ? { ...tab, ...patch } : tab));
+      }
+
+      return [
+        ...tabs,
+        {
+          id: generateId(),
+          title,
+          content: patch.content || '',
+          type: patch.type || (title === '相关下载' ? 'file' : 'markdown'),
+          sortOrder: tabs.length,
+        },
+      ];
+    });
+  };
+
+  const setStandardDetailTabType = (
+    title: StandardProductDetailTab,
+    type: AdminDetailTab['type'],
+  ) => {
+    const existingTab = findProductDetailTab(detailTabs, title);
+    if (existingTab) {
+      updateDetailTabType(existingTab.id, type);
       return;
     }
-    if (!subCategoryId) {
-      setError('请选择所属分类');
-      setSaving(false);
-      return;
-    }
+    upsertStandardDetailTab(title, { type });
+  };
 
-    const validSpecs = specs.filter((s) => s.label.trim() && s.value.trim());
-    const validFeatures = features.filter((f) => f.trim());
-    const validImages = images.filter((i) => i.trim());
-    const finalSlug = slug.trim() || name.trim().toLowerCase().replace(/\s+/g, '-');
+  const uploadVisualDocument = (title: string, file: File) => {
+    const existingTab = findProductDetailTab(detailTabs, title);
+    const tab: AdminDetailTab = existingTab || {
+      id: generateId(),
+      title,
+      content: '',
+      type: 'file',
+      sortOrder: detailTabs.length,
+    };
 
-    const productData = {
-      slug: finalSlug,
+    if (!existingTab) setDetailTabs((tabs) => [...tabs, tab]);
+    const standardTitle = canonicalProductDetailTab(title);
+    const documentKind = standardTitle === '应用案例' || standardTitle === '外形尺寸'
+      ? 'presentation'
+      : 'general';
+    void uploadDocument(tab, file, documentKind);
+  };
+
+  const buildDraftProduct = (): AdminProduct => {
+    const validImages = images.filter(Boolean);
+    const validDetailTabs = detailTabs
+      .filter((tab) => tab.title.trim())
+      .map((tab) => {
+        const standardTitle = canonicalProductDetailTab(tab.title);
+        if (standardTitle === '技术参数') {
+          return {
+            ...tab,
+            type: 'markdown' as const,
+            fileId: undefined,
+            fileName: undefined,
+            fileUrl: undefined,
+            fileType: undefined,
+            fileSize: undefined,
+            storageObjectPath: undefined,
+          };
+        }
+        if (standardTitle === '应用案例') return { ...tab, type: 'file' as const };
+        return tab;
+      });
+
+    return {
+      id: initialProduct?.id || draftProductId,
+      slug: generatedSlug,
       subCategoryId,
       name: name.trim(),
       model: model.trim(),
-      brand,
       description: description.trim(),
-      coverImage: coverImage.trim() || (validImages[0] || ''),
+      coverImage: validImages[0] || '',
+      coverThumbnail: thumbnailForImage(validImages[0] || '', initialProduct?.coverImage === validImages[0] ? initialProduct?.coverThumbnail : ''),
       images: validImages,
-      specs: validSpecs,
-      features: validFeatures,
+      specs: specs.filter((spec) => spec.label.trim() && spec.value.trim()),
+      features: features.filter((feature) => feature.trim()),
       subProducts: subProducts
-        .filter((sp) => sp.name.trim())
-        .map((sp) => ({
-          ...sp,
-          specs: sp.specs.filter((s) => s.label.trim() && s.value.trim()),
-          images: sp.images.filter((i) => i.trim()),
-        })),
-      detailTabs: detailTabs.filter((dt) => dt.title.trim()),
-      files: initialProduct?.files || [],
+        .filter((subProduct) => subProduct.name.trim())
+        .map((subProduct) => {
+          const validSubProductImages = subProduct.images.filter(Boolean);
+          return {
+            ...subProduct,
+            slug: subProduct.slug || generateProductSlug(subProduct.name),
+            coverImage: validSubProductImages[0] || '',
+            coverThumbnail: thumbnailForImage(validSubProductImages[0] || '', subProduct.coverImage === validSubProductImages[0] ? subProduct.coverThumbnail : ''),
+            images: validSubProductImages,
+            specs: subProduct.specs.filter((spec) => spec.label.trim() && spec.value.trim()),
+          };
+        }),
+      detailTabs: validDetailTabs,
+      files: productFiles.filter((file) =>
+        validDetailTabs.some((tab) => tab.id === file.detailTabId && tab.fileUrl === file.url),
+      ),
       sortOrder,
       isActive,
+      createdAt: initialProduct?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
+  };
 
-    await new Promise((resolve) => setTimeout(resolve, 500));
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
 
-    if (isEdit && initialProduct) {
-      updateProduct(initialProduct.id, productData);
-    } else {
-      createProduct(productData as any);
+    if (!name.trim()) {
+      setError('请输入产品名称');
+      return;
+    }
+    if (!subCategories.some((item) => item.id === subCategoryId)) {
+      setError('请选择所属二级分类');
+      return;
+    }
+    if (uploadingImages || uploadingSubProductId || uploadingTabId) {
+      setError('请等待文件上传完成后再预览');
+      return;
     }
 
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    const obsoleteTechnicalFiles = detailTabs
+      .filter((tab) => canonicalProductDetailTab(tab.title) === '技术参数' && tab.fileUrl)
+      .map((tab) => tab.fileUrl!);
+    if (obsoleteTechnicalFiles.length) {
+      setPendingDocumentDeletes((urls) => Array.from(new Set([...urls, ...obsoleteTechnicalFiles])));
+    }
+
+    setPreviewDraft(buildDraftProduct());
+  };
+
+  const confirmSave = async () => {
+    if (!previewDraft) return;
+    setError('');
+    setSaving(true);
+
+    const { id: _draftId, createdAt: _createdAt, updatedAt: _updatedAt, ...productData } = previewDraft;
+    const stagedUploadedMediaUrls = Array.from(uploadedMediaUrlsRef.current);
+    uploadedMediaUrlsRef.current.clear();
+
+    try {
+      if (isEdit && initialProduct) {
+        await updateProduct(initialProduct.id, productData);
+      } else {
+        await createProduct(productData);
+      }
+
+      const cleanupResults = await Promise.allSettled(
+        [
+          ...pendingDocumentDeletes.map((url) => deleteAdminProductDocument(url)),
+          ...pendingImageDeletes.map((url) => deleteAdminProductMedia(url)),
+        ],
+      );
+      const cleanupFailed = cleanupResults.some((result) => result.status === 'rejected');
+      setPendingDocumentDeletes([]);
+      setPendingImageDeletes([]);
+      setPreviewDraft(null);
+      setSaved(true);
+      if (cleanupFailed) {
+        setError('产品已保存，但部分旧媒体清理失败，请稍后重试');
+      }
+      setTimeout(() => setSaved(false), 3000);
+    } catch (saveError) {
+      stagedUploadedMediaUrls.forEach((url) => uploadedMediaUrlsRef.current.add(url));
+      setError(saveError instanceof Error ? saveError.message : '产品保存失败');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -314,25 +745,41 @@ export default function ProductForm({ initialProduct }: Props) {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          {isEdit && initialProduct && (
-            <Link
-              href={`/products/${initialProduct.slug}`}
-              target="_blank"
-              className="inline-flex items-center gap-2 rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm font-medium text-[#666666] hover:bg-[#F5F7FA] transition-colors"
+        <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto">
+          <div className="flex w-full rounded-lg border border-[#DCE5EE] bg-white p-1 sm:w-auto">
+            <button
+              type="button"
+              onClick={() => setEditorMode('visual')}
+              className={`inline-flex min-w-0 flex-1 items-center justify-center gap-2 rounded px-3 py-1.5 text-sm font-medium transition-colors sm:flex-none ${
+                editorMode === 'visual'
+                  ? 'bg-[#EAF2FA] text-[#1E3A5F]'
+                  : 'text-[#666666] hover:bg-[#F5F7FA]'
+              }`}
             >
-              <Eye className="h-4 w-4" />
-              前台预览
-            </Link>
-          )}
+              <LayoutTemplate className="h-4 w-4" />
+              可视化编辑
+            </button>
+            <button
+              type="button"
+              onClick={() => setEditorMode('fields')}
+              className={`inline-flex min-w-0 flex-1 items-center justify-center gap-2 rounded px-3 py-1.5 text-sm font-medium transition-colors sm:flex-none ${
+                editorMode === 'fields'
+                  ? 'bg-[#EAF2FA] text-[#1E3A5F]'
+                  : 'text-[#666666] hover:bg-[#F5F7FA]'
+              }`}
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              字段编辑
+            </button>
+          </div>
           <button
             type="submit"
             form="product-form"
-            disabled={saving}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#28A745] px-5 py-2.5 text-sm font-medium text-white shadow-md shadow-[#28A745]/10 transition-all hover:bg-[#218838] hover:-translate-y-[1px] disabled:pointer-events-none disabled:opacity-50"
+            disabled={saving || uploadingImages || Boolean(uploadingSubProductId) || Boolean(uploadingTabId)}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#1E3A5F] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#162A45] disabled:pointer-events-none disabled:opacity-50 sm:w-auto"
           >
-            <Save className="h-4 w-4" />
-            {saving ? '保存中...' : saved ? '已保存' : '保存'}
+            <Eye className="h-4 w-4" />
+            预览并保存
           </button>
         </div>
       </div>
@@ -353,6 +800,59 @@ export default function ProductForm({ initialProduct }: Props) {
       )}
 
       <form id="product-form" onSubmit={handleSubmit} className="space-y-4">
+        <input
+          ref={productImageInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          onChange={(event) => {
+            const files = Array.from(event.target.files || []);
+            if (files.length) void uploadImages(files);
+          }}
+        />
+
+        {editorMode === 'visual' ? (
+          <VisualProductEditor
+            categories={categories}
+            subCategories={subCategories}
+            name={name}
+            model={model}
+            description={description}
+            generatedSlug={generatedSlug}
+            subCategoryId={subCategoryId}
+            specs={specs}
+            features={features}
+            images={images}
+            sortOrder={sortOrder}
+            isActive={isActive}
+            uploadingImages={uploadingImages}
+            imageNotice={imageNotice}
+            detailTabs={detailTabs}
+            uploadingTabId={uploadingTabId}
+            onNameChange={setName}
+            onModelChange={setModel}
+            onDescriptionChange={setDescription}
+            onSubCategoryChange={setSubCategoryId}
+            onSortOrderChange={setSortOrder}
+            onActiveChange={setIsActive}
+            onAddSpec={addSpec}
+            onUpdateSpec={updateSpec}
+            onRemoveSpec={removeSpec}
+            onAddFeature={addFeature}
+            onUpdateFeature={updateFeature}
+            onRemoveFeature={removeFeature}
+            onUploadImages={() => productImageInputRef.current?.click()}
+            onMoveImage={moveImage}
+            onRemoveImage={removeImage}
+            onUpsertStandardTab={upsertStandardDetailTab}
+            onSetStandardTabType={setStandardDetailTabType}
+            onUpdateDetailTab={updateDetailTab}
+            onUploadDocument={uploadVisualDocument}
+            onRemoveDocument={removeDocument}
+          />
+        ) : (
+          <>
         {/* 1. Basic Info */}
         <SectionHeader title="基本信息" icon={FileText} section="basic" expanded={expandedSections.basic} onToggle={toggleSection} />
         {expandedSections.basic && (
@@ -363,24 +863,12 @@ export default function ProductForm({ initialProduct }: Props) {
                 <input
                   type="text"
                   value={name}
-                  onChange={(e) => { setName(e.target.value); if (!isEdit) setSlug(e.target.value.toLowerCase().replace(/\s+/g, '-')); }}
+                  onChange={(e) => setName(e.target.value)}
                   placeholder="例如：布料机液压站"
-                  className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+                  className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
                   required
                 />
               </div>
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-[#666666]">标识 (slug)</label>
-                <input
-                  type="text"
-                  value={slug}
-                  onChange={(e) => setSlug(e.target.value)}
-                  placeholder="例如：p-concrete-placing-boom"
-                  className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm font-mono outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-[#666666]">产品型号</label>
                 <input
@@ -388,31 +876,25 @@ export default function ProductForm({ initialProduct }: Props) {
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
                   placeholder="例如：HS-17M-PB"
-                  className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+                  className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
                 />
               </div>
+            </div>
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-[#666666]">品牌</label>
-                <select
-                  value={brand}
-                  onChange={(e) => setBrand(e.target.value)}
-                  className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
-                >
-                  <option value="福艾德">福艾德</option>
-                  <option value="派克">派克</option>
-                  <option value="力士乐">力士乐</option>
-                  <option value="贺德克">贺德克</option>
-                  <option value="其他">其他</option>
-                </select>
-              </div>
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-[#666666]">所属分类 *</label>
+                <label className="mb-1.5 block text-sm font-medium text-[#666666]">所属二级分类 *</label>
                 <SubCategorySelect
                   subCategories={subCategories}
                   categories={categories}
                   value={subCategoryId}
                   onChange={setSubCategoryId}
                 />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-[#666666]">页面标识</label>
+                <div className="flex h-[42px] items-center rounded-lg border border-[#E8ECF0] bg-[#F9FAFB] px-4 font-mono text-sm text-[#666666]">
+                  {name.trim() ? generatedSlug : '填写名称后自动生成'}
+                </div>
               </div>
             </div>
             <div>
@@ -422,27 +904,17 @@ export default function ProductForm({ initialProduct }: Props) {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="产品简要描述，显示在列表卡片中..."
                 rows={3}
-                className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10 resize-none"
+                className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10 resize-none"
               />
             </div>
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-[#666666]">封面图片URL</label>
-                <input
-                  type="text"
-                  value={coverImage}
-                  onChange={(e) => setCoverImage(e.target.value)}
-                  placeholder="例如：/images/products/xxx/1.jpg"
-                  className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
-                />
-              </div>
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-[#666666]">排序</label>
                 <input
                   type="number"
                   value={sortOrder}
                   onChange={(e) => setSortOrder(Number(e.target.value))}
-                  className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+                  className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
                 />
               </div>
               <div>
@@ -462,26 +934,26 @@ export default function ProductForm({ initialProduct }: Props) {
           <div className="rounded-xl border border-[#E8ECF0] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
             <div className="space-y-3">
               {specs.map((spec) => (
-                <div key={spec.id} className="flex items-center gap-3">
-                  <GripVertical className="h-4 w-4 shrink-0 text-[#CCCCCC]" />
+                <div key={spec.id} className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                  <GripVertical className="hidden h-4 w-4 shrink-0 text-[#CCCCCC] sm:block" />
                   <input
                     type="text"
                     value={spec.label}
                     onChange={(e) => updateSpec(spec.id, 'label', e.target.value)}
                     placeholder="参数名（如：系统压力）"
-                    className="flex-1 rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+                    className="w-full min-w-0 flex-1 rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
                   />
                   <input
                     type="text"
                     value={spec.value}
                     onChange={(e) => updateSpec(spec.id, 'value', e.target.value)}
                     placeholder="参数值（如：30Mpa）"
-                    className="flex-1 rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+                    className="w-full min-w-0 flex-1 rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
                   />
                   <button
                     type="button"
                     onClick={() => removeSpec(spec.id)}
-                    className="rounded p-1.5 text-[#CCCCCC] hover:bg-red-50 hover:text-red-500 transition-colors"
+                    className="self-end rounded p-1.5 text-[#CCCCCC] transition-colors hover:bg-red-50 hover:text-red-500 sm:self-auto"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -512,7 +984,7 @@ export default function ProductForm({ initialProduct }: Props) {
                     value={feat}
                     onChange={(e) => updateFeature(idx, e.target.value)}
                     placeholder="例如：全套一体化设计"
-                    className="flex-1 rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+                    className="min-w-0 flex-1 rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
                   />
                   <button
                     type="button"
@@ -539,44 +1011,65 @@ export default function ProductForm({ initialProduct }: Props) {
         <SectionHeader title="产品图片" icon={ImageIcon} section="images" expanded={expandedSections.images} onToggle={toggleSection} />
         {expandedSections.images && (
           <div className="rounded-xl border border-[#E8ECF0] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-            <p className="mb-4 text-sm text-[#999999]">
-              添加产品图片URL。接入 Supabase 后将支持本地上传。
-            </p>
-            <div className="space-y-3">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm text-[#666666]">第一张图片会作为产品封面。</p>
+                <p className="mt-1 text-xs text-[#999999]">上传时自动转为 WebP，质量 82，最长边不超过 2400px。</p>
+              </div>
+              <button
+                type="button"
+                disabled={uploadingImages}
+                onClick={() => productImageInputRef.current?.click()}
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-[#4A90D9] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1E3A5F] disabled:opacity-50"
+              >
+                {uploadingImages ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                {uploadingImages ? '压缩上传中...' : '上传图片'}
+              </button>
+            </div>
+            {imageNotice ? (
+              <p className="mb-4 rounded border border-green-200 bg-green-50 px-3 py-2 text-xs text-green-700">{imageNotice}</p>
+            ) : null}
+            {images.length ? (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {images.map((img, idx) => (
-                <div key={idx} className="flex items-center gap-3">
-                  <span className="w-6 text-center text-xs text-[#999999]">{idx + 1}</span>
-                  {img && (
-                    <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded border border-[#E8ECF0]">
-                      <Image src={img || '/images/hs/hydraulic.svg'} alt="" fill className="object-cover" />
+                <div key={img} className="overflow-hidden rounded-lg border border-[#E8ECF0] bg-[#F9FAFB]">
+                  <div className="relative aspect-[4/3] w-full bg-white">
+                    <Image src={img} alt={`${name || '产品'}图片${idx + 1}`} fill sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw" className="object-contain" />
+                    {idx === 0 ? (
+                      <span className="absolute left-2 top-2 rounded bg-[#1E3A5F] px-2 py-1 text-xs font-medium text-white">封面</span>
+                    ) : null}
+                  </div>
+                  <div className="flex items-center justify-between border-t border-[#E8ECF0] px-3 py-2">
+                    <span className="text-xs text-[#999999]">第 {idx + 1} 张</span>
+                    <div className="flex items-center gap-1">
+                      <button type="button" title="上移" disabled={idx === 0} onClick={() => moveImage(idx, -1)} className="rounded p-1.5 text-[#666666] hover:bg-white disabled:opacity-30">
+                        <ArrowUp className="h-4 w-4" />
+                      </button>
+                      <button type="button" title="下移" disabled={idx === images.length - 1} onClick={() => moveImage(idx, 1)} className="rounded p-1.5 text-[#666666] hover:bg-white disabled:opacity-30">
+                        <ArrowDown className="h-4 w-4" />
+                      </button>
+                      <button type="button" title="删除图片" onClick={() => removeImage(idx)} className="rounded p-1.5 text-[#999999] hover:bg-red-50 hover:text-red-500">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
-                  )}
-                  <input
-                    type="text"
-                    value={img}
-                    onChange={(e) => updateImage(idx, e.target.value)}
-                    placeholder={`图片 ${idx + 1} URL`}
-                    className="flex-1 rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(idx)}
-                    className="rounded p-1.5 text-[#CCCCCC] hover:bg-red-50 hover:text-red-500 transition-colors"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                  </div>
                 </div>
               ))}
-            </div>
-            <button
-              type="button"
-              onClick={addImage}
-              className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-dashed border-[#4A90D9] px-4 py-2 text-sm font-medium text-[#4A90D9] hover:bg-[#F0F5FA] transition-colors"
-            >
-              <Plus className="h-4 w-4" />
-              添加图片
-            </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                disabled={uploadingImages}
+                onClick={() => productImageInputRef.current?.click()}
+                className="flex min-h-40 w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[#B9C8D8] bg-[#F9FAFB] text-sm text-[#666666] hover:border-[#4A90D9] hover:text-[#4A90D9] disabled:opacity-50"
+              >
+                <ImageIcon className="h-8 w-8" />
+                选择本地产品图片
+              </button>
+            )}
           </div>
+        )}
+          </>
         )}
 
         {/* 5. Sub-products */}
@@ -604,7 +1097,7 @@ export default function ProductForm({ initialProduct }: Props) {
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div>
                         <label className="mb-1 block text-xs font-medium text-[#999999]">名称</label>
                         <input
@@ -612,7 +1105,7 @@ export default function ProductForm({ initialProduct }: Props) {
                           value={sp.name}
                           onChange={(e) => updateSubProduct(sp.id, 'name', e.target.value)}
                           placeholder="17米布料机泵站"
-                          className="w-full rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+                          className="w-full rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
                         />
                       </div>
                       <div>
@@ -622,17 +1115,7 @@ export default function ProductForm({ initialProduct }: Props) {
                           value={sp.model}
                           onChange={(e) => updateSubProduct(sp.id, 'model', e.target.value)}
                           placeholder="HS-17M-PB"
-                          className="w-full rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-1 block text-xs font-medium text-[#999999]">封面图URL</label>
-                        <input
-                          type="text"
-                          value={sp.coverImage}
-                          onChange={(e) => updateSubProduct(sp.id, 'coverImage', e.target.value)}
-                          placeholder="/images/xxx/1.jpg"
-                          className="w-full rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+                          className="w-full rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
                         />
                       </div>
                     </div>
@@ -641,18 +1124,18 @@ export default function ProductForm({ initialProduct }: Props) {
                     <div className="mt-4">
                       <p className="mb-2 text-xs font-medium text-[#999999]">规格参数</p>
                       {sp.specs.map((spec) => (
-                        <div key={spec.id} className="mb-2 flex items-center gap-2">
+                        <div key={spec.id} className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center">
                           <input
                             value={spec.label}
                             onChange={(e) => updateSubProductSpec(sp.id, spec.id, 'label', e.target.value)}
                             placeholder="参数名"
-                            className="flex-1 rounded border border-[#E8ECF0] px-2 py-1.5 text-xs outline-none focus:border-[#4A90D9]"
+                            className="w-full min-w-0 flex-1 rounded border border-[#E8ECF0] px-2 py-1.5 text-xs outline-none focus:border-[#4A90D9]"
                           />
                           <input
                             value={spec.value}
                             onChange={(e) => updateSubProductSpec(sp.id, spec.id, 'value', e.target.value)}
                             placeholder="值"
-                            className="flex-1 rounded border border-[#E8ECF0] px-2 py-1.5 text-xs outline-none focus:border-[#4A90D9]"
+                            className="w-full min-w-0 flex-1 rounded border border-[#E8ECF0] px-2 py-1.5 text-xs outline-none focus:border-[#4A90D9]"
                           />
                           <button
                             type="button"
@@ -674,31 +1157,48 @@ export default function ProductForm({ initialProduct }: Props) {
 
                     {/* Sub-product images */}
                     <div className="mt-4">
-                      <p className="mb-2 text-xs font-medium text-[#999999]">子产品图片</p>
-                      {sp.images.map((img, idx) => (
-                        <div key={idx} className="mb-2 flex items-center gap-2">
-                          <input
-                            value={img}
-                            onChange={(e) => updateSubProductImage(sp.id, idx, e.target.value)}
-                            placeholder={`图片 ${idx + 1} URL`}
-                            className="flex-1 rounded border border-[#E8ECF0] px-2 py-1.5 text-xs outline-none focus:border-[#4A90D9]"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeSubProductImage(sp.id, idx)}
-                            className="rounded p-1 text-[#CCCCCC] hover:text-red-500"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </button>
+                      <div className="mb-2 flex items-center justify-between gap-3">
+                        <p className="text-xs font-medium text-[#999999]">子产品图片</p>
+                        <input
+                          ref={(element) => { subProductImageInputRefs.current[sp.id] = element; }}
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          className="hidden"
+                          onChange={(event) => {
+                            const files = Array.from(event.target.files || []);
+                            if (files.length) void uploadSubProductImages(sp, files);
+                          }}
+                        />
+                        <button
+                          type="button"
+                          disabled={uploadingSubProductId === sp.id}
+                          onClick={() => subProductImageInputRefs.current[sp.id]?.click()}
+                          className="inline-flex items-center gap-1.5 rounded border border-[#4A90D9] px-3 py-1.5 text-xs font-medium text-[#4A90D9] hover:bg-white disabled:opacity-50"
+                        >
+                          {uploadingSubProductId === sp.id ? <LoaderCircle className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                          {uploadingSubProductId === sp.id ? '上传中' : '上传图片'}
+                        </button>
+                      </div>
+                      {sp.images.length ? (
+                        <div className="flex flex-wrap gap-2">
+                          {sp.images.map((img, idx) => (
+                            <div key={img} className="group relative h-20 w-20 overflow-hidden rounded border border-[#E8ECF0] bg-white">
+                              <Image src={img} alt={`${sp.name || '子产品'}图片${idx + 1}`} fill sizes="80px" className="object-contain" />
+                              <button
+                                type="button"
+                                title="删除图片"
+                                onClick={() => removeSubProductImage(sp.id, idx)}
+                                className="absolute right-1 top-1 rounded bg-white/90 p-1 text-[#999999] shadow hover:text-red-500"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                      <button
-                        type="button"
-                        onClick={() => addSubProductImage(sp.id)}
-                        className="text-xs text-[#4A90D9] hover:underline"
-                      >
-                        + 添加图片
-                      </button>
+                      ) : (
+                        <p className="rounded border border-dashed border-[#DCE5EE] bg-white px-3 py-4 text-center text-xs text-[#999999]">暂无图片</p>
+                      )}
                     </div>
 
                     {/* Hydraulic & Electric params */}
@@ -742,7 +1242,7 @@ export default function ProductForm({ initialProduct }: Props) {
         {expandedSections.tabs && (
           <div className="rounded-xl border border-[#E8ECF0] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
             <p className="mb-4 text-sm text-[#999999]">
-              详情页Tab内容，支持 Markdown 格式。类型为「file」时填写文件下载链接。
+              产品资料会直接上传到 Supabase Storage，并随产品目录发布到前台。
             </p>
             {detailTabs.length === 0 ? (
               <p className="py-6 text-center text-sm text-[#CCCCCC]">暂无详情Tab</p>
@@ -768,25 +1268,36 @@ export default function ProductForm({ initialProduct }: Props) {
                         <input
                           type="text"
                           value={tab.title}
-                          onChange={(e) => updateDetailTab(tab.id, 'title', e.target.value)}
+                          onChange={(e) => {
+                            const nextTitle = e.target.value;
+                            updateDetailTab(tab.id, 'title', nextTitle);
+                            const standardTitle = canonicalProductDetailTab(nextTitle);
+                            if (standardTitle === '技术参数') updateDetailTabType(tab.id, 'markdown');
+                            if (standardTitle === '应用案例') updateDetailTabType(tab.id, 'file');
+                          }}
                           placeholder="例如：产品简介 / 技术参数 / 产品资料"
-                          className="w-full rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+                          className="w-full rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
                         />
                       </div>
                       <div>
                         <label className="mb-1 block text-xs font-medium text-[#999999]">类型</label>
                         <select
-                          value={tab.type}
-                          onChange={(e) => updateDetailTab(tab.id, 'type', e.target.value)}
-                          className="w-full rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+                          value={detailTabEditorType(tab)}
+                          onChange={(e) => updateDetailTabType(tab.id, e.target.value as AdminDetailTab['type'])}
+                          disabled={isFixedDetailTabType(tab)}
+                          className="w-full rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
                         >
-                          <option value="markdown">Markdown内容</option>
-                          <option value="file">文件下载</option>
+                          {canonicalProductDetailTab(tab.title) !== '应用案例' ? (
+                            <option value="markdown">Markdown内容</option>
+                          ) : null}
+                          {canonicalProductDetailTab(tab.title) !== '技术参数' ? (
+                            <option value="file">文件下载</option>
+                          ) : null}
                         </select>
                       </div>
                     </div>
                     <div className="mt-3">
-                      {tab.type === 'markdown' ? (
+                      {!detailTabUsesFileEditor(tab) ? (
                         <>
                           <label className="mb-1 block text-xs font-medium text-[#999999]">Markdown内容</label>
                           <textarea
@@ -794,31 +1305,81 @@ export default function ProductForm({ initialProduct }: Props) {
                             onChange={(e) => updateDetailTab(tab.id, 'content', e.target.value)}
                             rows={8}
                             className="w-full rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm font-mono outline-none focus:border-[#4A90D9] resize-none"
-                            placeholder="支持 Markdown 格式..."
+                            placeholder={canonicalProductDetailTab(tab.title) === '技术参数'
+                              ? '| 参数 | 规格 |\n| --- | --- |\n| 系统压力 | 31.5 MPa |'
+                              : '支持 Markdown 格式...'}
                           />
                         </>
                       ) : (
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                          <div>
-                            <label className="mb-1 block text-xs font-medium text-[#999999]">文件名称</label>
-                            <input
-                              type="text"
-                              value={tab.content}
-                              onChange={(e) => updateDetailTab(tab.id, 'content', e.target.value)}
-                              placeholder="产品宣传册.pdf"
-                              className="w-full rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
-                            />
-                          </div>
-                          <div>
-                            <label className="mb-1 block text-xs font-medium text-[#999999]">文件URL</label>
-                            <input
-                              type="text"
-                              value={tab.content || ''}
-                              onChange={(e) => updateDetailTab(tab.id, 'content', e.target.value)}
-                              placeholder="/files/产品简介.pptx"
-                              className="w-full rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm outline-none transition-all focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
-                            />
-                          </div>
+                        <div className="space-y-3">
+                          <label className="block text-xs font-medium text-[#999999]">产品资料</label>
+                          <input
+                            ref={(element) => { documentInputRefs.current[tab.id] = element; }}
+                            type="file"
+                            accept={detailTabFileAccept(tab)}
+                            className="hidden"
+                            onChange={(event) => {
+                              const file = event.target.files?.[0];
+                              if (file) void uploadDocument(tab, file, detailTabDocumentKind(tab));
+                            }}
+                          />
+                          {tab.fileUrl ? (
+                            <div className="flex flex-col gap-3 rounded-lg border border-[#DCE5EE] bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-medium text-[#333333]">{tab.fileName || '产品资料'}</p>
+                                <p className="mt-1 text-xs uppercase text-[#999999]">
+                                  {tab.fileType || 'FILE'}{tab.fileSize ? ` · ${formatFileSize(tab.fileSize)}` : ''}
+                                </p>
+                              </div>
+                              <div className="flex shrink-0 items-center gap-2">
+                                <a
+                                  href={tab.fileUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  title="打开资料"
+                                  className="rounded p-2 text-[#666666] hover:bg-[#F0F5FA] hover:text-[#4A90D9]"
+                                >
+                                  <ExternalLink className="h-4 w-4" />
+                                </a>
+                                <button
+                                  type="button"
+                                  disabled={uploadingTabId === tab.id}
+                                  onClick={() => documentInputRefs.current[tab.id]?.click()}
+                                  className="inline-flex items-center gap-2 rounded-lg border border-[#4A90D9] px-3 py-2 text-xs font-medium text-[#4A90D9] hover:bg-[#F0F5FA] disabled:opacity-50"
+                                >
+                                  <Upload className="h-4 w-4" />
+                                  {uploadingTabId === tab.id ? '上传中...' : '替换'}
+                                </button>
+                                <button
+                                  type="button"
+                                  title="移除资料"
+                                  onClick={() => removeDocument(tab)}
+                                  className="rounded p-2 text-[#999999] hover:bg-red-50 hover:text-red-500"
+                                >
+                                  <X className="h-4 w-4" />
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              disabled={uploadingTabId === tab.id}
+                              onClick={() => documentInputRefs.current[tab.id]?.click()}
+                              className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-[#4A90D9] bg-white px-4 py-6 text-sm font-medium text-[#4A90D9] hover:bg-[#F0F5FA] disabled:opacity-50"
+                            >
+                              <Upload className="h-5 w-5" />
+                              {uploadingTabId === tab.id
+                                ? '正在上传到 Supabase...'
+                                : detailTabUploadLabel(tab)}
+                            </button>
+                          )}
+                          <input
+                            type="text"
+                            value={tab.content || ''}
+                            onChange={(e) => updateDetailTab(tab.id, 'content', e.target.value)}
+                            placeholder="资料说明（可选）"
+                            className="w-full rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+                          />
                         </div>
                       )}
                     </div>
@@ -837,6 +1398,40 @@ export default function ProductForm({ initialProduct }: Props) {
           </div>
         )}
       </form>
+
+      {previewDraft ? (
+        <div className="fixed inset-0 z-[100] overflow-y-auto bg-[#F5F7FA]">
+          <div className="sticky top-0 z-[110] border-b border-[#DCE5EE] bg-white shadow-sm">
+            <div className="mx-auto flex min-h-16 max-w-[1600px] flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-[#1E3A5F]">产品详情预览</p>
+                <p className="truncate text-xs text-[#999999]">此时尚未保存到 Supabase，请核对图片、参数和详情内容。</p>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                <button
+                  type="button"
+                  disabled={saving}
+                  onClick={() => setPreviewDraft(null)}
+                  className="inline-flex items-center gap-2 rounded border border-[#DCE5EE] px-4 py-2 text-sm font-medium text-[#666666] hover:bg-[#F5F7FA] disabled:opacity-50"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  返回编辑
+                </button>
+                <button
+                  type="button"
+                  disabled={saving}
+                  onClick={() => void confirmSave()}
+                  className="inline-flex items-center gap-2 rounded bg-[#28A745] px-4 py-2 text-sm font-medium text-white hover:bg-[#218838] disabled:opacity-50"
+                >
+                  {saving ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                  {saving ? '保存中...' : '确认保存'}
+                </button>
+              </div>
+            </div>
+          </div>
+          <ProductDetailClient product={adminProductToProduct(previewDraft)} />
+        </div>
+      ) : null}
     </div>
   );
 }

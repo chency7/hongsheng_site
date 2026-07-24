@@ -7,64 +7,60 @@ import { useSearchParams } from 'next/navigation';
 import { Search, Grid, List, X, ChevronRight, ChevronDown } from 'lucide-react';
 import Container from '@/components/site/Container';
 import MotionReveal from '@/components/site/MotionReveal';
-import { products, categoryOptions } from '@/data/products';
+import type { CategoryOption, Product } from '@/data/products';
 
 type ViewMode = 'grid' | 'list';
 type SortOption = 'newest';
 
-const findSubCategoryById = (subCategoryId: string) =>
+const findSubCategoryById = (categoryOptions: CategoryOption[], subCategoryId: string) =>
   categoryOptions
     .flatMap((category) => category.subCategories ?? [])
     .find((sub) => sub.id === subCategoryId);
 
-const getCategoryDisplayName = (categoryId: string) =>
-  findSubCategoryById(categoryId)?.name ?? categoryId;
+const getCategoryDisplayName = (categoryOptions: CategoryOption[], categoryId: string) =>
+  findSubCategoryById(categoryOptions, categoryId)?.name ??
+  categoryOptions.find((category) => category.id === categoryId)?.name ??
+  categoryId;
 
-const getDefaultProductId = (subCategoryId: string) => {
-  const subCategory = findSubCategoryById(subCategoryId);
-
-  if (!subCategory?.products?.length) {
-    return null;
-  }
-
-  return (
-    subCategory.products.find((product) => product.name === subCategory.name)?.productId ??
-    subCategory.products[0]?.productId ??
-    null
-  );
-};
-
-export default function ProductsClient() {
+export default function ProductsClient({
+  products,
+  categoryOptions,
+}: {
+  products: Product[];
+  categoryOptions: CategoryOption[];
+}) {
   const searchParams = useSearchParams();
+  const requestedCategory = searchParams.get('category');
+  const requestedProduct = searchParams.get('product');
+  const initialTopCategory = requestedCategory
+    ? categoryOptions.find((category) => category.id === requestedCategory)
+    : undefined;
+  const initialCategoryIds = initialTopCategory
+    ? [
+        initialTopCategory.id,
+        ...(initialTopCategory.subCategories
+          ?.filter((subCategory) => subCategory.products?.length)
+          .map((subCategory) => subCategory.id) ?? []),
+      ]
+    : requestedCategory
+      ? [requestedCategory]
+      : [];
+  const initialExpandedCategoryId = initialTopCategory?.id ?? (
+    requestedCategory
+      ? categoryOptions.find((category) =>
+          category.subCategories?.some((subCategory) => subCategory.id === requestedCategory),
+        )?.id
+      : undefined
+  );
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(initialCategoryIds);
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(requestedProduct);
   const [sortBy, setSortBy] = useState<SortOption>('newest');
-  const [expandedTopCategories, setExpandedTopCategories] = useState<Set<string>>(new Set());
-
-  useEffect(() => {
-    const catParam = searchParams.get('category');
-    const prodParam = searchParams.get('product');
-
-    if (catParam) {
-      setSelectedCategories([catParam]);
-
-      const topCat = categoryOptions.find((c) =>
-        c.subCategories?.some((sub) => sub.id === catParam)
-      );
-      if (topCat) {
-        setExpandedTopCategories(new Set([topCat.id]));
-      }
-    }
-
-    if (prodParam) {
-      setSelectedProductId(prodParam);
-    } else {
-      setSelectedProductId(null);
-    }
-  }, [searchParams]);
+  const [expandedTopCategories, setExpandedTopCategories] = useState<Set<string>>(
+    () => new Set(initialExpandedCategoryId ? [initialExpandedCategoryId] : []),
+  );
 
   // Debounce search
   useEffect(() => {
@@ -87,13 +83,13 @@ export default function ProductsClient() {
       const subIds = topCategory.subCategories
         .filter((sub) => sub.products && sub.products.length > 0)
         .map((sub) => sub.id);
-      const allSubIds = topCategory.subCategories.map((sub) => sub.id);
-      const isAllSelected = allSubIds.length > 0 && allSubIds.every((id) => selectedCategories.includes(id));
+      const selectableIds = [topCategory.id, ...subIds];
+      const isAllSelected = selectableIds.every((id) => selectedCategories.includes(id));
 
       if (isAllSelected) {
         setSelectedCategories([]);
       } else {
-        setSelectedCategories(subIds.length > 0 ? subIds : allSubIds);
+        setSelectedCategories(selectableIds);
       }
 
       setSelectedProductId(null);
@@ -155,7 +151,7 @@ export default function ProductsClient() {
     });
 
     return result;
-  }, [debouncedQuery, selectedCategories, selectedProductId, sortBy]);
+  }, [debouncedQuery, products, selectedCategories, selectedProductId, sortBy]);
 
   return (
     <div className="min-h-screen bg-[#F5F7FA] text-[#333333]">
@@ -172,7 +168,7 @@ export default function ProductsClient() {
               <>
                 <ChevronRight className="mx-2 h-4 w-4" />
                 <span className="text-[#4A90D9]">
-                  {getCategoryDisplayName(selectedCategories[0])}
+                  {getCategoryDisplayName(categoryOptions, selectedCategories[0])}
                 </span>
               </>
             )}
@@ -200,7 +196,10 @@ export default function ProductsClient() {
                   全部产品
                 </button>
                 {categoryOptions.map((cat) => {
-                  const subIds = cat.subCategories?.map((sub) => sub.id) || [];
+                  const subIds = [
+                    cat.id,
+                    ...(cat.subCategories?.filter((sub) => sub.products?.length).map((sub) => sub.id) || []),
+                  ];
                   const isAllSubSelected =
                     subIds.length > 0 && subIds.every((id) => selectedCategories.includes(id));
                   const isExpanded = expandedTopCategories.has(cat.id);
@@ -210,11 +209,8 @@ export default function ProductsClient() {
                     <div key={cat.id} className="space-y-0.5">
                       <button
                         onClick={() => {
-                          if (hasSub) {
-                            toggleTopCategoryExpand(cat.id);
-                          } else {
-                            toggleCategory(cat.id);
-                          }
+                          toggleCategory(cat.id);
+                          if (hasSub && !isExpanded) toggleTopCategoryExpand(cat.id);
                         }}
                         className={`flex w-full items-center gap-2 rounded-md px-4 py-2.5 text-left text-sm font-medium transition-colors ${
                           isAllSubSelected
@@ -272,7 +268,7 @@ export default function ProductsClient() {
                       key={catId}
                       className="inline-flex items-center gap-1 rounded border border-[#4A90D9] bg-white px-2 py-1 text-xs text-[#4A90D9]"
                     >
-                      {getCategoryDisplayName(catId)}
+                      {getCategoryDisplayName(categoryOptions, catId)}
                       <X
                         className="h-3 w-3 cursor-pointer hover:text-red-500"
                         onClick={() => removeFilter('category', catId)}
@@ -373,6 +369,7 @@ export default function ProductsClient() {
                               src={product.image || '/images/hs/hydraulic.svg'}
                               alt={product.name}
                               fill
+                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                               className="object-cover"
                             />
                           </div>
@@ -418,6 +415,7 @@ export default function ProductsClient() {
                             src={product.image || '/images/hs/hydraulic.svg'}
                             alt={product.name}
                             fill
+                            sizes="(max-width: 640px) 100vw, 200px"
                             className="object-cover transition-transform duration-300 group-hover:scale-105"
                           />
                         </div>
@@ -429,7 +427,6 @@ export default function ProductsClient() {
                               </h4>
                               <div className="flex items-center gap-4 text-[14px] text-[#666666]">
                                 <span>型号：{product.model}</span>
-                                <span>品牌：{product.brand}</span>
                               </div>
                             </div>
                           </div>
