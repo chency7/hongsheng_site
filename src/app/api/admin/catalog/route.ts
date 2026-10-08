@@ -27,49 +27,49 @@ export async function GET(request: NextRequest) {
   const session = await getAdminSession(request).catch((error) => error);
   if (session instanceof Error) return authErrorResponse(session);
   if (!session.authenticated) {
-    return applyAdminSession(NextResponse.json({ ok: false, message: '未登录' }, { status: 401 }), session);
+    return applyAdminSession(NextResponse.json({ ok: false, message: '未登录' }, { status: 401 }), session, request);
   }
 
   const fallbackCatalog = buildInitialAdminCatalog();
 
   if (!isSupabaseAdminStateConfigured()) {
-    return applyAdminSession(NextResponse.json({ ok: true, source: 'fallback', catalog: fallbackCatalog }), session);
+    return applyAdminSession(NextResponse.json({ ok: true, source: 'fallback', catalog: fallbackCatalog }), session, request);
   }
 
   const catalog = await readAdminCatalog();
 
   if (!catalog) {
     await writeAdminCatalog(fallbackCatalog);
-    return applyAdminSession(NextResponse.json({ ok: true, source: 'seeded', catalog: fallbackCatalog }), session);
+    return applyAdminSession(NextResponse.json({ ok: true, source: 'seeded', catalog: fallbackCatalog }), session, request);
   }
 
   if (!catalog.categories?.length && !catalog.subCategories?.length && !catalog.products?.length) {
     await writeAdminCatalog(fallbackCatalog);
-    return applyAdminSession(NextResponse.json({ ok: true, source: 'seeded', catalog: fallbackCatalog }), session);
+    return applyAdminSession(NextResponse.json({ ok: true, source: 'seeded', catalog: fallbackCatalog }), session, request);
   }
 
-  return applyAdminSession(NextResponse.json({ ok: true, source: 'supabase', catalog }), session);
+  return applyAdminSession(NextResponse.json({ ok: true, source: 'supabase', catalog }), session, request);
 }
 
 export async function PUT(request: NextRequest) {
   const session = await getAdminSession(request).catch((error) => error);
   if (session instanceof Error) return authErrorResponse(session);
   if (!session.authenticated) {
-    return applyAdminSession(NextResponse.json({ ok: false, message: '未登录' }, { status: 401 }), session);
+    return applyAdminSession(NextResponse.json({ ok: false, message: '未登录' }, { status: 401 }), session, request);
   }
 
   const body = await request.json().catch(() => null);
   const parsed = catalogSchema.safeParse(body);
 
   if (!parsed.success) {
-    return applyAdminSession(NextResponse.json({ ok: false, message: '后台数据格式不正确' }, { status: 400 }), session);
+    return applyAdminSession(NextResponse.json({ ok: false, message: '后台数据格式不正确' }, { status: 400 }), session, request);
   }
 
   if (!isSupabaseAdminStateConfigured()) {
-    return applyAdminSession(NextResponse.json({ ok: true, source: 'fallback', persisted: false }), session);
+    return applyAdminSession(NextResponse.json({ ok: true, source: 'fallback', persisted: false }), session, request);
   }
 
   await writeAdminCatalog(body);
   revalidatePath('/products', 'layout');
-  return applyAdminSession(NextResponse.json({ ok: true, source: 'supabase', persisted: true }), session);
+  return applyAdminSession(NextResponse.json({ ok: true, source: 'supabase', persisted: true }), session, request);
 }

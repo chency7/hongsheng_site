@@ -96,17 +96,27 @@ pnpm start
 
 ### Docker 部署
 
-1. 构建镜像：
+离线包部署（服务器无 Git/Node）见：[docs/docker.md](docs/docker.md)；完整流程见：[docs/deployment.md](docs/deployment.md)
+
+1. 配置根目录 `.env`（至少包含 Supabase / SMTP 变量）
+
+2. 构建镜像：
 
 ```bash
 pnpm docker:build
 ```
 
-2. 运行容器：
+3. 运行容器：
 
 ```bash
-pnpm docker:run
+pnpm docker:up
 ```
+
+4. 访问：
+
+- 官网：http://localhost:3001
+- 后台：http://localhost:3001/admin/login
+- 健康检查：http://localhost:3001/api/health
 
 ## 📝 开发规范
 
@@ -126,6 +136,10 @@ APP_ENV=development
 
 ## 📚 相关文档
 
+- [Docker 部署（简版）](docs/docker.md)
+- [生产部署流程](docs/deployment.md)
+- [后台 Supabase + Docker](docs/admin-supabase-docker.md)
+- [产品后台架构边界](docs/admin-product-management-architecture.md)
 - [Next.js 文档](https://nextjs.org/docs)
 - [TailwindCSS 文档](https://tailwindcss.com/docs)
 - [TypeScript 文档](https://www.typescriptlang.org/docs)
@@ -141,3 +155,4 @@ APP_ENV=development
 ## 📄 许可证
 
 [MIT](LICENSE)
+

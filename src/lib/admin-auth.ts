@@ -22,6 +22,11 @@ type SupabaseAuthSession = {
   user: SupabaseAuthUser;
 };
 
+type AuthLookupResult<T> =
+  | { status: 'ok'; data: T }
+  | { status: 'unauthorized' }
+  | { status: 'error' };
+
 export type AdminUser = {
   id: string;
   email: string;
@@ -33,6 +38,8 @@ export type AdminSession = {
   user?: AdminUser;
   refreshedSession?: SupabaseAuthSession;
   shouldClearCookies?: boolean;
+  /** transient network/service issue; cookies should be kept */
+  transient?: boolean;
 };
 
 export class AdminAuthError extends Error {
@@ -102,6 +109,33 @@ function normalizeAdminUser(user: SupabaseAuthUser): AdminUser {
   };
 }
 
+/**
+ * Cookie Secure 标志：
+ * - ADMIN_COOKIE_SECURE=true/false 可强制覆盖
+ * - 否则按实际请求协议（含 x-forwarded-proto）决定
+ * - 避免 production + http://IP 访问时 Secure Cookie 无法写入导致“登录后立刻被踢”
+ */
+export function shouldUseSecureCookie(request?: Pick<Request, 'headers' | 'url'>) {
+  const forced = process.env.ADMIN_COOKIE_SECURE?.trim().toLowerCase();
+  if (forced === 'true' || forced === '1') return true;
+  if (forced === 'false' || forced === '0') return false;
+
+  if (request) {
+    const forwarded = request.headers.get('x-forwarded-proto')?.split(',')[0]?.trim().toLowerCase();
+    if (forwarded === 'https' || forwarded === 'http') {
+      return forwarded === 'https';
+    }
+
+    try {
+      return new URL(request.url).protocol === 'https:';
+    } catch {
+      // ignore invalid url
+    }
+  }
+
+  return false;
+}
+
 export async function signInAdminWithPassword(email: string, password: string) {
   const { url } = getSupabaseAuthConfig();
   const response = await fetchWithTimeout(`${url}/auth/v1/token?grant_type=password`, {
@@ -131,29 +165,60 @@ export async function signInAdminWithPassword(email: string, password: string) {
   return { session, user: normalizeAdminUser(session.user) };
 }
 
-async function readAuthUser(accessToken: string) {
+async function readAuthUser(accessToken: string): Promise<AuthLookupResult<SupabaseAuthUser>> {
   const { url } = getSupabaseAuthConfig();
-  const response = await fetchWithTimeout(`${url}/auth/v1/user`, {
-    method: 'GET',
-    headers: getAuthHeaders(accessToken),
-    cache: 'no-store',
-  }).catch(() => null);
+  let response: Response | null;
 
-  if (!response?.ok) return null;
-  return response.json() as Promise<SupabaseAuthUser>;
+  try {
+    response = await fetchWithTimeout(`${url}/auth/v1/user`, {
+      method: 'GET',
+      headers: getAuthHeaders(accessToken),
+      cache: 'no-store',
+    });
+  } catch {
+    return { status: 'error' };
+  }
+
+  if (!response) return { status: 'error' };
+  if (response.status === 401 || response.status === 403) return { status: 'unauthorized' };
+  if (!response.ok) return { status: 'error' };
+
+  try {
+    const user = await response.json() as SupabaseAuthUser;
+    return { status: 'ok', data: user };
+  } catch {
+    return { status: 'error' };
+  }
 }
 
-async function refreshAuthSession(refreshToken: string) {
+async function refreshAuthSession(refreshToken: string): Promise<AuthLookupResult<SupabaseAuthSession>> {
   const { url } = getSupabaseAuthConfig();
-  const response = await fetchWithTimeout(`${url}/auth/v1/token?grant_type=refresh_token`, {
-    method: 'POST',
-    headers: getAuthHeaders(),
-    body: JSON.stringify({ refresh_token: refreshToken }),
-    cache: 'no-store',
-  }).catch(() => null);
+  let response: Response | null;
 
-  if (!response?.ok) return null;
-  return response.json() as Promise<SupabaseAuthSession>;
+  try {
+    response = await fetchWithTimeout(`${url}/auth/v1/token?grant_type=refresh_token`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ refresh_token: refreshToken }),
+      cache: 'no-store',
+    });
+  } catch {
+    return { status: 'error' };
+  }
+
+  if (!response) return { status: 'error' };
+  if (response.status === 401 || response.status === 403) return { status: 'unauthorized' };
+  if (!response.ok) return { status: 'error' };
+
+  try {
+    const session = await response.json() as SupabaseAuthSession;
+    if (!session.access_token || !session.refresh_token || !session.user) {
+      return { status: 'error' };
+    }
+    return { status: 'ok', data: session };
+  } catch {
+    return { status: 'error' };
+  }
 }
 
 export async function getAdminSession(request: NextRequest): Promise<AdminSession> {
@@ -161,12 +226,17 @@ export async function getAdminSession(request: NextRequest): Promise<AdminSessio
   const refreshToken = request.cookies.get(ADMIN_REFRESH_TOKEN_COOKIE)?.value;
 
   if (accessToken) {
-    const user = await readAuthUser(accessToken);
-    if (user) {
-      if (!hasAdminRole(user)) {
+    const userResult = await readAuthUser(accessToken);
+    if (userResult.status === 'ok') {
+      if (!hasAdminRole(userResult.data)) {
         return { authenticated: false, shouldClearCookies: true };
       }
-      return { authenticated: true, user: normalizeAdminUser(user) };
+      return { authenticated: true, user: normalizeAdminUser(userResult.data) };
+    }
+
+    // access token 明确失效时才走 refresh；网络抖动不立刻清 cookie
+    if (userResult.status === 'error' && !refreshToken) {
+      return { authenticated: false, shouldClearCookies: false, transient: true };
     }
   }
 
@@ -174,11 +244,16 @@ export async function getAdminSession(request: NextRequest): Promise<AdminSessio
     return { authenticated: false, shouldClearCookies: Boolean(accessToken) };
   }
 
-  const refreshedSession = await refreshAuthSession(refreshToken);
-  if (!refreshedSession?.access_token || !refreshedSession.refresh_token || !refreshedSession.user) {
+  const refreshResult = await refreshAuthSession(refreshToken);
+  if (refreshResult.status === 'error') {
+    return { authenticated: false, shouldClearCookies: false, transient: true };
+  }
+
+  if (refreshResult.status === 'unauthorized') {
     return { authenticated: false, shouldClearCookies: true };
   }
 
+  const refreshedSession = refreshResult.data;
   if (!hasAdminRole(refreshedSession.user)) {
     return { authenticated: false, shouldClearCookies: true };
   }
@@ -190,15 +265,15 @@ export async function getAdminSession(request: NextRequest): Promise<AdminSessio
   };
 }
 
-export function shouldUseSecureCookie() {
-  return process.env.NODE_ENV === 'production';
-}
-
-export function setAdminSessionCookies(response: NextResponse, session: SupabaseAuthSession) {
+export function setAdminSessionCookies(
+  response: NextResponse,
+  session: SupabaseAuthSession,
+  request?: Pick<Request, 'headers' | 'url'>,
+) {
   const cookieOptions = {
     httpOnly: true,
     sameSite: 'lax' as const,
-    secure: shouldUseSecureCookie(),
+    secure: shouldUseSecureCookie(request),
     path: '/',
   };
 
@@ -216,22 +291,29 @@ export function setAdminSessionCookies(response: NextResponse, session: Supabase
   });
 }
 
-export function clearAdminSessionCookies(response: NextResponse) {
+export function clearAdminSessionCookies(
+  response: NextResponse,
+  request?: Pick<Request, 'headers' | 'url'>,
+) {
   for (const name of [ADMIN_ACCESS_TOKEN_COOKIE, ADMIN_REFRESH_TOKEN_COOKIE]) {
     response.cookies.set({
       name,
       value: '',
       httpOnly: true,
       sameSite: 'lax',
-      secure: shouldUseSecureCookie(),
+      secure: shouldUseSecureCookie(request),
       path: '/',
       maxAge: 0,
     });
   }
 }
 
-export function applyAdminSession(response: NextResponse, session: AdminSession) {
-  if (session.refreshedSession) setAdminSessionCookies(response, session.refreshedSession);
-  if (session.shouldClearCookies) clearAdminSessionCookies(response);
+export function applyAdminSession(
+  response: NextResponse,
+  session: AdminSession,
+  request?: Pick<Request, 'headers' | 'url'>,
+) {
+  if (session.refreshedSession) setAdminSessionCookies(response, session.refreshedSession, request);
+  if (session.shouldClearCookies) clearAdminSessionCookies(response, request);
   return response;
 }

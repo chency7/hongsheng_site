@@ -32,7 +32,7 @@ async function requireAdminSession(request: NextRequest) {
   if (!session.authenticated) {
     return {
       session,
-      response: applyAdminSession(NextResponse.json({ ok: false, message: '未登录' }, { status: 401 }), session),
+      response: applyAdminSession(NextResponse.json({ ok: false, message: '未登录' }, { status: 401 }), session, request),
     };
   }
   return { session, response: null };
@@ -43,9 +43,9 @@ export async function GET(request: NextRequest) {
   if (response) return response;
 
   const users = await listManagedAdminUsers().catch((error) => error);
-  if (users instanceof Error) return applyAdminSession(authErrorResponse(users), session);
+  if (users instanceof Error) return applyAdminSession(authErrorResponse(users), session, request);
 
-  return applyAdminSession(NextResponse.json({ ok: true, users }), session);
+  return applyAdminSession(NextResponse.json({ ok: true, users }), session, request);
 }
 
 export async function POST(request: NextRequest) {
@@ -61,9 +61,9 @@ export async function POST(request: NextRequest) {
   }
 
   const user = await createManagedAdminUser(parsed.data).catch((error) => error);
-  if (user instanceof Error) return applyAdminSession(authErrorResponse(user), session);
+  if (user instanceof Error) return applyAdminSession(authErrorResponse(user), session, request);
 
-  return applyAdminSession(NextResponse.json({ ok: true, user }), session);
+  return applyAdminSession(NextResponse.json({ ok: true, user }), session, request);
 }
 
 export async function PATCH(request: NextRequest) {
@@ -86,7 +86,7 @@ export async function PATCH(request: NextRequest) {
   }
 
   const user = await setManagedAdminRole(parsed.data.userId, parsed.data.isAdmin).catch((error) => error);
-  if (user instanceof Error) return applyAdminSession(authErrorResponse(user), session);
+  if (user instanceof Error) return applyAdminSession(authErrorResponse(user), session, request);
 
-  return applyAdminSession(NextResponse.json({ ok: true, user }), session);
+  return applyAdminSession(NextResponse.json({ ok: true, user }), session, request);
 }

@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { AdminAuthError, setAdminSessionCookies, signInAdminWithPassword } from '@/lib/admin-auth';
 
@@ -7,7 +7,7 @@ const loginSchema = z.object({
   password: z.string().min(1).max(256),
 });
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const parsed = loginSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
     return NextResponse.json({ ok: false, message: '请输入有效的邮箱和密码' }, { status: 400 });
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
   try {
     const { session, user } = await signInAdminWithPassword(parsed.data.email, parsed.data.password);
     const response = NextResponse.json({ ok: true, user });
-    setAdminSessionCookies(response, session);
+    setAdminSessionCookies(response, session, request);
     return response;
   } catch (error) {
     if (error instanceof AdminAuthError) {

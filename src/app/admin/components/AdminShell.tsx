@@ -49,7 +49,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           }`}
         >
           <AdminHeader />
-          <main className="min-w-0 p-4 [contain:layout_paint] sm:p-6 lg:p-8">{children}</main>
+          <main className="min-w-0 p-4 sm:p-6 lg:p-8">{children}</main>
         </div>
       </div>
     </AuthGuard>

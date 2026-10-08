@@ -41,3 +41,6 @@ next-env.d.ts
 
 .contentlayer
 sqlite.db
+
+offline-deploy/
+*.tar

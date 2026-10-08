@@ -2,14 +2,15 @@
 FROM node:22.20-alpine AS builder
 WORKDIR /app
 
-# Alpine 常用兼容库 + 原生模块构建依赖（如 better-sqlite3）
+# Alpine 常用兼容库 + 原生模块构建依赖（如 better-sqlite3 / sharp）
 RUN apk add --no-cache libc6-compat python3 make g++
 
 # 安装 pnpm
 RUN npm i -g pnpm
 
 # 仅复制依赖清单，提升缓存命中率
-COPY package.json pnpm-lock.yaml ./
+# 需同时带上 pnpm-workspace.yaml / .npmrc，否则 allowBuilds 不生效
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 RUN pnpm install --frozen-lockfile
 
 # 复制源代码并构建

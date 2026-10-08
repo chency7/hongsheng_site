@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
   const session = await requireAdmin(request);
   if (session instanceof NextResponse) return session;
   if (!session.authenticated) {
-    return applyAdminSession(NextResponse.json({ ok: false, message: '未登录' }, { status: 401 }), session);
+    return applyAdminSession(NextResponse.json({ ok: false, message: '未登录' }, { status: 401 }), session, request);
   }
 
   try {
@@ -45,16 +45,16 @@ export async function POST(request: NextRequest) {
     const documentKind = String(formData.get('documentKind') || 'general');
 
     if (!(file instanceof File) || !categoryId || !subCategoryId || !productId) {
-      return applyAdminSession(NextResponse.json({ ok: false, message: '媒体上传参数不完整' }, { status: 400 }), session);
+      return applyAdminSession(NextResponse.json({ ok: false, message: '媒体上传参数不完整' }, { status: 400 }), session, request);
     }
 
     if (mediaType === 'image') {
       const image = await storeProductImage({ file, categoryId, subCategoryId, productId });
-      return applyAdminSession(NextResponse.json({ ok: true, image }), session);
+      return applyAdminSession(NextResponse.json({ ok: true, image }), session, request);
     }
 
     if (!detailTabId) {
-      return applyAdminSession(NextResponse.json({ ok: false, message: '产品资料上传参数不完整' }, { status: 400 }), session);
+      return applyAdminSession(NextResponse.json({ ok: false, message: '产品资料上传参数不完整' }, { status: 400 }), session, request);
     }
 
     const storedFile = await storeProductDocument({
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
       detailTabId,
       documentKind: documentKind === 'presentation' ? 'presentation' : 'general',
     });
-    return applyAdminSession(NextResponse.json({ ok: true, file: storedFile }), session);
+    return applyAdminSession(NextResponse.json({ ok: true, file: storedFile }), session, request);
   } catch (error) {
     console.error('Product document upload failed', error);
     return errorResponse(error, '产品资料上传失败');
@@ -76,22 +76,22 @@ export async function DELETE(request: NextRequest) {
   const session = await requireAdmin(request);
   if (session instanceof NextResponse) return session;
   if (!session.authenticated) {
-    return applyAdminSession(NextResponse.json({ ok: false, message: '未登录' }, { status: 401 }), session);
+    return applyAdminSession(NextResponse.json({ ok: false, message: '未登录' }, { status: 401 }), session, request);
   }
 
   try {
     const parsed = deleteSchema.safeParse(await request.json().catch(() => null));
     if (!parsed.success) {
-      return applyAdminSession(NextResponse.json({ ok: false, message: '文件地址不正确' }, { status: 400 }), session);
+      return applyAdminSession(NextResponse.json({ ok: false, message: '文件地址不正确' }, { status: 400 }), session, request);
     }
 
     const catalog = await readAdminCatalog();
     if (!catalog) {
-      return applyAdminSession(NextResponse.json({ ok: false, message: '产品目录不存在' }, { status: 409 }), session);
+      return applyAdminSession(NextResponse.json({ ok: false, message: '产品目录不存在' }, { status: 409 }), session, request);
     }
 
     await removeUnreferencedProductMedia(catalog, parsed.data.url);
-    return applyAdminSession(NextResponse.json({ ok: true }), session);
+    return applyAdminSession(NextResponse.json({ ok: true }), session, request);
   } catch (error) {
     console.error('Product document delete failed', error);
     return errorResponse(error, '产品资料删除失败');

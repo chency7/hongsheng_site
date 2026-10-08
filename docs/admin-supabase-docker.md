@@ -1,5 +1,7 @@
 # 后台管理 Supabase + Docker 部署
 
+完整生产部署流程见：[deployment.md](./deployment.md)。
+
 ## 1. 创建 Supabase 表
 
 在 Supabase 项目的 SQL Editor 中执行：
@@ -74,3 +76,4 @@ http://localhost:3001/admin/login
 - 后台增删改会通过 `/api/admin/catalog` 写入 Supabase。
 - 前台产品中心与产品详情页读取同一份 Supabase catalog；生产环境 Supabase 读取失败时会直接暴露错误，不会静默回退到 `src/data/products.ts` 的本地媒体地址。
 - 产品图片和产品资料统一存放在 `files` bucket。执行 `pnpm supabase:sync-product-media` 可重复同步本地种子媒体，并清理 catalog 已不再引用的产品媒体。
+

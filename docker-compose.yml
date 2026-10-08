@@ -1,6 +1,7 @@
 services:
   app:
     container_name: next-start
+    image: hongsheng-site:latest
     build:
       context: .
       dockerfile: Dockerfile

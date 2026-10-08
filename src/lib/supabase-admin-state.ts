@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { buildInitialAdminCatalog, normalizeAdminCatalog, type AdminCatalog } from '@/lib/admin-catalog';
+import { buildInitialAdminCatalog, normalizeAdminCatalog, type AdminCatalog, type AdminProduct } from '@/lib/admin-catalog';
 import type { CategoryOption, Product } from '@/data/products';
 import { adminProductToProduct } from '@/lib/admin/product-view';
 
@@ -189,8 +189,23 @@ export function adminCatalogToCategoryOptions(catalog: AdminCatalog): CategoryOp
 }
 
 export function adminCatalogToProducts(catalog: AdminCatalog): Product[] {
+  const categoryById = new Map(catalog.categories.map((category) => [category.id, category]));
+  const subCategoryById = new Map(catalog.subCategories.map((subCategory) => [subCategory.id, subCategory]));
+
+  // 产品对外可见要求：产品本身启用，且所属子分类、上级分类均处于启用状态
+  const isProductVisible = (product: AdminProduct) => {
+    if (!product.isActive) return false;
+
+    const subCategory = subCategoryById.get(product.subCategoryId);
+    if (subCategory) {
+      return subCategory.isActive && (categoryById.get(subCategory.categoryId)?.isActive ?? true);
+    }
+
+    return categoryById.get(product.subCategoryId)?.isActive ?? true;
+  };
+
   return catalog.products
-    .filter((product) => product.isActive)
+    .filter(isProductVisible)
     .sort((a, b) => a.sortOrder - b.sortOrder)
     .map(adminProductToProduct);
 }
