@@ -7,16 +7,15 @@ import { I18nProvider } from '@/components/providers/i18n-provider';
 import SiteHeader from '@/components/site/SiteHeader';
 import SiteFooter from '@/components/site/SiteFooter';
 import ScrollToTop from '@/components/site/ScrollToTop';
-import type { CategoryOption } from '@/data/products';
+import { usePublicCatalog } from '@/lib/public-catalog';
 
 export default function ClientLayout({
   children,
-  categoryOptions,
 }: {
   children: React.ReactNode;
-  categoryOptions: CategoryOption[];
 }) {
   const pathname = usePathname();
+  const { categoryOptions } = usePublicCatalog();
 
   useEffect(() => {
     window.scrollTo(0, 0);

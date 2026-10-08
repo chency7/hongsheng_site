@@ -3,11 +3,13 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useSearchParams } from 'next/navigation';
-import { Search, Grid, List, X, ChevronRight, ChevronDown } from 'lucide-react';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { Search, Grid, List, X, ChevronRight, ChevronDown, LoaderCircle, PackageSearch } from 'lucide-react';
 import Container from '@/components/site/Container';
 import MotionReveal from '@/components/site/MotionReveal';
 import type { CategoryOption, Product } from '@/data/products';
+import ProductDetailClient from './ProductDetailClient';
+import { usePublicCatalog } from '@/lib/public-catalog';
 
 type ViewMode = 'grid' | 'list';
 type SortOption = 'newest';
@@ -22,16 +24,88 @@ const getCategoryDisplayName = (categoryOptions: CategoryOption[], categoryId: s
   categoryOptions.find((category) => category.id === categoryId)?.name ??
   categoryId;
 
-export default function ProductsClient({
+/**
+ * 产品中心（纯前端静态导出版）：
+ * - 无参数          → 产品列表
+ * - ?id=<productId> → 产品详情
+ * 旧版 /products/<slug> 路径也兼容（托管层把该路径回退到本页即可）。
+ */
+export default function ProductsClient() {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { products, categoryOptions, isLoading, error } = usePublicCatalog();
+
+  // 兼容旧版 /products/<slug> 路径
+  const legacyProductId = pathname?.startsWith('/products/')
+    ? decodeURIComponent(pathname.slice('/products/'.length).replace(/\/+$/, ''))
+    : '';
+  const detailProductId = searchParams.get('id') || legacyProductId || '';
+  const detailProduct = detailProductId
+    ? products.find((product) => product.id === detailProductId)
+    : null;
+
+  if (detailProductId) {
+    if (detailProduct) {
+      return <ProductDetailClient product={detailProduct} />;
+    }
+
+    if (isLoading) {
+      return (
+        <div className="flex min-h-[60vh] items-center justify-center bg-[#F5F7FA] text-sm text-[#666666]" role="status">
+          <LoaderCircle className="mr-2 h-4 w-4 animate-spin text-[#4A90D9]" aria-hidden="true" />
+          正在加载产品信息
+        </div>
+      );
+    }
+
+    return (
+      <div className="min-h-[70vh] bg-[#F5F7FA]">
+        <Container className="py-24 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+            <PackageSearch className="h-8 w-8 text-[#999999]" aria-hidden="true" />
+          </div>
+          <h1 className="mt-6 text-2xl font-semibold text-[#333333]">产品未找到</h1>
+          <p className="mt-3 text-sm text-[#666666]">
+            {error ? `产品目录暂时无法加载：${error.message}` : '该产品可能已下架或链接有误。'}
+          </p>
+          <Link
+            href="/products"
+            className="mt-8 inline-flex items-center gap-2 rounded bg-[#4A90D9] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1E3A5F]"
+          >
+            返回产品列表
+          </Link>
+        </Container>
+      </div>
+    );
+  }
+
+  return (
+    <ProductsListView
+      products={products}
+      categoryOptions={categoryOptions}
+      isLoading={isLoading}
+      error={error}
+      requestedCategory={searchParams.get('category')}
+      requestedProduct={searchParams.get('product')}
+    />
+  );
+}
+
+function ProductsListView({
   products,
   categoryOptions,
+  isLoading,
+  error,
+  requestedCategory,
+  requestedProduct,
 }: {
   products: Product[];
   categoryOptions: CategoryOption[];
+  isLoading: boolean;
+  error: Error | null;
+  requestedCategory: string | null;
+  requestedProduct: string | null;
 }) {
-  const searchParams = useSearchParams();
-  const requestedCategory = searchParams.get('category');
-  const requestedProduct = searchParams.get('product');
   const initialTopCategory = requestedCategory
     ? categoryOptions.find((category) => category.id === requestedCategory)
     : undefined;
@@ -152,6 +226,35 @@ export default function ProductsClient({
 
     return result;
   }, [debouncedQuery, products, selectedCategories, selectedProductId, sortBy]);
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center bg-[#F5F7FA] text-sm text-[#666666]" role="status">
+        <LoaderCircle className="mr-2 h-4 w-4 animate-spin text-[#4A90D9]" aria-hidden="true" />
+        正在加载产品目录
+      </div>
+    );
+  }
+
+  if (error && products.length === 0) {
+    return (
+      <div className="min-h-[70vh] bg-[#F5F7FA]">
+        <Container className="py-24 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+            <PackageSearch className="h-8 w-8 text-[#999999]" aria-hidden="true" />
+          </div>
+          <h1 className="mt-6 text-2xl font-semibold text-[#333333]">产品目录暂时无法加载</h1>
+          <p className="mt-3 text-sm text-[#666666]">{error.message}</p>
+          <Link
+            href="/products"
+            className="mt-8 inline-flex items-center gap-2 rounded bg-[#4A90D9] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1E3A5F]"
+          >
+            重新加载
+          </Link>
+        </Container>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F5F7FA] text-[#333333]">
@@ -285,6 +388,12 @@ export default function ProductsClient({
               </div>
             )}
 
+            {error ? (
+              <div className="mb-4 rounded-[8px] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                产品目录加载失败：{error.message}
+              </div>
+            ) : null}
+
             {/* Top Toolbar */}
             <div className="mb-6 flex flex-col justify-between gap-4 rounded-[8px] border border-[#E8ECF0] bg-white p-3 shadow-[0_2px_8px_rgba(0,0,0,0.04)] sm:flex-row sm:items-center">
               <div className="text-sm text-[#666666]">
@@ -357,7 +466,7 @@ export default function ProductsClient({
                     {viewMode === 'grid' ? (
                       // Grid Card
                       <Link
-                        href={`/products/${product.id}`}
+                        href={`/products?id=${encodeURIComponent(product.id)}`}
                         className="group block flex h-full flex-col overflow-hidden rounded-[8px] border border-[#E8ECF0] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-[2px] hover:border-[#4A90D9] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
                       >
                         <div className="relative flex h-[180px] w-full items-center justify-center overflow-hidden border-b border-[#E8ECF0] bg-white p-4">
@@ -407,7 +516,7 @@ export default function ProductsClient({
                     ) : (
                       // List Card
                       <Link
-                        href={`/products/${product.id}`}
+                        href={`/products?id=${encodeURIComponent(product.id)}`}
                         className="group block flex flex-col gap-6 rounded-[8px] border border-[#E8ECF0] bg-white p-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all duration-300 hover:border-[#4A90D9] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] sm:flex-row"
                       >
                         <div className="relative h-[150px] w-full shrink-0 overflow-hidden rounded-md border border-[#E8ECF0] bg-slate-50 sm:w-[200px]">
@@ -454,18 +563,6 @@ export default function ProductsClient({
                 ))}
               </div>
             )}
-
-            {/* Pagination Placeholder (Hidden) */}
-            {/* {filteredProducts.length > 0 && (
-              <div className="mt-10 flex justify-center items-center gap-2">
-                <button className="w-8 h-8 flex items-center justify-center rounded border border-[#E8ECF0] bg-white text-[#666666] hover:bg-[#F5F7FA] hover:text-[#4A90D9]">&lt;</button>
-                <button className="w-8 h-8 flex items-center justify-center rounded bg-[#4A90D9] text-white font-medium shadow-sm">1</button>
-                <button className="w-8 h-8 flex items-center justify-center rounded border border-[#E8ECF0] bg-white text-[#666666] hover:bg-[#F5F7FA] hover:text-[#4A90D9]">2</button>
-                <button className="w-8 h-8 flex items-center justify-center rounded border border-[#E8ECF0] bg-white text-[#666666] hover:bg-[#F5F7FA] hover:text-[#4A90D9]">3</button>
-                <span className="text-[#666666]">...</span>
-                <button className="w-8 h-8 flex items-center justify-center rounded border border-[#E8ECF0] bg-white text-[#666666] hover:bg-[#F5F7FA] hover:text-[#4A90D9]">&gt;</button>
-              </div>
-            )} */}
           </div>
         </div>
       </Container>

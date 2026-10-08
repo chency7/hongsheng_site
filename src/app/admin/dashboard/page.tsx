@@ -122,7 +122,7 @@ export default function AdminDashboardPage() {
                   </td>
                   <td className="px-6 py-3">
                     <Link
-                      href={`/admin/products/${product.id}/edit`}
+                      href={`/admin/products/edit?id=${encodeURIComponent(product.id)}`}
                       className="text-sm text-[#4A90D9] hover:underline"
                     >
                       编辑

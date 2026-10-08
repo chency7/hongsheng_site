@@ -6,6 +6,7 @@ import MotionReveal from '@/components/site/MotionReveal';
 import ButtonLink from '@/components/site/ButtonLink';
 import { Mail, MapPin, Phone, Send } from 'lucide-react';
 import Image from 'next/image';
+import { getFunctionsUrl, getSupabaseAnonKey } from '@/lib/supabase-browser';
 
 type NeedType = '业务咨询' | '技术咨询' | '售后服务' | '合作咨询' | '其他';
 
@@ -63,10 +64,11 @@ export default function ContactClient() {
     setSubmitMessage('');
 
     try {
-      const response = await fetch('/api/contact', {
+      const response = await fetch(getFunctionsUrl('send-contact-email'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          apikey: getSupabaseAnonKey(),
         },
         body: JSON.stringify(form),
       });

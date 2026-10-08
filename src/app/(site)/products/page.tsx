@@ -1,14 +1,14 @@
 import React, { Suspense } from 'react';
 import ProductsClient from './ProductsClient';
 import { BreadcrumbSchema, WebPageSchema } from '@/components/seo/SchemaOrg';
-import {
-  adminCatalogToCategoryOptions,
-  adminCatalogToProducts,
-  getAdminCatalogForSite,
-} from '@/lib/admin/catalog-repository';
 
-export const dynamic = 'force-dynamic';
-
+/**
+ * 产品中心（静态导出）。
+ * 列表与详情均由 ProductsClient 在浏览器端渲染：
+ * - /products           → 列表
+ * - /products?id=<slug> → 详情
+ * 旧版 /products/<slug> 链接可在托管层 301 到 /products?id=<slug>。
+ */
 export const metadata = {
   title: '产品中心 - 液压泵站与试验检测设备',
   description:
@@ -35,11 +35,7 @@ export const metadata = {
   },
 };
 
-export default async function ProductsPage() {
-  const catalog = await getAdminCatalogForSite();
-  const products = adminCatalogToProducts(catalog);
-  const categoryOptions = adminCatalogToCategoryOptions(catalog);
-
+export default function ProductsPage() {
   return (
     <>
       <BreadcrumbSchema
@@ -54,7 +50,7 @@ export default async function ProductsPage() {
         url="https://www.xl-honsun.com/products"
       />
       <Suspense fallback={<div className="min-h-screen" />}>
-        <ProductsClient products={products} categoryOptions={categoryOptions} />
+        <ProductsClient />
       </Suspense>
     </>
   );

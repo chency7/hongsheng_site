@@ -3,6 +3,7 @@
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import {
   type LucideIcon,
   LayoutDashboard,
@@ -71,7 +72,7 @@ function AdminSidebar({ collapsed, pathname, onToggleCollapsed }: AdminSidebarPr
   }, [pathname]);
 
   const handleLogout = useCallback(async () => {
-    await fetch('/api/admin/logout', { method: 'POST' }).catch(() => null);
+    await getSupabaseBrowserClient().auth.signOut().catch(() => undefined);
     router.push('/admin/login');
   }, [router]);
 

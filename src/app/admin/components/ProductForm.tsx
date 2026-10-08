@@ -32,7 +32,7 @@ import {
   findProductDetailTab,
   type StandardProductDetailTab,
 } from '@/lib/product-detail-tabs';
-import ProductDetailClient from '@/app/(site)/products/[id]/ProductDetailClient';
+import ProductDetailClient from '@/app/(site)/products/ProductDetailClient';
 import type {
   AdminProduct,
   AdminProductFile,

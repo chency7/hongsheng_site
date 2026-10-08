@@ -105,7 +105,7 @@ function getDerivedCatalog() {
   };
 }
 
-function getCatalogSnapshot(): AdminCatalog {
+export function getCatalogSnapshot(): AdminCatalog {
   return {
     categories: globalCategories,
     subCategories: globalSubCategories,

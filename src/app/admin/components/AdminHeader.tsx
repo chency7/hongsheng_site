@@ -3,6 +3,7 @@
 import React, { memo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { User, LogOut, Bell } from 'lucide-react';
+import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import { useAdminSession } from './AdminSessionContext';
 
 function AdminHeader() {
@@ -11,7 +12,7 @@ function AdminHeader() {
   const displayName = user?.displayName || '管理员';
 
   const handleLogout = useCallback(async () => {
-    await fetch('/api/admin/logout', { method: 'POST' }).catch(() => null);
+    await getSupabaseBrowserClient().auth.signOut().catch(() => undefined);
     router.push('/admin/login');
   }, [router]);
 

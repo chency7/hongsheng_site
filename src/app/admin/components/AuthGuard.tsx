@@ -3,15 +3,20 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { LoaderCircle } from 'lucide-react';
-import { AdminSessionProvider, type AdminSessionUser } from './AdminSessionContext';
+import {
+  getSupabaseBrowserClient,
+  hasAdminRole,
+  normalizeAdminUser,
+  type AdminSessionUser,
+} from '@/lib/supabase-browser';
+import { AdminSessionProvider } from './AdminSessionContext';
 
-const SESSION_CHECK_TIMEOUT_MS = 10000;
-
-type SessionResponse = {
-  authenticated?: boolean;
-  user?: AdminSessionUser | null;
-};
-
+/**
+ * 后台会话守卫：浏览器直连 Supabase Auth。
+ * - getUser() 会自动刷新过期 token
+ * - 校验 app_metadata.role = admin
+ * - 监听 SIGNED_OUT / TOKEN_REFRESHED 事件保持会话状态
+ */
 export default function AuthGuard({
   children,
   isLoginPage,
@@ -25,44 +30,57 @@ export default function AuthGuard({
 
   useEffect(() => {
     let cancelled = false;
-    const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), SESSION_CHECK_TIMEOUT_MS);
+    const supabase = getSupabaseBrowserClient();
 
     async function checkSession() {
-      const response = await fetch('/api/admin/session', {
-        cache: 'no-store',
-        signal: controller.signal,
-      }).catch(() => null);
-      const data = response?.ok
-        ? await response.json().catch(() => null) as SessionResponse | null
-        : null;
-      const authenticated = Boolean(data?.authenticated);
+      try {
+        const { data, error } = await supabase.auth.getUser();
+        const adminUser =
+          !error && data.user && hasAdminRole(data.user) ? normalizeAdminUser(data.user) : null;
 
-      if (cancelled) return;
+        if (cancelled) return;
 
-      if (isLoginPage) {
-        setSessionReady(true);
-        if (authenticated) {
-          router.replace('/admin/dashboard');
+        if (isLoginPage) {
+          setSessionReady(true);
+          if (adminUser) {
+            router.replace('/admin/dashboard');
+          }
+          return;
         }
-        return;
-      }
 
-      if (!authenticated) {
-        window.location.replace('/admin/login');
-        return;
-      }
+        if (!adminUser) {
+          window.location.replace('/admin/login');
+          return;
+        }
 
-      setUser(data?.user || null);
-      setSessionReady(true);
+        setUser(adminUser);
+        setSessionReady(true);
+      } catch {
+        // 网络异常：不立即踢出会话，保持当前页面
+        if (!cancelled && !isLoginPage) {
+          setSessionReady(true);
+        }
+      }
     }
 
     void checkSession();
 
+    const { data: listener } = supabase.auth.onAuthStateChange((event) => {
+      if (cancelled) return;
+      if (event === 'SIGNED_OUT') {
+        if (!isLoginPage) {
+          window.location.replace('/admin/login');
+        }
+        return;
+      }
+      if (event === 'USER_UPDATED') {
+        void checkSession();
+      }
+    });
+
     return () => {
       cancelled = true;
-      controller.abort();
-      window.clearTimeout(timeout);
+      listener.subscription.unsubscribe();
     };
   }, [isLoginPage, router]);
 

@@ -11,16 +11,14 @@ import {
   Users,
 } from 'lucide-react';
 import { useAdminSession } from '../components/AdminSessionContext';
+import {
+  createManagedAdminUser,
+  listManagedAdminUsers,
+  setManagedAdminRole,
+  type ManagedAdminUser,
+} from '@/lib/admin/users-client';
 
-type ManagedUser = {
-  id: string;
-  email: string;
-  displayName: string;
-  isAdmin: boolean;
-  createdAt: string | null;
-  confirmedAt: string | null;
-  lastSignInAt: string | null;
-};
+type ManagedUser = ManagedAdminUser;
 
 const USERS_CACHE_TTL_MS = 30000;
 let usersCache: { users: ManagedUser[]; expiresAt: number } | null = null;
@@ -36,12 +34,6 @@ function formatDate(value: string | null) {
     hour: '2-digit',
     minute: '2-digit',
   });
-}
-
-async function readApiMessage(response: Response | null, fallback: string) {
-  if (!response) return fallback;
-  const data = await response.json().catch(() => null) as { message?: string } | null;
-  return data?.message || fallback;
 }
 
 export default function AdminUsersPage() {
@@ -70,18 +62,15 @@ export default function AdminUsersPage() {
     }
 
     setLoading(true);
-    const response = await fetch('/api/admin/users', { cache: 'no-store' }).catch(() => null);
-    const data = response?.ok ? await response.json().catch(() => null) as { users?: ManagedUser[] } | null : null;
-
-    if (!response?.ok || !data?.users) {
-      setError(await readApiMessage(response, '账号列表读取失败'));
+    try {
+      const users = await listManagedAdminUsers();
+      setUsers(users);
+      usersCache = { users, expiresAt: Date.now() + USERS_CACHE_TTL_MS };
+    } catch (error) {
+      setError(error instanceof Error ? error.message : '账号列表读取失败');
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setUsers(data.users);
-    usersCache = { users: data.users, expiresAt: Date.now() + USERS_CACHE_TTL_MS };
-    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -94,29 +83,23 @@ export default function AdminUsersPage() {
     setMessage('');
     setCreating(true);
 
-    const response = await fetch('/api/admin/users', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, isAdmin: createAsAdmin }),
-    }).catch(() => null);
-    const data = response?.ok ? await response.json().catch(() => null) as { user?: ManagedUser } | null : null;
+    try {
+      const user = await createManagedAdminUser({ email, password, isAdmin: createAsAdmin });
 
-    if (!response?.ok || !data?.user) {
-      setError(await readApiMessage(response, '账号创建失败'));
+      setUsers((current) => {
+        const nextUsers = [user, ...current.filter((item) => item.id !== user.id)];
+        usersCache = { users: nextUsers, expiresAt: Date.now() + USERS_CACHE_TTL_MS };
+        return nextUsers;
+      });
+      setEmail('');
+      setPassword('');
+      setCreateAsAdmin(true);
+      setMessage(`已创建账号 ${user.email}`);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : '账号创建失败');
+    } finally {
       setCreating(false);
-      return;
     }
-
-    setUsers((current) => {
-      const nextUsers = [data.user!, ...current.filter((user) => user.id !== data.user!.id)];
-      usersCache = { users: nextUsers, expiresAt: Date.now() + USERS_CACHE_TTL_MS };
-      return nextUsers;
-    });
-    setEmail('');
-    setPassword('');
-    setCreateAsAdmin(true);
-    setMessage(`已创建账号 ${data.user.email}`);
-    setCreating(false);
   };
 
   const handleRoleChange = async (user: ManagedUser, isAdmin: boolean) => {
@@ -124,26 +107,20 @@ export default function AdminUsersPage() {
     setMessage('');
     setUpdatingUserId(user.id);
 
-    const response = await fetch('/api/admin/users', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: user.id, isAdmin }),
-    }).catch(() => null);
-    const data = response?.ok ? await response.json().catch(() => null) as { user?: ManagedUser } | null : null;
+    try {
+      const updatedUser = await setManagedAdminRole(user.id, isAdmin);
 
-    if (!response?.ok || !data?.user) {
-      setError(await readApiMessage(response, '账号权限更新失败'));
+      setUsers((current) => {
+        const nextUsers = current.map((item) => (item.id === updatedUser.id ? updatedUser : item));
+        usersCache = { users: nextUsers, expiresAt: Date.now() + USERS_CACHE_TTL_MS };
+        return nextUsers;
+      });
+      setMessage(`${updatedUser.email} 已${updatedUser.isAdmin ? '授予' : '取消'}管理员权限`);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : '账号权限更新失败');
+    } finally {
       setUpdatingUserId(null);
-      return;
     }
-
-    setUsers((current) => {
-      const nextUsers = current.map((item) => (item.id === data.user!.id ? data.user! : item));
-      usersCache = { users: nextUsers, expiresAt: Date.now() + USERS_CACHE_TTL_MS };
-      return nextUsers;
-    });
-    setMessage(`${data.user.email} 已${data.user.isAdmin ? '授予' : '取消'}管理员权限`);
-    setUpdatingUserId(null);
   };
 
   return (

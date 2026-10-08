@@ -1,15 +1,20 @@
 'use client';
 
-import React from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import React, { Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useAdminStore } from '@/lib/admin-store';
-import ProductForm from '../../../components/ProductForm';
+import ProductForm from '../../components/ProductForm';
 
-export default function EditProductPage() {
-  const params = useParams();
+/**
+ * 静态导出版产品编辑页：/admin/products/edit?id=<productId>
+ * （原动态路由 /admin/products/[id]/edit 在 output: export 下不可用）
+ */
+function EditProductContent() {
+  const searchParams = useSearchParams();
   const router = useRouter();
+  const productId = searchParams.get('id') || '';
   const { isCatalogLoading, getProductById } = useAdminStore();
-  const product = getProductById(params.id as string);
+  const product = getProductById(productId);
 
   if (isCatalogLoading) {
     return (
@@ -34,4 +39,18 @@ export default function EditProductPage() {
   }
 
   return <ProductForm key={`${product.id}-${product.updatedAt}`} initialProduct={product} />;
+}
+
+export default function EditProductPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[320px] items-center justify-center text-sm text-[#999999]">
+          正在加载...
+        </div>
+      }
+    >
+      <EditProductContent />
+    </Suspense>
+  );
 }

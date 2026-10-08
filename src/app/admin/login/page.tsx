@@ -3,6 +3,15 @@
 import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Factory, LoaderCircle, LockKeyhole, LogIn, Mail } from 'lucide-react';
+import { getSupabaseBrowserClient, hasAdminRole } from '@/lib/supabase-browser';
+
+function mapLoginError(error: { status?: number; message?: string }): string {
+  if (error.status === 400) return '邮箱或密码错误，请重试';
+  if (error.status === 422) return '请输入有效的邮箱和密码';
+  if (error.status === 429) return '尝试次数过多，请稍后再试';
+  if (error.message) return error.message;
+  return '登录服务暂时不可用，请稍后重试';
+}
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -17,20 +26,32 @@ export default function AdminLoginPage() {
     setError('');
     setLoading(true);
 
-    const response = await fetch('/api/admin/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    }).catch(() => null);
+    try {
+      const supabase = getSupabaseBrowserClient();
+      const { data, error: loginError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
 
-    if (response?.ok) {
+      if (loginError) {
+        setError(mapLoginError(loginError));
+        setLoading(false);
+        return;
+      }
+
+      if (!data.user || !hasAdminRole(data.user)) {
+        await supabase.auth.signOut();
+        setError('该账号没有后台管理权限');
+        setLoading(false);
+        return;
+      }
+
       router.replace('/admin/dashboard');
-      router.refresh();
       return;
+    } catch {
+      setError('登录服务暂时不可用，请稍后重试');
     }
 
-    const data = response ? await response.json().catch(() => null) : null;
-    setError(data?.message || '登录服务暂时不可用，请稍后重试');
     setLoading(false);
   };
 

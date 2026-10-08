@@ -256,7 +256,7 @@ export default function AdminProductsPage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <Link
-                          href={`/products/${product.slug}`}
+                          href={`/products?id=${encodeURIComponent(product.slug)}`}
                           target="_blank"
                           className="rounded p-1.5 text-[#999999] hover:bg-[#F0F5FA] hover:text-[#28A745] transition-colors"
                           title="前台预览"
@@ -264,7 +264,7 @@ export default function AdminProductsPage() {
                           <Eye className="h-4 w-4" />
                         </Link>
                         <Link
-                          href={`/admin/products/${product.id}/edit`}
+                          href={`/admin/products/edit?id=${encodeURIComponent(product.id)}`}
                           className="rounded p-1.5 text-[#999999] hover:bg-[#F0F5FA] hover:text-[#4A90D9] transition-colors"
                           title="编辑"
                         >
