@@ -1,7 +1,13 @@
 @import 'maplibre-gl/dist/maplibre-gl.css';
+/* LXGW WenKai 中文正文字体：unicode-range 分包（每个文件几十 KB，按需加载） */
+@import 'lxgw-wenkai-webfont/style.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --font-wenkai: 'LXGW WenKai', system-ui, 'Microsoft YaHei', sans-serif;
+}
 
 /* :root {
   --background: #ffffff;

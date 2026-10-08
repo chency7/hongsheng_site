@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
+    "postbuild": "node scripts/fix-segment-cache.mjs && node scripts/gzip-out.mjs",
     "start": "next start",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
@@ -20,8 +21,6 @@
     "@next/mdx": "^16.1.6",
     "@radix-ui/react-select": "2.3.3",
     "@radix-ui/react-switch": "^1.2.6",
-    "@react-three/drei": "^10.7.7",
-    "@react-three/fiber": "^9.5.0",
     "@supabase/supabase-js": "^2.117.3",
     "@tailwindcss/typography": "^0.5.16",
     "fontfaceobserver": "^2.3.0",
@@ -31,6 +30,7 @@
     "lodash": "^4.17.21",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.475.0",
+    "lxgw-wenkai-webfont": "^1.7.0",
     "maplibre-gl": "^5.7.0",
     "next": "^16.4.0",
     "next-intl": "^4.3.12",
@@ -51,8 +51,7 @@
     "remark-toc": "^9.0.0",
     "rimraf": "^6.0.1",
     "swr": "^2.3.2",
-    "tailwindcss-debug-screens": "^2.2.1",
-    "three": "^0.183.1"
+    "tailwindcss-debug-screens": "^2.2.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^18.4.3",
@@ -64,7 +63,6 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@types/three": "^0.185.1",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "eslint": "^8.57.1",
@@ -79,6 +77,7 @@
     "prettier": "^3.5.1",
     "prettier-plugin-tailwindcss": "^0.5.14",
     "rehype-prism-plus": "^2.0.0",
+    "sharp": "^0.35.5",
     "tailwindcss": "^3.4.1",
     "typescript": "^5",
     "webpack": "^5.98.0",

@@ -17,23 +17,14 @@ export const pacifico = Pacifico({
   fallback: ['cursive', 'system-ui'],
 });
 
-export const lxgwWenKai = localFont({
-  src: [
-    {
-      path: '../../public/fonts/LXGWWenKai-Regular.ttf',
-      weight: '400',
-      style: 'normal',
-    },
-  ],
-  variable: '--font-wenkai',
-  display: 'block',
-  fallback: ['system-ui', 'Microsoft YaHei', 'sans-serif'],
-});
+// 中文正文字体 LXGW WenKai 改为按需分包加载：
+// 见 global.css 的 @import 'lxgw-wenkai-webfont/style.css' 与 --font-wenkai 定义。
+// （原 next/font/local 整包 TTF 18.8MB，改为 unicode-range 分包后访客只下载用到的字形）
 
 export const calSans = localFont({
   src: [
     {
-      path: '../../public/fonts/CalSans-SemiBold.ttf',
+      path: '../fonts/CalSans-SemiBold.ttf',
       weight: '400',
       style: 'normal',
     },

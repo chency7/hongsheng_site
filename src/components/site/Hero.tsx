@@ -1,16 +1,10 @@
 'use client';
 
 import React from 'react';
-import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 import Container from '@/components/site/Container';
 import ButtonLink from '@/components/site/ButtonLink';
 import MotionReveal from '@/components/site/MotionReveal';
-
-const HydraulicModel = dynamic(() => import('@/components/site/HydraulicModel'), {
-  ssr: false,
-  loading: () => <div className="absolute inset-0 -z-10" />,
-});
 
 export default function Hero() {
   return (
@@ -20,7 +14,7 @@ export default function Hero() {
         <div className="hero-bg absolute inset-0 z-5  bg-[rgba(11,15,22,1)] h-full w-full">
           <div
             className="absolute inset-0 bg-cover bg-center opacity-70"
-            style={{ backgroundImage: "url('images/scsb/生产基地.png')" }}
+            style={{ backgroundImage: "url('/images/scsb/生产基地.png')" }}
           />
           <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(11,15,22,0.5),rgba(11,15,22,0.3),rgba(11,15,22,0.5))]" />
           {/* Bottom Fade Gradient - Ensures smooth transition to next section */}

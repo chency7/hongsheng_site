@@ -1,6 +1,6 @@
 import './global.css';
 import { Metadata } from 'next';
-import { inter, pacifico, lxgwWenKai, calSans } from '@/utils/fonts';
+import { pacifico, calSans } from '@/utils/fonts';
 import { OrganizationSchema, LocalBusinessSchema } from '@/components/seo/SchemaOrg';
 
 export const metadata: Metadata = {
@@ -87,7 +87,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="zh"
-      className={[lxgwWenKai.variable, pacifico.variable, calSans.variable].join(' ')}
+      className={[pacifico.variable, calSans.variable].join(' ')}
       suppressHydrationWarning
     >
       <head>
