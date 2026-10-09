@@ -1,8 +1,6 @@
 'use client';
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import {
   type LucideIcon,
@@ -38,6 +36,12 @@ type SidebarMenuItemProps = {
   collapsed: boolean;
 };
 
+/**
+ * 后台菜单使用整页跳转（普通 <a>）而非客户端路由：
+ * 静态导出下 Next 的 SPA 路由在预取请求被取消时会死等
+ * （表现为"点了没反应 / 一直 loading"），整页加载虽然多一次文档请求，
+ * 但绝对可靠，且 JS/CSS 已长缓存，实测单页约 400ms。
+ */
 const SidebarMenuItem = memo(function SidebarMenuItem({
   href,
   label,
@@ -46,9 +50,8 @@ const SidebarMenuItem = memo(function SidebarMenuItem({
   collapsed,
 }: SidebarMenuItemProps) {
   return (
-    <Link
+    <a
       href={href}
-      prefetch
       className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-150 ${
         active
           ? 'bg-[#4A90D9] text-white shadow-md'
@@ -56,14 +59,13 @@ const SidebarMenuItem = memo(function SidebarMenuItem({
       } ${collapsed ? 'justify-center px-2' : ''}`}
       title={collapsed ? label : undefined}
     >
-      <Icon className="h-5 w-5 shrink-0" />
+      <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
       {!collapsed && <span>{label}</span>}
-    </Link>
+    </a>
   );
 });
 
 function AdminSidebar({ collapsed, pathname, onToggleCollapsed }: AdminSidebarProps) {
-  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
@@ -72,28 +74,34 @@ function AdminSidebar({ collapsed, pathname, onToggleCollapsed }: AdminSidebarPr
   }, [pathname]);
 
   const handleLogout = useCallback(async () => {
-    await getSupabaseBrowserClient().auth.signOut().catch(() => undefined);
-    router.push('/admin/login');
-  }, [router]);
+    await getSupabaseBrowserClient()
+      .auth.signOut()
+      .catch(() => undefined);
+    window.location.assign('/admin/login');
+  }, []);
 
   const activeItems = useMemo(
-    () => menuItems.map((item) => ({
-      ...item,
-      active: pathname === item.href || pathname.startsWith(item.href + '/'),
-    })),
-    [pathname],
+    () =>
+      menuItems.map((item) => ({
+        ...item,
+        active: pathname === item.href || pathname.startsWith(item.href + '/'),
+      })),
+    [pathname]
   );
 
   const sidebarContent = (
     <div className="flex h-full flex-col bg-[#1E3A5F] text-white">
       <div className="flex h-16 items-center justify-between border-b border-white/10 px-4">
         {!collapsed && (
-          <Link href="/admin/dashboard" className="text-lg font-bold tracking-wide">
+          <a href="/admin/dashboard" className="text-lg font-bold tracking-wide">
             HS 后台管理
-          </Link>
+          </a>
         )}
         <button
-          onClick={() => { onToggleCollapsed(); setMobileOpen(false); }}
+          onClick={() => {
+            onToggleCollapsed();
+            setMobileOpen(false);
+          }}
           className="rounded p-1.5 text-white/60 transition-colors duration-150 hover:bg-white/10 hover:text-white"
           aria-label={collapsed ? '展开侧边栏' : '收起侧边栏'}
           title={collapsed ? '展开侧边栏' : '收起侧边栏'}
@@ -134,7 +142,11 @@ function AdminSidebar({ collapsed, pathname, onToggleCollapsed }: AdminSidebarPr
     <>
       {/* Mobile header */}
       <div className="fixed left-0 right-0 top-0 z-40 flex h-14 items-center justify-between border-b border-[#E8ECF0] bg-[#1E3A5F] px-4 lg:hidden">
-        <button onClick={() => setMobileOpen(true)} className="rounded p-1.5 text-white" aria-label="打开侧边栏">
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="rounded p-1.5 text-white"
+          aria-label="打开侧边栏"
+        >
           <Menu className="h-5 w-5" />
         </button>
         <span className="text-sm font-bold text-white">HS 后台管理</span>

@@ -4,7 +4,7 @@ import localFont from 'next/font/local';
 export const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
-  display: 'block',
+  display: 'swap',
   weight: ['400'],
   fallback: ['system-ui', 'sans-serif'],
 });
@@ -12,7 +12,7 @@ export const inter = Inter({
 export const pacifico = Pacifico({
   weight: ['400'],
   subsets: ['latin'],
-  display: 'block',
+  display: 'swap',
   variable: '--font-Pacifico',
   fallback: ['cursive', 'system-ui'],
 });
@@ -30,6 +30,6 @@ export const calSans = localFont({
     },
   ],
   variable: '--font-calsans',
-  display: 'block',
+  display: 'swap',
   fallback: ['system-ui', 'sans-serif'],
 });

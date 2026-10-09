@@ -27,7 +27,7 @@ type ManagedFile = {
   isDocument: boolean;
 };
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 12;
 const imageExtensions = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']);
 const typeIcons = {
   image: ImageIcon,
@@ -36,7 +36,7 @@ const typeIcons = {
 };
 
 export default function AdminFilesPage() {
-  const { getProducts, updateProduct } = useAdminStore();
+  const { getProducts, updateProduct, isCatalogLoading } = useAdminStore();
   const products = getProducts();
 
   const [search, setSearch] = useState('');
@@ -116,7 +116,9 @@ export default function AdminFilesPage() {
     let result = allFiles;
     if (search) {
       const q = search.toLowerCase();
-      result = result.filter((f) => f.fileName.toLowerCase().includes(q) || f.productName.toLowerCase().includes(q));
+      result = result.filter(
+        (f) => f.fileName.toLowerCase().includes(q) || f.productName.toLowerCase().includes(q)
+      );
     }
     if (typeFilter !== 'all') {
       result = result.filter((f) => f.type === typeFilter);
@@ -128,7 +130,7 @@ export default function AdminFilesPage() {
   const safePage = Math.min(currentPage, totalPages);
   const visibleFiles = useMemo(
     () => filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE),
-    [filtered, safePage],
+    [filtered, safePage]
   );
 
   const typeCounts = useMemo(() => {
@@ -157,7 +159,7 @@ export default function AdminFilesPage() {
                 fileSize: undefined,
                 storageObjectPath: undefined,
               }
-            : tab,
+            : tab
         ),
         files: product.files.filter((item) => item.detailTabId !== file.detailTabId),
       });
@@ -167,14 +169,20 @@ export default function AdminFilesPage() {
     }
   };
 
+  if (isCatalogLoading) {
+    return (
+      <div className="flex min-h-[320px] items-center justify-center text-sm text-[#999999]">
+        正在读取产品目录...
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-[22px] font-bold text-[#1E3A5F]">文件资产</h1>
-          <p className="mt-1 text-sm text-[#999999]">
-            共 {allFiles.length} 项文件资产
-          </p>
+          <p className="mt-1 text-sm text-[#999999]">共 {allFiles.length} 项文件资产</p>
         </div>
       </div>
 
@@ -189,7 +197,10 @@ export default function AdminFilesPage() {
         {(['all', 'image', 'pptx', 'pdf'] as const).map((type) => (
           <button
             key={type}
-            onClick={() => { setTypeFilter(type); setCurrentPage(1); }}
+            onClick={() => {
+              setTypeFilter(type);
+              setCurrentPage(1);
+            }}
             className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors duration-150 ${
               typeFilter === type
                 ? 'bg-[#1E3A5F] text-white shadow-sm'
@@ -204,7 +215,10 @@ export default function AdminFilesPage() {
           <input
             type="text"
             value={search}
-            onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
             placeholder="搜索文件..."
             className="w-full rounded-lg border border-[#E8ECF0] py-2.5 pl-10 pr-4 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
           />
@@ -217,11 +231,13 @@ export default function AdminFilesPage() {
           <table className="w-full text-left text-sm">
             <thead className="border-b border-[#E8ECF0] bg-[#F9FAFB]">
               <tr>
-                <th className="w-12 px-4 py-4 text-xs font-medium text-[#999999] uppercase">类型</th>
-                <th className="px-4 py-4 text-xs font-medium text-[#999999] uppercase">文件名</th>
-                <th className="px-4 py-4 text-xs font-medium text-[#999999] uppercase">所属产品</th>
-                <th className="px-4 py-4 text-xs font-medium text-[#999999] uppercase">路径/URL</th>
-                <th className="px-4 py-4 text-xs font-medium text-[#999999] uppercase">操作</th>
+                <th className="w-12 px-4 py-4 text-xs font-medium uppercase text-[#999999]">
+                  类型
+                </th>
+                <th className="px-4 py-4 text-xs font-medium uppercase text-[#999999]">文件名</th>
+                <th className="px-4 py-4 text-xs font-medium uppercase text-[#999999]">所属产品</th>
+                <th className="px-4 py-4 text-xs font-medium uppercase text-[#999999]">路径/URL</th>
+                <th className="px-4 py-4 text-xs font-medium uppercase text-[#999999]">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -235,16 +251,22 @@ export default function AdminFilesPage() {
                 visibleFiles.map((file, idx) => {
                   const Icon = typeIcons[file.type as keyof typeof typeIcons] || File;
                   return (
-                    <tr key={`${file.url}-${(safePage - 1) * PAGE_SIZE + idx}`} className="border-b border-[#E8ECF0] transition-colors hover:bg-[#F9FAFB]">
+                    <tr
+                      key={`${file.url}-${(safePage - 1) * PAGE_SIZE + idx}`}
+                      className="border-b border-[#E8ECF0] transition-colors hover:bg-[#F9FAFB]"
+                    >
                       <td className="px-4 py-3">
                         <div className="flex h-8 w-8 items-center justify-center rounded bg-[#F0F5FA]">
                           <Icon className="h-4 w-4 text-[#4A90D9]" />
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <p className="font-medium text-[#333333] max-w-[200px] truncate">{file.fileName}</p>
-                        <p className="text-xs text-[#999999] uppercase">
-                          {file.type}{file.fileSize ? ` · ${formatFileSize(file.fileSize)}` : ''}
+                        <p className="max-w-[200px] truncate font-medium text-[#333333]">
+                          {file.fileName}
+                        </p>
+                        <p className="text-xs uppercase text-[#999999]">
+                          {file.type}
+                          {file.fileSize ? ` · ${formatFileSize(file.fileSize)}` : ''}
                         </p>
                       </td>
                       <td className="px-4 py-3 text-[#666666]">{file.productName}</td>
@@ -263,7 +285,7 @@ export default function AdminFilesPage() {
                               href={file.url}
                               target="_blank"
                               rel="noreferrer"
-                              className="rounded p-1.5 text-[#999999] hover:bg-[#F0F5FA] hover:text-[#4A90D9] transition-colors"
+                              className="rounded p-1.5 text-[#999999] transition-colors hover:bg-[#F0F5FA] hover:text-[#4A90D9]"
                               title="打开"
                             >
                               <ExternalLink className="h-4 w-4" />
@@ -273,7 +295,7 @@ export default function AdminFilesPage() {
                             <a
                               href={file.url}
                               download
-                              className="rounded p-1.5 text-[#999999] hover:bg-[#F0F5FA] hover:text-[#28A745] transition-colors"
+                              className="rounded p-1.5 text-[#999999] transition-colors hover:bg-[#F0F5FA] hover:text-[#28A745]"
                               title="下载"
                             >
                               <Download className="h-4 w-4" />
@@ -283,7 +305,7 @@ export default function AdminFilesPage() {
                             <button
                               type="button"
                               onClick={() => setDeleteTarget(file)}
-                              className="rounded p-1.5 text-[#999999] hover:bg-red-50 hover:text-red-500 transition-colors"
+                              className="rounded p-1.5 text-[#999999] transition-colors hover:bg-red-50 hover:text-red-500"
                               title="移除"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -303,7 +325,7 @@ export default function AdminFilesPage() {
             <span>
               第 {safePage} / {totalPages} 页，共 {filtered.length} 项
             </span>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
@@ -312,6 +334,26 @@ export default function AdminFilesPage() {
               >
                 上一页
               </button>
+              {pageNumbers(safePage, totalPages).map((item, index) =>
+                item === '...' ? (
+                  <span key={`gap-${index}`} className="px-1 text-[#999999]">
+                    …
+                  </span>
+                ) : (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => setCurrentPage(item)}
+                    className={`min-w-9 rounded border px-3 py-1.5 transition-colors ${
+                      item === safePage
+                        ? 'border-[#1E3A5F] bg-[#1E3A5F] text-white'
+                        : 'border-[#E8ECF0] bg-white hover:bg-[#F5F7FA]'
+                    }`}
+                  >
+                    {item}
+                  </button>
+                )
+              )}
               <button
                 type="button"
                 onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
@@ -368,6 +410,25 @@ function formatFileSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+/** 生成带省略号的页码序列，页数较多时便于快速跳转 */
+function pageNumbers(current: number, total: number): (number | '...')[] {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, index) => index + 1);
+  }
+  const wanted = new Set<number>([1, total, current - 1, current, current + 1]);
+  const sorted = Array.from(wanted)
+    .filter((page) => page >= 1 && page <= total)
+    .sort((a, b) => a - b);
+  const result: (number | '...')[] = [];
+  let previous = 0;
+  for (const page of sorted) {
+    if (previous && page - previous > 1) result.push('...');
+    result.push(page);
+    previous = page;
+  }
+  return result;
 }
 
 function fileNameFromUrl(value: string) {

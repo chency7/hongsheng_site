@@ -84,6 +84,9 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // 前端直连 Supabase（目录 RPC 与产品图），预连接可省去首屏 DNS/TLS 握手耗时
+  const supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, '');
+
   return (
     <html
       lang="zh"
@@ -91,6 +94,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
     >
       <head>
+        {supabaseOrigin ? (
+          <>
+            <link rel="preconnect" href={supabaseOrigin} crossOrigin="anonymous" />
+            <link rel="dns-prefetch" href={supabaseOrigin} />
+          </>
+        ) : null}
         <OrganizationSchema />
         <LocalBusinessSchema />
       </head>

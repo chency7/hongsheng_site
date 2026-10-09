@@ -69,7 +69,7 @@ export default function AboutHero() {
             <MotionReveal delay={0.2}>
               <div className="relative aspect-[4/3] w-full overflow-hidden rounded-tr-[50px] shadow-xl border-4 border-white">
                 <Image
-                  src="/images/banner.jpg"
+                  src="/images/banner.webp"
                   alt="Company Building"
                   fill
                   className="object-cover"

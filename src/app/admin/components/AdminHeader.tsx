@@ -1,20 +1,18 @@
 'use client';
 
 import React, { memo, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import { User, LogOut, Bell } from 'lucide-react';
 import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import { useAdminSession } from './AdminSessionContext';
 
 function AdminHeader() {
-  const router = useRouter();
   const user = useAdminSession();
   const displayName = user?.displayName || '管理员';
 
   const handleLogout = useCallback(async () => {
     await getSupabaseBrowserClient().auth.signOut().catch(() => undefined);
-    router.push('/admin/login');
-  }, [router]);
+    window.location.assign('/admin/login');
+  }, []);
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-[#E8ECF0] bg-white px-6 shadow-sm">

@@ -200,7 +200,7 @@ export default function ContactClient() {
                 <div className="mt-6 overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-sm dark:border-zinc-200/80 dark:bg-white">
                   <div className="relative h-[470px] w-full">
                     <Image
-                      src="/images/地图成品.png"
+                      src="/images/地图成品.webp"
                       alt="公司地址地图"
                       fill
                       className="object-cover"

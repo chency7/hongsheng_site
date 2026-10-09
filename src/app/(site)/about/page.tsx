@@ -72,13 +72,13 @@ export default function AboutPage() {
       year: '2023',
       title: '扬帆起航',
       desc: '公司正式成立，总部落地长沙。组建了核心液压与电控系统集成团队，确立了以技术驱动发展的战略方向。',
-      image: '/images/banner.jpg',
+      image: '/images/banner.webp',
     },
     {
       year: '至今',
       title: '蓬勃发展',
       desc: '持续完善设备与制造能力，业务已覆盖工程机械、船舶海洋、风力发电等多行业，成功交付多个大型系统与试验检测平台。',
-      image: '/images/about/system-integration.jpg',
+      image: '/images/about/system-integration.webp',
     },
   ];
 
@@ -109,7 +109,7 @@ export default function AboutPage() {
             <MotionReveal delay={0.2}>
               <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl shadow-xl">
                 <Image
-                  src="/images/banner.jpg"
+                  src="/images/banner.webp"
                   alt="Company Building"
                   fill
                   className="object-cover"
@@ -128,7 +128,7 @@ export default function AboutPage() {
             <MotionReveal>
               <div className="relative h-[400px] overflow-hidden rounded-3xl shadow-xl">
                 <Image
-                  src="/images/about/mission.jpg"
+                  src="/images/about/mission.webp"
                   alt="Mission"
                   fill
                   className="object-cover"

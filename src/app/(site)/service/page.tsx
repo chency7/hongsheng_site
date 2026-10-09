@@ -40,7 +40,7 @@ export default function ServicePage() {
       keywords: ['液压系统', '电控集成', '定制方案'],
       color: 'bg-blue-600',
       icon: Lightbulb,
-      image: '/images/service/创新设计.png',
+      image: '/images/service/创新设计.webp',
       iconColor: 'text-blue-600',
     },
     {
@@ -50,7 +50,7 @@ export default function ServicePage() {
       keywords: ['精益管理', '零缺陷品控', '高效精准'],
       color: 'bg-green-600',
       icon: Wrench,
-      image: '/images/service/精益制造.png',
+      image: '/images/service/精益制造.webp',
       iconColor: 'text-green-600',
     },
     {
@@ -60,7 +60,7 @@ export default function ServicePage() {
       keywords: ['24小时服务', '全生命周期管理'],
       color: 'bg-[#F4B400]',
       icon: HeartHandshake,
-      image: '/images/service/用心服务.png',
+      image: '/images/service/用心服务.webp',
       iconColor: 'text-[#F4B400]',
     },
   ];

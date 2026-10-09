@@ -76,19 +76,20 @@ async function flattenInDir(dir) {
   }
 }
 
-// 只扫描第一/二层目录（路由目录都在前两层），避免误伤 _next/static 内部结构
-const scanTargets = [ROOT];
-for (const entry of await fs.readdir(ROOT, { withFileTypes: true })) {
-  if (entry.isDirectory() && !entry.name.startsWith('_next') && !entry.name.startsWith('__next')) {
-    scanTargets.push(path.join(ROOT, entry.name));
-    // 嵌套路由（如 out/admin/dashboard、out/cases/<slug>）
-    for (const sub of await fs.readdir(path.join(ROOT, entry.name), { withFileTypes: true })) {
-      if (sub.isDirectory() && !sub.name.startsWith('__next')) {
-        scanTargets.push(path.join(ROOT, entry.name, sub.name));
-      }
-    }
+// 递归收集所有层级的路由目录（如 out/admin/products/new），
+// 但跳过 _next 静态产物目录与 __next.* 分段目录本身，避免误伤 _next/static 内部结构
+async function collectRouteDirs(dir, out = []) {
+  for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    if (entry.name === '_next' || entry.name.startsWith('__next.')) continue;
+    const full = path.join(dir, entry.name);
+    out.push(full);
+    await collectRouteDirs(full, out);
   }
+  return out;
 }
+
+const scanTargets = [ROOT, ...(await collectRouteDirs(ROOT))];
 
 for (const dir of scanTargets) {
   await flattenInDir(dir).catch(() => undefined);

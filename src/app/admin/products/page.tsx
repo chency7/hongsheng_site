@@ -1,9 +1,17 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
-import { Plus, Pencil, Trash2, Search, Eye, CornerDownRight, FolderTree, Layers3 } from 'lucide-react';
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Search,
+  Eye,
+  CornerDownRight,
+  FolderTree,
+  Layers3,
+} from 'lucide-react';
 import { useAdminStore } from '@/lib/admin-store';
 import type { AdminProduct } from '@/lib/admin-store';
 import { deleteAdminProductMedia } from '@/lib/admin/media-client';
@@ -23,7 +31,15 @@ const ALL_CATEGORIES_VALUE = '__all_categories__';
 const PAGE_SIZE = 20;
 
 export default function AdminProductsPage() {
-  const { isCatalogLoading, getProducts, getSubCategories, getCategories, updateProduct, deleteProduct, getStats } = useAdminStore();
+  const {
+    isCatalogLoading,
+    getProducts,
+    getSubCategories,
+    getCategories,
+    updateProduct,
+    deleteProduct,
+    getStats,
+  } = useAdminStore();
   const products = getProducts();
   const subCategories = getSubCategories();
   const categories = getCategories();
@@ -36,11 +52,12 @@ export default function AdminProductsPage() {
   const [error, setError] = useState('');
 
   const categoryGroups = useMemo(
-    () => categories.map((category) => ({
-      category,
-      children: subCategories.filter((subCategory) => subCategory.categoryId === category.id),
-    })),
-    [categories, subCategories],
+    () =>
+      categories.map((category) => ({
+        category,
+        children: subCategories.filter((subCategory) => subCategory.categoryId === category.id),
+      })),
+    [categories, subCategories]
   );
 
   const categoryNameById = useMemo(() => {
@@ -55,7 +72,7 @@ export default function AdminProductsPage() {
 
   const categoryIds = useMemo(
     () => new Set(categories.map((category) => category.id)),
-    [categories],
+    [categories]
   );
 
   const childIdsByCategoryId = useMemo(() => {
@@ -70,9 +87,11 @@ export default function AdminProductsPage() {
 
   const selectedFilterLabel = useMemo(() => {
     if (!filterCat) return '全部分类';
-    return categories.find((category) => category.id === filterCat)?.name
-      || subCategories.find((subCategory) => subCategory.id === filterCat)?.name
-      || '全部分类';
+    return (
+      categories.find((category) => category.id === filterCat)?.name ||
+      subCategories.find((subCategory) => subCategory.id === filterCat)?.name ||
+      '全部分类'
+    );
   }, [categories, filterCat, subCategories]);
 
   const filtered = useMemo(() => {
@@ -87,7 +106,8 @@ export default function AdminProductsPage() {
       if (categoryIds.has(filterCat)) {
         const childCategoryIds = childIdsByCategoryId.get(filterCat) || new Set<string>();
         result = result.filter(
-          (product) => product.subCategoryId === filterCat || childCategoryIds.has(product.subCategoryId),
+          (product) =>
+            product.subCategoryId === filterCat || childCategoryIds.has(product.subCategoryId)
         );
       } else {
         result = result.filter((product) => product.subCategoryId === filterCat);
@@ -100,7 +120,7 @@ export default function AdminProductsPage() {
   const safePage = Math.min(currentPage, totalPages);
   const visibleProducts = useMemo(
     () => filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE),
-    [filtered, safePage],
+    [filtered, safePage]
   );
 
   if (isCatalogLoading) {
@@ -120,13 +140,13 @@ export default function AdminProductsPage() {
             共 {stats.totalProducts} 个产品，{stats.activeProducts} 个已启用
           </p>
         </div>
-        <Link
+        <a
           href="/admin/products/new"
           className="inline-flex items-center gap-2 rounded-lg bg-[#1E3A5F] px-5 py-2.5 text-sm font-medium text-white shadow-md shadow-[#1E3A5F]/10 transition-[background-color,transform] duration-150 hover:-translate-y-[1px] hover:bg-[#162A45]"
         >
           <Plus className="h-4 w-4" />
           新增产品
-        </Link>
+        </a>
       </div>
 
       {error && (
@@ -142,14 +162,20 @@ export default function AdminProductsPage() {
           <input
             type="text"
             value={search}
-            onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
             placeholder="搜索产品名称/型号..."
             className="w-full rounded-lg border border-[#E8ECF0] py-2.5 pl-10 pr-4 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
           />
         </div>
         <Select
           value={filterCat || ALL_CATEGORIES_VALUE}
-          onValueChange={(value) => { setFilterCat(value === ALL_CATEGORIES_VALUE ? '' : value); setCurrentPage(1); }}
+          onValueChange={(value) => {
+            setFilterCat(value === ALL_CATEGORIES_VALUE ? '' : value);
+            setCurrentPage(1);
+          }}
         >
           <SelectTrigger className="sm:w-60" aria-label="筛选产品分类">
             <SelectValue>{selectedFilterLabel}</SelectValue>
@@ -203,12 +229,12 @@ export default function AdminProductsPage() {
           <table className="w-full text-left text-sm">
             <thead className="border-b border-[#E8ECF0] bg-[#F9FAFB]">
               <tr>
-                <th className="w-16 px-4 py-4 text-xs font-medium text-[#999999] uppercase">#</th>
-                <th className="px-4 py-4 text-xs font-medium text-[#999999] uppercase">产品</th>
-                <th className="px-4 py-4 text-xs font-medium text-[#999999] uppercase">型号</th>
-                <th className="px-4 py-4 text-xs font-medium text-[#999999] uppercase">所属分类</th>
-                <th className="px-4 py-4 text-xs font-medium text-[#999999] uppercase">状态</th>
-                <th className="px-4 py-4 text-xs font-medium text-[#999999] uppercase">操作</th>
+                <th className="w-16 px-4 py-4 text-xs font-medium uppercase text-[#999999]">#</th>
+                <th className="px-4 py-4 text-xs font-medium uppercase text-[#999999]">产品</th>
+                <th className="px-4 py-4 text-xs font-medium uppercase text-[#999999]">型号</th>
+                <th className="px-4 py-4 text-xs font-medium uppercase text-[#999999]">所属分类</th>
+                <th className="px-4 py-4 text-xs font-medium uppercase text-[#999999]">状态</th>
+                <th className="px-4 py-4 text-xs font-medium uppercase text-[#999999]">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -220,13 +246,22 @@ export default function AdminProductsPage() {
                 </tr>
               ) : (
                 visibleProducts.map((product, idx) => (
-                  <tr key={product.id} className="border-b border-[#E8ECF0] transition-colors hover:bg-[#F9FAFB]">
-                    <td className="px-4 py-3 text-[#999999]">{(safePage - 1) * PAGE_SIZE + idx + 1}</td>
+                  <tr
+                    key={product.id}
+                    className="border-b border-[#E8ECF0] transition-colors hover:bg-[#F9FAFB]"
+                  >
+                    <td className="px-4 py-3 text-[#999999]">
+                      {(safePage - 1) * PAGE_SIZE + idx + 1}
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded bg-slate-50">
                           <Image
-                            src={product.coverThumbnail || product.coverImage || '/images/hs/hydraulic.svg'}
+                            src={
+                              product.coverThumbnail ||
+                              product.coverImage ||
+                              '/images/hs/hydraulic.svg'
+                            }
                             alt={product.name}
                             fill
                             sizes="40px"
@@ -247,32 +282,39 @@ export default function AdminProductsPage() {
                         checked={product.isActive}
                         onCheckedChange={() => {
                           setError('');
-                          void updateProduct(product.id, { isActive: !product.isActive }).catch((updateError) => {
-                            setError(updateError instanceof Error ? updateError.message : '产品状态更新失败');
-                          });
+                          void updateProduct(product.id, { isActive: !product.isActive }).catch(
+                            (updateError) => {
+                              setError(
+                                updateError instanceof Error
+                                  ? updateError.message
+                                  : '产品状态更新失败'
+                              );
+                            }
+                          );
                         }}
                       />
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <Link
+                        <a
                           href={`/products?id=${encodeURIComponent(product.slug)}`}
                           target="_blank"
-                          className="rounded p-1.5 text-[#999999] hover:bg-[#F0F5FA] hover:text-[#28A745] transition-colors"
+                          rel="noreferrer"
+                          className="rounded p-1.5 text-[#999999] transition-colors hover:bg-[#F0F5FA] hover:text-[#28A745]"
                           title="前台预览"
                         >
                           <Eye className="h-4 w-4" />
-                        </Link>
-                        <Link
+                        </a>
+                        <a
                           href={`/admin/products/edit?id=${encodeURIComponent(product.id)}`}
-                          className="rounded p-1.5 text-[#999999] hover:bg-[#F0F5FA] hover:text-[#4A90D9] transition-colors"
+                          className="rounded p-1.5 text-[#999999] transition-colors hover:bg-[#F0F5FA] hover:text-[#4A90D9]"
                           title="编辑"
                         >
                           <Pencil className="h-4 w-4" />
-                        </Link>
+                        </a>
                         <button
                           onClick={() => setDeleteTarget(product)}
-                          className="rounded p-1.5 text-[#999999] hover:bg-red-50 hover:text-red-500 transition-colors"
+                          className="rounded p-1.5 text-[#999999] transition-colors hover:bg-red-50 hover:text-red-500"
                           title="删除"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -323,15 +365,21 @@ export default function AdminProductsPage() {
             void (async () => {
               try {
                 await deleteProduct(product.id);
-                const mediaUrls = new Set([
-                  product.coverImage,
-                  product.coverThumbnail,
-                  ...product.images,
-                  ...product.files.map((file) => file.url),
-                  ...product.subProducts.flatMap((subProduct) => [subProduct.coverImage, subProduct.coverThumbnail, ...subProduct.images]),
-                ].filter((url): url is string => Boolean(url)));
+                const mediaUrls = new Set(
+                  [
+                    product.coverImage,
+                    product.coverThumbnail,
+                    ...product.images,
+                    ...product.files.map((file) => file.url),
+                    ...product.subProducts.flatMap((subProduct) => [
+                      subProduct.coverImage,
+                      subProduct.coverThumbnail,
+                      ...subProduct.images,
+                    ]),
+                  ].filter((url): url is string => Boolean(url))
+                );
                 const cleanupResults = await Promise.allSettled(
-                  Array.from(mediaUrls).map((url) => deleteAdminProductMedia(url)),
+                  Array.from(mediaUrls).map((url) => deleteAdminProductMedia(url))
                 );
                 if (cleanupResults.some((result) => result.status === 'rejected')) {
                   setError('产品已删除，但部分资料文件清理失败，可运行媒体同步任务清理未引用文件');

@@ -38,15 +38,15 @@ export default function SiteFooter({ showPartners = false }: { showPartners?: bo
   ];
 
   const partnerLogos: PartnerLogo[] = [
-    { name: '中国中车', logo: '/images/partners/株洲时代新材料.png' },
-    { name: '三一重工', logo: '/images/partners/三一重工.png' },
-    { name: '中联重科', logo: '/images/partners/中联重科.png' },
-    { name: '徐工集团', logo: '/images/partners/徐工集团.png' },
-    { name: '蓝天科技', logo: '/images/partners/蓝天科技.png' },
-    { name: '飞翼股份', logo: '/images/partners/飞翼股份.png' },
-    { name: '百通新材', logo: '/images/partners/百通新材.png' },
-    { name: '深蓝动力', logo: '/images/partners/深蓝动力.png' },
-    { name: '北路智控', logo: '/images/partners/北路智控.png' },
+    { name: '中国中车', logo: '/images/partners/株洲时代新材料.webp' },
+    { name: '三一重工', logo: '/images/partners/三一重工.webp' },
+    { name: '中联重科', logo: '/images/partners/中联重科.webp' },
+    { name: '徐工集团', logo: '/images/partners/徐工集团.webp' },
+    { name: '蓝天科技', logo: '/images/partners/蓝天科技.webp' },
+    { name: '飞翼股份', logo: '/images/partners/飞翼股份.webp' },
+    { name: '百通新材', logo: '/images/partners/百通新材.webp' },
+    { name: '深蓝动力', logo: '/images/partners/深蓝动力.webp' },
+    { name: '北路智控', logo: '/images/partners/北路智控.webp' },
   ];
 
   const year = new Date().getFullYear();

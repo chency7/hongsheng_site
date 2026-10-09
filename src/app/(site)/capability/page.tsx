@@ -263,7 +263,7 @@ export default function CapabilityPage() {
                 <div className="bg-white/8 overflow-hidden rounded-[30px] border border-white/10 shadow-[0_18px_48px_rgba(6,19,31,0.18)] backdrop-blur">
                   <div className="relative aspect-[4/5]">
                     <Image
-                      src="/images/about/system-integration.jpg"
+                      src="/images/about/system-integration.webp"
                       alt="系统集成能力"
                       fill
                       className="object-cover"
@@ -284,7 +284,7 @@ export default function CapabilityPage() {
                   <div className="bg-white/8 overflow-hidden rounded-[30px] border border-white/10 shadow-[0_18px_48px_rgba(6,19,31,0.18)] backdrop-blur">
                     <div className="relative aspect-[4/3]">
                       <Image
-                        src="/images/about/simulation-lab.jpg"
+                        src="/images/about/simulation-lab.webp"
                         alt="仿真与实验能力"
                         fill
                         className="object-cover"
@@ -498,7 +498,7 @@ export default function CapabilityPage() {
                 <div className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-[0_12px_36px_rgba(15,23,42,0.06)]">
                   <div className="relative aspect-[4/5]">
                     <Image
-                      src="/images/about/engineer-team.jpg"
+                      src="/images/about/engineer-team.webp"
                       alt="工程团队"
                       fill
                       className="object-cover"

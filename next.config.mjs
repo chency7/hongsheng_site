@@ -15,6 +15,14 @@ const nextConfig = {
     ],
   },
   poweredByHeader: false,
+  experimental: {
+    // 客户端路由缓存：静态导出下页面 payload 均为静态，缓存更久可减少
+    // 每次点菜单都回源拉取 __next.*.__PAGE__.txt（弱网/带宽受限时导航明显变慢）
+    staleTimes: {
+      static: 600,
+      dynamic: 60,
+    },
+  },
 };
 
 export default nextConfig;

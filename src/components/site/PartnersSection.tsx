@@ -14,10 +14,10 @@ type PartnerItem = {
 
 export default function PartnersSection() {
   const customers: PartnerItem[] = [
-    { name: '中国中车', logo: '/images/partners/株洲时代新材料.png' },
-    { name: '三一重工', logo: '/images/partners/三一重工.png' },
-    { name: '中联重科', logo: '/images/partners/中联重科.png' },
-    { name: '徐工集团', logo: '/images/partners/徐工集团.png' },
+    { name: '中国中车', logo: '/images/partners/株洲时代新材料.webp' },
+    { name: '三一重工', logo: '/images/partners/三一重工.webp' },
+    { name: '中联重科', logo: '/images/partners/中联重科.webp' },
+    { name: '徐工集团', logo: '/images/partners/徐工集团.webp' },
   ];
 
   return (

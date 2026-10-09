@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
 import {
   Save,
@@ -117,9 +116,7 @@ function detailTabUsesFileEditor(tab: AdminDetailTab) {
 
 function detailTabDocumentKind(tab: AdminDetailTab): 'general' | 'presentation' {
   const standardTitle = canonicalProductDetailTab(tab.title);
-  return standardTitle === '应用案例' || standardTitle === '外形尺寸'
-    ? 'presentation'
-    : 'general';
+  return standardTitle === '应用案例' || standardTitle === '外形尺寸' ? 'presentation' : 'general';
 }
 
 function detailTabFileAccept(tab: AdminDetailTab) {
@@ -136,13 +133,8 @@ function detailTabUploadLabel(tab: AdminDetailTab) {
 }
 
 export default function ProductForm({ initialProduct }: Props) {
-  const {
-    getSubCategories,
-    getCategories,
-    getProducts,
-    createProduct,
-    updateProduct,
-  } = useAdminStore();
+  const { getSubCategories, getCategories, getProducts, createProduct, updateProduct } =
+    useAdminStore();
 
   const subCategories = getSubCategories();
   const categories = getCategories();
@@ -159,7 +151,11 @@ export default function ProductForm({ initialProduct }: Props) {
   const [sortOrder, setSortOrder] = useState(initialProduct?.sortOrder ?? 0);
   const [isActive, setIsActive] = useState(initialProduct?.isActive ?? true);
   const [images, setImages] = useState<string[]>(() =>
-    Array.from(new Set([initialProduct?.coverImage, ...(initialProduct?.images || [])].filter(Boolean) as string[])),
+    Array.from(
+      new Set(
+        [initialProduct?.coverImage, ...(initialProduct?.images || [])].filter(Boolean) as string[]
+      )
+    )
   );
 
   // Specs
@@ -176,9 +172,7 @@ export default function ProductForm({ initialProduct }: Props) {
   );
 
   // Detail tabs
-  const [detailTabs, setDetailTabs] = useState<AdminDetailTab[]>(
-    initialProduct?.detailTabs || []
-  );
+  const [detailTabs, setDetailTabs] = useState<AdminDetailTab[]>(initialProduct?.detailTabs || []);
   const [productFiles, setProductFiles] = useState<AdminProductFile[]>(initialProduct?.files || []);
   const [pendingDocumentDeletes, setPendingDocumentDeletes] = useState<string[]>([]);
   const [pendingImageDeletes, setPendingImageDeletes] = useState<string[]>([]);
@@ -199,11 +193,14 @@ export default function ProductForm({ initialProduct }: Props) {
   const [previewDraft, setPreviewDraft] = useState<AdminProduct | null>(null);
   const [editorMode, setEditorMode] = useState<'visual' | 'fields'>('visual');
 
-  useEffect(() => () => {
-    uploadedMediaUrlsRef.current.forEach((url) => {
-      void deleteAdminProductMedia(url).catch(() => undefined);
-    });
-  }, []);
+  useEffect(
+    () => () => {
+      uploadedMediaUrlsRef.current.forEach((url) => {
+        void deleteAdminProductMedia(url).catch(() => undefined);
+      });
+    },
+    []
+  );
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     basic: true,
     specs: true,
@@ -255,12 +252,11 @@ export default function ProductForm({ initialProduct }: Props) {
     setPendingImageDeletes((urls) => Array.from(new Set([...urls, url])));
   };
 
-  const thumbnailForImage = (url: string, fallback?: string) => (
+  const thumbnailForImage = (url: string, fallback?: string) =>
     thumbnailByImageUrlRef.current.get(url) ||
     fallback ||
     thumbnailUrlFromProductImageUrl(url) ||
-    ''
-  );
+    '';
 
   const removeImage = (idx: number) => {
     const image = images[idx];
@@ -275,7 +271,7 @@ export default function ProductForm({ initialProduct }: Props) {
       const next = [...current];
       [next[idx], next[target]] = [next[target], next[idx]];
       const nextThumbnail = thumbnailForImage(next[0] || '');
-      setPreviewDraft((draft) => draft ? { ...draft, coverThumbnail: nextThumbnail } : draft);
+      setPreviewDraft((draft) => (draft ? { ...draft, coverThumbnail: nextThumbnail } : draft));
       return next;
     });
   };
@@ -291,18 +287,22 @@ export default function ProductForm({ initialProduct }: Props) {
     setLockedSlug(generatedSlug);
     try {
       const uploaded = await Promise.all(
-        files.map((file) => uploadAdminProductImage({
-          file,
-          categoryId: categoryContext.categoryId,
-          subCategoryId: categoryContext.storageSubCategoryId,
-          productId: storageProductId,
-        })),
+        files.map((file) =>
+          uploadAdminProductImage({
+            file,
+            categoryId: categoryContext.categoryId,
+            subCategoryId: categoryContext.storageSubCategoryId,
+            productId: storageProductId,
+          })
+        )
       );
       uploaded.forEach((image) => {
         uploadedMediaUrlsRef.current.add(image.url);
         thumbnailByImageUrlRef.current.set(image.url, image.thumbnailUrl);
       });
-      setImages((current) => Array.from(new Set([...current, ...uploaded.map((image) => image.url)])));
+      setImages((current) =>
+        Array.from(new Set([...current, ...uploaded.map((image) => image.url)]))
+      );
       setImageNotice(`已上传 ${uploaded.length} 张图片，原图与缩略图都已生成，列表加载会更轻快。`);
     } catch (uploadError) {
       setError(uploadError instanceof Error ? uploadError.message : '产品图片上传失败，请重试');
@@ -328,25 +328,41 @@ export default function ProductForm({ initialProduct }: Props) {
     };
     setSubProducts([...subProducts, sp]);
   };
-  const updateSubProduct = (id: string, field: string, val: string | string[] | AdminProductSpec[]) => {
+  const updateSubProduct = (
+    id: string,
+    field: string,
+    val: string | string[] | AdminProductSpec[]
+  ) => {
     setSubProducts(subProducts.map((sp) => (sp.id === id ? { ...sp, [field]: val } : sp)));
   };
   const removeSubProduct = (id: string) => {
     const removed = subProducts.find((subProduct) => subProduct.id === id);
     removed?.images.forEach(queueImageDelete);
-    if (removed?.coverImage && !removed.images.includes(removed.coverImage)) queueImageDelete(removed.coverImage);
+    if (removed?.coverImage && !removed.images.includes(removed.coverImage))
+      queueImageDelete(removed.coverImage);
     setSubProducts(subProducts.filter((sp) => sp.id !== id));
   };
   const addSubProductSpec = (subId: string) => {
     setSubProducts(
       subProducts.map((sp) =>
         sp.id === subId
-          ? { ...sp, specs: [...sp.specs, { id: generateId(), label: '', value: '', sortOrder: sp.specs.length }] }
+          ? {
+              ...sp,
+              specs: [
+                ...sp.specs,
+                { id: generateId(), label: '', value: '', sortOrder: sp.specs.length },
+              ],
+            }
           : sp
       )
     );
   };
-  const updateSubProductSpec = (subId: string, specId: string, field: 'label' | 'value', val: string) => {
+  const updateSubProductSpec = (
+    subId: string,
+    specId: string,
+    field: 'label' | 'value',
+    val: string
+  ) => {
     setSubProducts(
       subProducts.map((sp) =>
         sp.id === subId
@@ -390,27 +406,33 @@ export default function ProductForm({ initialProduct }: Props) {
     setLockedSlug(generatedSlug);
     try {
       const uploaded = await Promise.all(
-        files.map((file) => uploadAdminProductImage({
-          file,
-          categoryId: categoryContext.categoryId,
-          subCategoryId: categoryContext.storageSubCategoryId,
-          productId: `${storageProductId}-${subProduct.id}`,
-        })),
+        files.map((file) =>
+          uploadAdminProductImage({
+            file,
+            categoryId: categoryContext.categoryId,
+            subCategoryId: categoryContext.storageSubCategoryId,
+            productId: `${storageProductId}-${subProduct.id}`,
+          })
+        )
       );
       uploaded.forEach((image) => {
         uploadedMediaUrlsRef.current.add(image.url);
         thumbnailByImageUrlRef.current.set(image.url, image.thumbnailUrl);
       });
-      setSubProducts((current) => current.map((item) => {
-        if (item.id !== subProduct.id) return item;
-        const nextImages = Array.from(new Set([...item.images, ...uploaded.map((image) => image.url)]));
-        return {
-          ...item,
-          images: nextImages,
-          coverImage: nextImages[0] || '',
-          coverThumbnail: thumbnailForImage(nextImages[0] || '', item.coverThumbnail),
-        };
-      }));
+      setSubProducts((current) =>
+        current.map((item) => {
+          if (item.id !== subProduct.id) return item;
+          const nextImages = Array.from(
+            new Set([...item.images, ...uploaded.map((image) => image.url)])
+          );
+          return {
+            ...item,
+            images: nextImages,
+            coverImage: nextImages[0] || '',
+            coverThumbnail: thumbnailForImage(nextImages[0] || '', item.coverThumbnail),
+          };
+        })
+      );
     } catch (uploadError) {
       setError(uploadError instanceof Error ? uploadError.message : '子产品图片上传失败，请重试');
     } finally {
@@ -466,15 +488,15 @@ export default function ProductForm({ initialProduct }: Props) {
                   }
                 : {}),
             }
-          : item,
-      ),
+          : item
+      )
     );
   };
 
   const uploadDocument = async (
     tab: AdminDetailTab,
     file: File,
-    documentKind: 'general' | 'presentation' = 'general',
+    documentKind: 'general' | 'presentation' = 'general'
   ) => {
     if (!categoryContext || !name.trim()) {
       setError('请先填写产品名称并选择所属二级分类');
@@ -514,8 +536,8 @@ export default function ProductForm({ initialProduct }: Props) {
                 fileSize: storedFile.fileSize,
                 storageObjectPath: storedFile.storageObjectPath,
               }
-            : item,
-        ),
+            : item
+        )
       );
     } catch (uploadError) {
       setError(uploadError instanceof Error ? uploadError.message : '产品资料上传失败');
@@ -543,14 +565,14 @@ export default function ProductForm({ initialProduct }: Props) {
               fileSize: undefined,
               storageObjectPath: undefined,
             }
-          : item,
-      ),
+          : item
+      )
     );
   };
 
   const upsertStandardDetailTab = (
     title: StandardProductDetailTab,
-    patch: { content?: string; type?: AdminDetailTab['type'] },
+    patch: { content?: string; type?: AdminDetailTab['type'] }
   ) => {
     setDetailTabs((tabs) => {
       const existingTab = findProductDetailTab(tabs, title);
@@ -573,7 +595,7 @@ export default function ProductForm({ initialProduct }: Props) {
 
   const setStandardDetailTabType = (
     title: StandardProductDetailTab,
-    type: AdminDetailTab['type'],
+    type: AdminDetailTab['type']
   ) => {
     const existingTab = findProductDetailTab(detailTabs, title);
     if (existingTab) {
@@ -595,9 +617,8 @@ export default function ProductForm({ initialProduct }: Props) {
 
     if (!existingTab) setDetailTabs((tabs) => [...tabs, tab]);
     const standardTitle = canonicalProductDetailTab(title);
-    const documentKind = standardTitle === '应用案例' || standardTitle === '外形尺寸'
-      ? 'presentation'
-      : 'general';
+    const documentKind =
+      standardTitle === '应用案例' || standardTitle === '外形尺寸' ? 'presentation' : 'general';
     void uploadDocument(tab, file, documentKind);
   };
 
@@ -631,7 +652,10 @@ export default function ProductForm({ initialProduct }: Props) {
       model: model.trim(),
       description: description.trim(),
       coverImage: validImages[0] || '',
-      coverThumbnail: thumbnailForImage(validImages[0] || '', initialProduct?.coverImage === validImages[0] ? initialProduct?.coverThumbnail : ''),
+      coverThumbnail: thumbnailForImage(
+        validImages[0] || '',
+        initialProduct?.coverImage === validImages[0] ? initialProduct?.coverThumbnail : ''
+      ),
       images: validImages,
       specs: specs.filter((spec) => spec.label.trim() && spec.value.trim()),
       features: features.filter((feature) => feature.trim()),
@@ -643,14 +667,17 @@ export default function ProductForm({ initialProduct }: Props) {
             ...subProduct,
             slug: subProduct.slug || generateProductSlug(subProduct.name),
             coverImage: validSubProductImages[0] || '',
-            coverThumbnail: thumbnailForImage(validSubProductImages[0] || '', subProduct.coverImage === validSubProductImages[0] ? subProduct.coverThumbnail : ''),
+            coverThumbnail: thumbnailForImage(
+              validSubProductImages[0] || '',
+              subProduct.coverImage === validSubProductImages[0] ? subProduct.coverThumbnail : ''
+            ),
             images: validSubProductImages,
             specs: subProduct.specs.filter((spec) => spec.label.trim() && spec.value.trim()),
           };
         }),
       detailTabs: validDetailTabs,
       files: productFiles.filter((file) =>
-        validDetailTabs.some((tab) => tab.id === file.detailTabId && tab.fileUrl === file.url),
+        validDetailTabs.some((tab) => tab.id === file.detailTabId && tab.fileUrl === file.url)
       ),
       sortOrder,
       isActive,
@@ -680,7 +707,9 @@ export default function ProductForm({ initialProduct }: Props) {
       .filter((tab) => canonicalProductDetailTab(tab.title) === '技术参数' && tab.fileUrl)
       .map((tab) => tab.fileUrl!);
     if (obsoleteTechnicalFiles.length) {
-      setPendingDocumentDeletes((urls) => Array.from(new Set([...urls, ...obsoleteTechnicalFiles])));
+      setPendingDocumentDeletes((urls) =>
+        Array.from(new Set([...urls, ...obsoleteTechnicalFiles]))
+      );
     }
 
     setPreviewDraft(buildDraftProduct());
@@ -691,7 +720,12 @@ export default function ProductForm({ initialProduct }: Props) {
     setError('');
     setSaving(true);
 
-    const { id: _draftId, createdAt: _createdAt, updatedAt: _updatedAt, ...productData } = previewDraft;
+    const {
+      id: _draftId,
+      createdAt: _createdAt,
+      updatedAt: _updatedAt,
+      ...productData
+    } = previewDraft;
     const stagedUploadedMediaUrls = Array.from(uploadedMediaUrlsRef.current);
     uploadedMediaUrlsRef.current.clear();
 
@@ -702,12 +736,10 @@ export default function ProductForm({ initialProduct }: Props) {
         await createProduct(productData);
       }
 
-      const cleanupResults = await Promise.allSettled(
-        [
-          ...pendingDocumentDeletes.map((url) => deleteAdminProductDocument(url)),
-          ...pendingImageDeletes.map((url) => deleteAdminProductMedia(url)),
-        ],
-      );
+      const cleanupResults = await Promise.allSettled([
+        ...pendingDocumentDeletes.map((url) => deleteAdminProductDocument(url)),
+        ...pendingImageDeletes.map((url) => deleteAdminProductMedia(url)),
+      ]);
       const cleanupFailed = cleanupResults.some((result) => result.status === 'rejected');
       setPendingDocumentDeletes([]);
       setPendingImageDeletes([]);
@@ -730,12 +762,12 @@ export default function ProductForm({ initialProduct }: Props) {
       {/* Header */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
-          <Link
+          <a
             href="/admin/products"
-            className="rounded-lg border border-[#E8ECF0] p-2 text-[#999999] hover:bg-[#F5F7FA] hover:text-[#333333] transition-colors"
+            className="rounded-lg border border-[#E8ECF0] p-2 text-[#999999] transition-colors hover:bg-[#F5F7FA] hover:text-[#333333]"
           >
             <ArrowLeft className="h-5 w-5" />
-          </Link>
+          </a>
           <div>
             <h1 className="text-[22px] font-bold text-[#1E3A5F]">
               {isEdit ? '编辑产品' : '新增产品'}
@@ -775,7 +807,9 @@ export default function ProductForm({ initialProduct }: Props) {
           <button
             type="submit"
             form="product-form"
-            disabled={saving || uploadingImages || Boolean(uploadingSubProductId) || Boolean(uploadingTabId)}
+            disabled={
+              saving || uploadingImages || Boolean(uploadingSubProductId) || Boolean(uploadingTabId)
+            }
             className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#1E3A5F] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#162A45] disabled:pointer-events-none disabled:opacity-50 sm:w-auto"
           >
             <Eye className="h-4 w-4" />
@@ -793,9 +827,9 @@ export default function ProductForm({ initialProduct }: Props) {
       {saved && (
         <div className="mb-6 rounded-xl border border-green-200 bg-green-50 px-5 py-3 text-sm text-green-600">
           {isEdit ? '产品信息已更新' : '产品创建成功'}{' '}
-          <Link href="/admin/products" className="underline">
+          <a href="/admin/products" className="underline">
             返回产品列表
-          </Link>
+          </a>
         </div>
       )}
 
@@ -853,227 +887,306 @@ export default function ProductForm({ initialProduct }: Props) {
           />
         ) : (
           <>
-        {/* 1. Basic Info */}
-        <SectionHeader title="基本信息" icon={FileText} section="basic" expanded={expandedSections.basic} onToggle={toggleSection} />
-        {expandedSections.basic && (
-          <div className="rounded-xl border border-[#E8ECF0] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)] space-y-5">
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-[#666666]">产品名称 *</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="例如：布料机液压站"
-                  className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
-                  required
-                />
-              </div>
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-[#666666]">产品型号</label>
-                <input
-                  type="text"
-                  value={model}
-                  onChange={(e) => setModel(e.target.value)}
-                  placeholder="例如：HS-17M-PB"
-                  className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-[#666666]">所属二级分类 *</label>
-                <SubCategorySelect
-                  subCategories={subCategories}
-                  categories={categories}
-                  value={subCategoryId}
-                  onChange={setSubCategoryId}
-                />
-              </div>
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-[#666666]">页面标识</label>
-                <div className="flex h-[42px] items-center rounded-lg border border-[#E8ECF0] bg-[#F9FAFB] px-4 font-mono text-sm text-[#666666]">
-                  {name.trim() ? generatedSlug : '填写名称后自动生成'}
-                </div>
-              </div>
-            </div>
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-[#666666]">简要描述</label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="产品简要描述，显示在列表卡片中..."
-                rows={3}
-                className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10 resize-none"
-              />
-            </div>
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-[#666666]">排序</label>
-                <input
-                  type="number"
-                  value={sortOrder}
-                  onChange={(e) => setSortOrder(Number(e.target.value))}
-                  className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
-                />
-              </div>
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-[#666666]">状态</label>
-                <div className="flex items-center gap-3 pt-1.5">
-                  <Switch checked={isActive} onCheckedChange={setIsActive} />
-                  <span className="text-sm text-[#666666]">{isActive ? '启用' : '禁用'}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* 2. Specs */}
-        <SectionHeader title="规格参数" icon={FileText} section="specs" expanded={expandedSections.specs} onToggle={toggleSection} />
-        {expandedSections.specs && (
-          <div className="rounded-xl border border-[#E8ECF0] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-            <div className="space-y-3">
-              {specs.map((spec) => (
-                <div key={spec.id} className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-                  <GripVertical className="hidden h-4 w-4 shrink-0 text-[#CCCCCC] sm:block" />
-                  <input
-                    type="text"
-                    value={spec.label}
-                    onChange={(e) => updateSpec(spec.id, 'label', e.target.value)}
-                    placeholder="参数名（如：系统压力）"
-                    className="w-full min-w-0 flex-1 rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
-                  />
-                  <input
-                    type="text"
-                    value={spec.value}
-                    onChange={(e) => updateSpec(spec.id, 'value', e.target.value)}
-                    placeholder="参数值（如：30Mpa）"
-                    className="w-full min-w-0 flex-1 rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeSpec(spec.id)}
-                    className="self-end rounded p-1.5 text-[#CCCCCC] transition-colors hover:bg-red-50 hover:text-red-500 sm:self-auto"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={addSpec}
-              className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-dashed border-[#4A90D9] px-4 py-2 text-sm font-medium text-[#4A90D9] hover:bg-[#F0F5FA] transition-colors"
-            >
-              <Plus className="h-4 w-4" />
-              添加参数
-            </button>
-          </div>
-        )}
-
-        {/* 3. Features */}
-        <SectionHeader title="核心特性" icon={FileText} section="features" expanded={expandedSections.features} onToggle={toggleSection} />
-        {expandedSections.features && (
-          <div className="rounded-xl border border-[#E8ECF0] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-            <div className="space-y-3">
-              {features.map((feat, idx) => (
-                <div key={idx} className="flex items-center gap-3">
-                  <GripVertical className="h-4 w-4 shrink-0 text-[#CCCCCC]" />
-                  <input
-                    type="text"
-                    value={feat}
-                    onChange={(e) => updateFeature(idx, e.target.value)}
-                    placeholder="例如：全套一体化设计"
-                    className="min-w-0 flex-1 rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeFeature(idx)}
-                    className="rounded p-1.5 text-[#CCCCCC] hover:bg-red-50 hover:text-red-500 transition-colors"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={addFeature}
-              className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-dashed border-[#4A90D9] px-4 py-2 text-sm font-medium text-[#4A90D9] hover:bg-[#F0F5FA] transition-colors"
-            >
-              <Plus className="h-4 w-4" />
-              添加特性
-            </button>
-          </div>
-        )}
-
-        {/* 4. Images */}
-        <SectionHeader title="产品图片" icon={ImageIcon} section="images" expanded={expandedSections.images} onToggle={toggleSection} />
-        {expandedSections.images && (
-          <div className="rounded-xl border border-[#E8ECF0] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-sm text-[#666666]">第一张图片会作为产品封面。</p>
-                <p className="mt-1 text-xs text-[#999999]">上传时自动转为 WebP，质量 82，最长边不超过 2400px。</p>
-              </div>
-              <button
-                type="button"
-                disabled={uploadingImages}
-                onClick={() => productImageInputRef.current?.click()}
-                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-[#4A90D9] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1E3A5F] disabled:opacity-50"
-              >
-                {uploadingImages ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                {uploadingImages ? '压缩上传中...' : '上传图片'}
-              </button>
-            </div>
-            {imageNotice ? (
-              <p className="mb-4 rounded border border-green-200 bg-green-50 px-3 py-2 text-xs text-green-700">{imageNotice}</p>
-            ) : null}
-            {images.length ? (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              {images.map((img, idx) => (
-                <div key={img} className="overflow-hidden rounded-lg border border-[#E8ECF0] bg-[#F9FAFB]">
-                  <div className="relative aspect-[4/3] w-full bg-white">
-                    <Image src={img} alt={`${name || '产品'}图片${idx + 1}`} fill sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw" className="object-contain" />
-                    {idx === 0 ? (
-                      <span className="absolute left-2 top-2 rounded bg-[#1E3A5F] px-2 py-1 text-xs font-medium text-white">封面</span>
-                    ) : null}
+            {/* 1. Basic Info */}
+            <SectionHeader
+              title="基本信息"
+              icon={FileText}
+              section="basic"
+              expanded={expandedSections.basic}
+              onToggle={toggleSection}
+            />
+            {expandedSections.basic && (
+              <div className="space-y-5 rounded-xl border border-[#E8ECF0] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-[#666666]">
+                      产品名称 *
+                    </label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="例如：布料机液压站"
+                      className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+                      required
+                    />
                   </div>
-                  <div className="flex items-center justify-between border-t border-[#E8ECF0] px-3 py-2">
-                    <span className="text-xs text-[#999999]">第 {idx + 1} 张</span>
-                    <div className="flex items-center gap-1">
-                      <button type="button" title="上移" disabled={idx === 0} onClick={() => moveImage(idx, -1)} className="rounded p-1.5 text-[#666666] hover:bg-white disabled:opacity-30">
-                        <ArrowUp className="h-4 w-4" />
-                      </button>
-                      <button type="button" title="下移" disabled={idx === images.length - 1} onClick={() => moveImage(idx, 1)} className="rounded p-1.5 text-[#666666] hover:bg-white disabled:opacity-30">
-                        <ArrowDown className="h-4 w-4" />
-                      </button>
-                      <button type="button" title="删除图片" onClick={() => removeImage(idx)} className="rounded p-1.5 text-[#999999] hover:bg-red-50 hover:text-red-500">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-[#666666]">
+                      产品型号
+                    </label>
+                    <input
+                      type="text"
+                      value={model}
+                      onChange={(e) => setModel(e.target.value)}
+                      placeholder="例如：HS-17M-PB"
+                      className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-[#666666]">
+                      所属二级分类 *
+                    </label>
+                    <SubCategorySelect
+                      subCategories={subCategories}
+                      categories={categories}
+                      value={subCategoryId}
+                      onChange={setSubCategoryId}
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-[#666666]">
+                      页面标识
+                    </label>
+                    <div className="flex h-[42px] items-center rounded-lg border border-[#E8ECF0] bg-[#F9FAFB] px-4 font-mono text-sm text-[#666666]">
+                      {name.trim() ? generatedSlug : '填写名称后自动生成'}
                     </div>
                   </div>
                 </div>
-              ))}
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-[#666666]">
+                    简要描述
+                  </label>
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="产品简要描述，显示在列表卡片中..."
+                    rows={3}
+                    className="w-full resize-none rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+                  />
+                </div>
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-[#666666]">排序</label>
+                    <input
+                      type="number"
+                      value={sortOrder}
+                      onChange={(e) => setSortOrder(Number(e.target.value))}
+                      className="w-full rounded-lg border border-[#E8ECF0] px-4 py-2.5 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-[#666666]">状态</label>
+                    <div className="flex items-center gap-3 pt-1.5">
+                      <Switch checked={isActive} onCheckedChange={setIsActive} />
+                      <span className="text-sm text-[#666666]">{isActive ? '启用' : '禁用'}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-            ) : (
-              <button
-                type="button"
-                disabled={uploadingImages}
-                onClick={() => productImageInputRef.current?.click()}
-                className="flex min-h-40 w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[#B9C8D8] bg-[#F9FAFB] text-sm text-[#666666] hover:border-[#4A90D9] hover:text-[#4A90D9] disabled:opacity-50"
-              >
-                <ImageIcon className="h-8 w-8" />
-                选择本地产品图片
-              </button>
             )}
-          </div>
-        )}
+
+            {/* 2. Specs */}
+            <SectionHeader
+              title="规格参数"
+              icon={FileText}
+              section="specs"
+              expanded={expandedSections.specs}
+              onToggle={toggleSection}
+            />
+            {expandedSections.specs && (
+              <div className="rounded-xl border border-[#E8ECF0] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+                <div className="space-y-3">
+                  {specs.map((spec) => (
+                    <div
+                      key={spec.id}
+                      className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3"
+                    >
+                      <GripVertical className="hidden h-4 w-4 shrink-0 text-[#CCCCCC] sm:block" />
+                      <input
+                        type="text"
+                        value={spec.label}
+                        onChange={(e) => updateSpec(spec.id, 'label', e.target.value)}
+                        placeholder="参数名（如：系统压力）"
+                        className="w-full min-w-0 flex-1 rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+                      />
+                      <input
+                        type="text"
+                        value={spec.value}
+                        onChange={(e) => updateSpec(spec.id, 'value', e.target.value)}
+                        placeholder="参数值（如：30Mpa）"
+                        className="w-full min-w-0 flex-1 rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeSpec(spec.id)}
+                        className="self-end rounded p-1.5 text-[#CCCCCC] transition-colors hover:bg-red-50 hover:text-red-500 sm:self-auto"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={addSpec}
+                  className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-dashed border-[#4A90D9] px-4 py-2 text-sm font-medium text-[#4A90D9] transition-colors hover:bg-[#F0F5FA]"
+                >
+                  <Plus className="h-4 w-4" />
+                  添加参数
+                </button>
+              </div>
+            )}
+
+            {/* 3. Features */}
+            <SectionHeader
+              title="核心特性"
+              icon={FileText}
+              section="features"
+              expanded={expandedSections.features}
+              onToggle={toggleSection}
+            />
+            {expandedSections.features && (
+              <div className="rounded-xl border border-[#E8ECF0] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+                <div className="space-y-3">
+                  {features.map((feat, idx) => (
+                    <div key={idx} className="flex items-center gap-3">
+                      <GripVertical className="h-4 w-4 shrink-0 text-[#CCCCCC]" />
+                      <input
+                        type="text"
+                        value={feat}
+                        onChange={(e) => updateFeature(idx, e.target.value)}
+                        placeholder="例如：全套一体化设计"
+                        className="min-w-0 flex-1 rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeFeature(idx)}
+                        className="rounded p-1.5 text-[#CCCCCC] transition-colors hover:bg-red-50 hover:text-red-500"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={addFeature}
+                  className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-dashed border-[#4A90D9] px-4 py-2 text-sm font-medium text-[#4A90D9] transition-colors hover:bg-[#F0F5FA]"
+                >
+                  <Plus className="h-4 w-4" />
+                  添加特性
+                </button>
+              </div>
+            )}
+
+            {/* 4. Images */}
+            <SectionHeader
+              title="产品图片"
+              icon={ImageIcon}
+              section="images"
+              expanded={expandedSections.images}
+              onToggle={toggleSection}
+            />
+            {expandedSections.images && (
+              <div className="rounded-xl border border-[#E8ECF0] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+                <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm text-[#666666]">第一张图片会作为产品封面。</p>
+                    <p className="mt-1 text-xs text-[#999999]">
+                      上传时自动转为 WebP，质量 82，最长边不超过 2400px。
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={uploadingImages}
+                    onClick={() => productImageInputRef.current?.click()}
+                    className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-[#4A90D9] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1E3A5F] disabled:opacity-50"
+                  >
+                    {uploadingImages ? (
+                      <LoaderCircle className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4" />
+                    )}
+                    {uploadingImages ? '压缩上传中...' : '上传图片'}
+                  </button>
+                </div>
+                {imageNotice ? (
+                  <p className="mb-4 rounded border border-green-200 bg-green-50 px-3 py-2 text-xs text-green-700">
+                    {imageNotice}
+                  </p>
+                ) : null}
+                {images.length ? (
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    {images.map((img, idx) => (
+                      <div
+                        key={img}
+                        className="overflow-hidden rounded-lg border border-[#E8ECF0] bg-[#F9FAFB]"
+                      >
+                        <div className="relative aspect-[4/3] w-full bg-white">
+                          <Image
+                            src={img}
+                            alt={`${name || '产品'}图片${idx + 1}`}
+                            fill
+                            sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                            className="object-contain"
+                          />
+                          {idx === 0 ? (
+                            <span className="absolute left-2 top-2 rounded bg-[#1E3A5F] px-2 py-1 text-xs font-medium text-white">
+                              封面
+                            </span>
+                          ) : null}
+                        </div>
+                        <div className="flex items-center justify-between border-t border-[#E8ECF0] px-3 py-2">
+                          <span className="text-xs text-[#999999]">第 {idx + 1} 张</span>
+                          <div className="flex items-center gap-1">
+                            <button
+                              type="button"
+                              title="上移"
+                              disabled={idx === 0}
+                              onClick={() => moveImage(idx, -1)}
+                              className="rounded p-1.5 text-[#666666] hover:bg-white disabled:opacity-30"
+                            >
+                              <ArrowUp className="h-4 w-4" />
+                            </button>
+                            <button
+                              type="button"
+                              title="下移"
+                              disabled={idx === images.length - 1}
+                              onClick={() => moveImage(idx, 1)}
+                              className="rounded p-1.5 text-[#666666] hover:bg-white disabled:opacity-30"
+                            >
+                              <ArrowDown className="h-4 w-4" />
+                            </button>
+                            <button
+                              type="button"
+                              title="删除图片"
+                              onClick={() => removeImage(idx)}
+                              className="rounded p-1.5 text-[#999999] hover:bg-red-50 hover:text-red-500"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={uploadingImages}
+                    onClick={() => productImageInputRef.current?.click()}
+                    className="flex min-h-40 w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[#B9C8D8] bg-[#F9FAFB] text-sm text-[#666666] hover:border-[#4A90D9] hover:text-[#4A90D9] disabled:opacity-50"
+                  >
+                    <ImageIcon className="h-8 w-8" />
+                    选择本地产品图片
+                  </button>
+                )}
+              </div>
+            )}
           </>
         )}
 
         {/* 5. Sub-products */}
-        <SectionHeader title={`子产品变体 (${subProducts.length})`} icon={Package} section="subProducts" expanded={expandedSections.subProducts} onToggle={toggleSection} />
+        <SectionHeader
+          title={`子产品变体 (${subProducts.length})`}
+          icon={Package}
+          section="subProducts"
+          expanded={expandedSections.subProducts}
+          onToggle={toggleSection}
+        />
         {expandedSections.subProducts && (
           <div className="rounded-xl border border-[#E8ECF0] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
             <p className="mb-4 text-sm text-[#999999]">
@@ -1092,14 +1205,16 @@ export default function ProductForm({ initialProduct }: Props) {
                       <button
                         type="button"
                         onClick={() => removeSubProduct(sp.id)}
-                        className="rounded p-1.5 text-[#CCCCCC] hover:bg-red-50 hover:text-red-500 transition-colors"
+                        className="rounded p-1.5 text-[#CCCCCC] transition-colors hover:bg-red-50 hover:text-red-500"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div>
-                        <label className="mb-1 block text-xs font-medium text-[#999999]">名称</label>
+                        <label className="mb-1 block text-xs font-medium text-[#999999]">
+                          名称
+                        </label>
                         <input
                           type="text"
                           value={sp.name}
@@ -1109,7 +1224,9 @@ export default function ProductForm({ initialProduct }: Props) {
                         />
                       </div>
                       <div>
-                        <label className="mb-1 block text-xs font-medium text-[#999999]">型号</label>
+                        <label className="mb-1 block text-xs font-medium text-[#999999]">
+                          型号
+                        </label>
                         <input
                           type="text"
                           value={sp.model}
@@ -1124,16 +1241,23 @@ export default function ProductForm({ initialProduct }: Props) {
                     <div className="mt-4">
                       <p className="mb-2 text-xs font-medium text-[#999999]">规格参数</p>
                       {sp.specs.map((spec) => (
-                        <div key={spec.id} className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center">
+                        <div
+                          key={spec.id}
+                          className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center"
+                        >
                           <input
                             value={spec.label}
-                            onChange={(e) => updateSubProductSpec(sp.id, spec.id, 'label', e.target.value)}
+                            onChange={(e) =>
+                              updateSubProductSpec(sp.id, spec.id, 'label', e.target.value)
+                            }
                             placeholder="参数名"
                             className="w-full min-w-0 flex-1 rounded border border-[#E8ECF0] px-2 py-1.5 text-xs outline-none focus:border-[#4A90D9]"
                           />
                           <input
                             value={spec.value}
-                            onChange={(e) => updateSubProductSpec(sp.id, spec.id, 'value', e.target.value)}
+                            onChange={(e) =>
+                              updateSubProductSpec(sp.id, spec.id, 'value', e.target.value)
+                            }
                             placeholder="值"
                             className="w-full min-w-0 flex-1 rounded border border-[#E8ECF0] px-2 py-1.5 text-xs outline-none focus:border-[#4A90D9]"
                           />
@@ -1160,7 +1284,9 @@ export default function ProductForm({ initialProduct }: Props) {
                       <div className="mb-2 flex items-center justify-between gap-3">
                         <p className="text-xs font-medium text-[#999999]">子产品图片</p>
                         <input
-                          ref={(element) => { subProductImageInputRefs.current[sp.id] = element; }}
+                          ref={(element) => {
+                            subProductImageInputRefs.current[sp.id] = element;
+                          }}
                           type="file"
                           accept="image/*"
                           multiple
@@ -1176,15 +1302,28 @@ export default function ProductForm({ initialProduct }: Props) {
                           onClick={() => subProductImageInputRefs.current[sp.id]?.click()}
                           className="inline-flex items-center gap-1.5 rounded border border-[#4A90D9] px-3 py-1.5 text-xs font-medium text-[#4A90D9] hover:bg-white disabled:opacity-50"
                         >
-                          {uploadingSubProductId === sp.id ? <LoaderCircle className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                          {uploadingSubProductId === sp.id ? (
+                            <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Upload className="h-3.5 w-3.5" />
+                          )}
                           {uploadingSubProductId === sp.id ? '上传中' : '上传图片'}
                         </button>
                       </div>
                       {sp.images.length ? (
                         <div className="flex flex-wrap gap-2">
                           {sp.images.map((img, idx) => (
-                            <div key={img} className="group relative h-20 w-20 overflow-hidden rounded border border-[#E8ECF0] bg-white">
-                              <Image src={img} alt={`${sp.name || '子产品'}图片${idx + 1}`} fill sizes="80px" className="object-contain" />
+                            <div
+                              key={img}
+                              className="group relative h-20 w-20 overflow-hidden rounded border border-[#E8ECF0] bg-white"
+                            >
+                              <Image
+                                src={img}
+                                alt={`${sp.name || '子产品'}图片${idx + 1}`}
+                                fill
+                                sizes="80px"
+                                className="object-contain"
+                              />
                               <button
                                 type="button"
                                 title="删除图片"
@@ -1197,28 +1336,38 @@ export default function ProductForm({ initialProduct }: Props) {
                           ))}
                         </div>
                       ) : (
-                        <p className="rounded border border-dashed border-[#DCE5EE] bg-white px-3 py-4 text-center text-xs text-[#999999]">暂无图片</p>
+                        <p className="rounded border border-dashed border-[#DCE5EE] bg-white px-3 py-4 text-center text-xs text-[#999999]">
+                          暂无图片
+                        </p>
                       )}
                     </div>
 
                     {/* Hydraulic & Electric params */}
                     <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div>
-                        <label className="mb-1 block text-xs font-medium text-[#999999]">液压参数 (Markdown表格)</label>
+                        <label className="mb-1 block text-xs font-medium text-[#999999]">
+                          液压参数 (Markdown表格)
+                        </label>
                         <textarea
                           value={sp.hydraulicParams}
-                          onChange={(e) => updateSubProduct(sp.id, 'hydraulicParams', e.target.value)}
+                          onChange={(e) =>
+                            updateSubProduct(sp.id, 'hydraulicParams', e.target.value)
+                          }
                           rows={4}
-                          className="w-full rounded-lg border border-[#E8ECF0] px-3 py-2 text-xs font-mono outline-none focus:border-[#4A90D9] resize-none"
+                          className="w-full resize-none rounded-lg border border-[#E8ECF0] px-3 py-2 font-mono text-xs outline-none focus:border-[#4A90D9]"
                         />
                       </div>
                       <div>
-                        <label className="mb-1 block text-xs font-medium text-[#999999]">电控参数 (Markdown表格)</label>
+                        <label className="mb-1 block text-xs font-medium text-[#999999]">
+                          电控参数 (Markdown表格)
+                        </label>
                         <textarea
                           value={sp.electricParams}
-                          onChange={(e) => updateSubProduct(sp.id, 'electricParams', e.target.value)}
+                          onChange={(e) =>
+                            updateSubProduct(sp.id, 'electricParams', e.target.value)
+                          }
                           rows={4}
-                          className="w-full rounded-lg border border-[#E8ECF0] px-3 py-2 text-xs font-mono outline-none focus:border-[#4A90D9] resize-none"
+                          className="w-full resize-none rounded-lg border border-[#E8ECF0] px-3 py-2 font-mono text-xs outline-none focus:border-[#4A90D9]"
                         />
                       </div>
                     </div>
@@ -1229,7 +1378,7 @@ export default function ProductForm({ initialProduct }: Props) {
             <button
               type="button"
               onClick={addSubProduct}
-              className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-dashed border-[#4A90D9] px-4 py-2 text-sm font-medium text-[#4A90D9] hover:bg-[#F0F5FA] transition-colors"
+              className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-dashed border-[#4A90D9] px-4 py-2 text-sm font-medium text-[#4A90D9] transition-colors hover:bg-[#F0F5FA]"
             >
               <Plus className="h-4 w-4" />
               添加子产品变体
@@ -1238,7 +1387,13 @@ export default function ProductForm({ initialProduct }: Props) {
         )}
 
         {/* 6. Detail Tabs */}
-        <SectionHeader title={`详情Tab页 (${detailTabs.length})`} icon={FileText} section="tabs" expanded={expandedSections.tabs} onToggle={toggleSection} />
+        <SectionHeader
+          title={`详情Tab页 (${detailTabs.length})`}
+          icon={FileText}
+          section="tabs"
+          expanded={expandedSections.tabs}
+          onToggle={toggleSection}
+        />
         {expandedSections.tabs && (
           <div className="rounded-xl border border-[#E8ECF0] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
             <p className="mb-4 text-sm text-[#999999]">
@@ -1257,14 +1412,16 @@ export default function ProductForm({ initialProduct }: Props) {
                       <button
                         type="button"
                         onClick={() => removeDetailTab(tab.id)}
-                        className="rounded p-1.5 text-[#CCCCCC] hover:bg-red-50 hover:text-red-500 transition-colors"
+                        className="rounded p-1.5 text-[#CCCCCC] transition-colors hover:bg-red-50 hover:text-red-500"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div>
-                        <label className="mb-1 block text-xs font-medium text-[#999999]">Tab标题</label>
+                        <label className="mb-1 block text-xs font-medium text-[#999999]">
+                          Tab标题
+                        </label>
                         <input
                           type="text"
                           value={tab.title}
@@ -1272,7 +1429,8 @@ export default function ProductForm({ initialProduct }: Props) {
                             const nextTitle = e.target.value;
                             updateDetailTab(tab.id, 'title', nextTitle);
                             const standardTitle = canonicalProductDetailTab(nextTitle);
-                            if (standardTitle === '技术参数') updateDetailTabType(tab.id, 'markdown');
+                            if (standardTitle === '技术参数')
+                              updateDetailTabType(tab.id, 'markdown');
                             if (standardTitle === '应用案例') updateDetailTabType(tab.id, 'file');
                           }}
                           placeholder="例如：产品简介 / 技术参数 / 产品资料"
@@ -1280,10 +1438,14 @@ export default function ProductForm({ initialProduct }: Props) {
                         />
                       </div>
                       <div>
-                        <label className="mb-1 block text-xs font-medium text-[#999999]">类型</label>
+                        <label className="mb-1 block text-xs font-medium text-[#999999]">
+                          类型
+                        </label>
                         <select
                           value={detailTabEditorType(tab)}
-                          onChange={(e) => updateDetailTabType(tab.id, e.target.value as AdminDetailTab['type'])}
+                          onChange={(e) =>
+                            updateDetailTabType(tab.id, e.target.value as AdminDetailTab['type'])
+                          }
                           disabled={isFixedDetailTabType(tab)}
                           className="w-full rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus:border-[#4A90D9] focus:ring-2 focus:ring-[#4A90D9]/10"
                         >
@@ -1299,22 +1461,30 @@ export default function ProductForm({ initialProduct }: Props) {
                     <div className="mt-3">
                       {!detailTabUsesFileEditor(tab) ? (
                         <>
-                          <label className="mb-1 block text-xs font-medium text-[#999999]">Markdown内容</label>
+                          <label className="mb-1 block text-xs font-medium text-[#999999]">
+                            Markdown内容
+                          </label>
                           <textarea
                             value={tab.content}
                             onChange={(e) => updateDetailTab(tab.id, 'content', e.target.value)}
                             rows={8}
-                            className="w-full rounded-lg border border-[#E8ECF0] px-3 py-2 text-sm font-mono outline-none focus:border-[#4A90D9] resize-none"
-                            placeholder={canonicalProductDetailTab(tab.title) === '技术参数'
-                              ? '| 参数 | 规格 |\n| --- | --- |\n| 系统压力 | 31.5 MPa |'
-                              : '支持 Markdown 格式...'}
+                            className="w-full resize-none rounded-lg border border-[#E8ECF0] px-3 py-2 font-mono text-sm outline-none focus:border-[#4A90D9]"
+                            placeholder={
+                              canonicalProductDetailTab(tab.title) === '技术参数'
+                                ? '| 参数 | 规格 |\n| --- | --- |\n| 系统压力 | 31.5 MPa |'
+                                : '支持 Markdown 格式...'
+                            }
                           />
                         </>
                       ) : (
                         <div className="space-y-3">
-                          <label className="block text-xs font-medium text-[#999999]">产品资料</label>
+                          <label className="block text-xs font-medium text-[#999999]">
+                            产品资料
+                          </label>
                           <input
-                            ref={(element) => { documentInputRefs.current[tab.id] = element; }}
+                            ref={(element) => {
+                              documentInputRefs.current[tab.id] = element;
+                            }}
                             type="file"
                             accept={detailTabFileAccept(tab)}
                             className="hidden"
@@ -1326,9 +1496,12 @@ export default function ProductForm({ initialProduct }: Props) {
                           {tab.fileUrl ? (
                             <div className="flex flex-col gap-3 rounded-lg border border-[#DCE5EE] bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
                               <div className="min-w-0">
-                                <p className="truncate text-sm font-medium text-[#333333]">{tab.fileName || '产品资料'}</p>
+                                <p className="truncate text-sm font-medium text-[#333333]">
+                                  {tab.fileName || '产品资料'}
+                                </p>
                                 <p className="mt-1 text-xs uppercase text-[#999999]">
-                                  {tab.fileType || 'FILE'}{tab.fileSize ? ` · ${formatFileSize(tab.fileSize)}` : ''}
+                                  {tab.fileType || 'FILE'}
+                                  {tab.fileSize ? ` · ${formatFileSize(tab.fileSize)}` : ''}
                                 </p>
                               </div>
                               <div className="flex shrink-0 items-center gap-2">
@@ -1390,7 +1563,7 @@ export default function ProductForm({ initialProduct }: Props) {
             <button
               type="button"
               onClick={addDetailTab}
-              className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-dashed border-[#4A90D9] px-4 py-2 text-sm font-medium text-[#4A90D9] hover:bg-[#F0F5FA] transition-colors"
+              className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-dashed border-[#4A90D9] px-4 py-2 text-sm font-medium text-[#4A90D9] transition-colors hover:bg-[#F0F5FA]"
             >
               <Plus className="h-4 w-4" />
               添加Tab
@@ -1405,7 +1578,9 @@ export default function ProductForm({ initialProduct }: Props) {
             <div className="mx-auto flex min-h-16 max-w-[1600px] flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-[#1E3A5F]">产品详情预览</p>
-                <p className="truncate text-xs text-[#999999]">此时尚未保存到 Supabase，请核对图片、参数和详情内容。</p>
+                <p className="truncate text-xs text-[#999999]">
+                  此时尚未保存到 Supabase，请核对图片、参数和详情内容。
+                </p>
               </div>
               <div className="flex shrink-0 items-center gap-2">
                 <button
@@ -1423,7 +1598,11 @@ export default function ProductForm({ initialProduct }: Props) {
                   onClick={() => void confirmSave()}
                   className="inline-flex items-center gap-2 rounded bg-[#28A745] px-4 py-2 text-sm font-medium text-white hover:bg-[#218838] disabled:opacity-50"
                 >
-                  {saving ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                  {saving ? (
+                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4" />
+                  )}
                   {saving ? '保存中...' : '确认保存'}
                 </button>
               </div>

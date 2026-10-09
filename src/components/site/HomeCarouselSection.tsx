@@ -19,15 +19,15 @@ import MotionReveal from '@/components/site/MotionReveal';
 import EquipmentCarousel from '@/components/site/EquipmentCarousel';
 
 const slides = [
-  { src: '/images/scsb/生产基地.png', name: '生产基地', icon: Factory, desc: '现代化制造基地' },
-  { src: '/images/scsb/数控设备.png', name: '数控设备', icon: Cpu, desc: '高精度数控机群' },
-  { src: '/images/scsb/数控高速加工中心.png', name: '高速加工', icon: Zap, desc: '高效精密加工' },
-  { src: '/images/scsb/4.5米长加工中心.png', name: '大型加工', icon: Target, desc: '4.5米长工件加工' },
-  { src: '/images/scsb/大型深孔镗.png', name: '深孔镗床', icon: CircleDot, desc: '复杂深孔加工' },
-  { src: '/images/scsb/焊接机器人工作站.png', name: '焊接机器人', icon: Bot, desc: '自动化焊接工作站' },
-  { src: '/images/scsb/数控焊接摆塔机.png', name: '焊接摆塔', icon: Flame, desc: '精密焊接工艺' },
-  { src: '/images/scsb/油漆线.png', name: '表面处理', icon: Palette, desc: '专业油漆涂装线' },
-  { src: '/images/scsb/液压试验台.png', name: '试验检测', icon: Activity, desc: '全功能液压测试' },
+  { src: '/images/scsb/生产基地.webp', name: '生产基地', icon: Factory, desc: '现代化制造基地' },
+  { src: '/images/scsb/数控设备.webp', name: '数控设备', icon: Cpu, desc: '高精度数控机群' },
+  { src: '/images/scsb/数控高速加工中心.webp', name: '高速加工', icon: Zap, desc: '高效精密加工' },
+  { src: '/images/scsb/4.5米长加工中心.webp', name: '大型加工', icon: Target, desc: '4.5米长工件加工' },
+  { src: '/images/scsb/大型深孔镗.webp', name: '深孔镗床', icon: CircleDot, desc: '复杂深孔加工' },
+  { src: '/images/scsb/焊接机器人工作站.webp', name: '焊接机器人', icon: Bot, desc: '自动化焊接工作站' },
+  { src: '/images/scsb/数控焊接摆塔机.webp', name: '焊接摆塔', icon: Flame, desc: '精密焊接工艺' },
+  { src: '/images/scsb/油漆线.webp', name: '表面处理', icon: Palette, desc: '专业油漆涂装线' },
+  { src: '/images/scsb/液压试验台.webp', name: '试验检测', icon: Activity, desc: '全功能液压测试' },
 ];
 
 export default function HomeCarouselSection() {
