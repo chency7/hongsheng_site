@@ -1,5 +1,5 @@
 import { categoryOptions, products as initialProducts } from '@/data/products';
-import { thumbnailUrlFromProductImageUrl } from '@/lib/admin/product-thumbnails';
+import { normalizeStorageUrl, thumbnailUrlFromProductImageUrl } from '@/lib/admin/product-thumbnails';
 
 export interface AdminCategory {
   id: string;
@@ -235,7 +235,26 @@ export function buildInitialAdminCatalog(): AdminCatalog {
   });
 }
 
-export function normalizeAdminCatalog(catalog: AdminCatalog): AdminCatalog {
+/** 递归重写目录里所有 Supabase Storage 地址的主机名（详见 normalizeStorageUrl） */
+function normalizeCatalogStorageUrls<T>(value: T): T {
+  if (typeof value === 'string') return normalizeStorageUrl(value) as unknown as T;
+  if (Array.isArray(value)) {
+    return value.map((item) => normalizeCatalogStorageUrls(item)) as unknown as T;
+  }
+  if (value && typeof value === 'object') {
+    const result: Record<string, unknown> = {};
+    for (const [key, item] of Object.entries(value as Record<string, unknown>)) {
+      result[key] = normalizeCatalogStorageUrls(item);
+    }
+    return result as unknown as T;
+  }
+  return value;
+}
+
+export function normalizeAdminCatalog(rawCatalog: AdminCatalog): AdminCatalog {
+  // 数据里存的图片/文件地址可能是旧域名（如 IP + HTTP），统一改写为当前
+  // NEXT_PUBLIC_SUPABASE_URL，避免换域名或上 HTTPS 后变成混合内容被拦截。
+  const catalog = normalizeCatalogStorageUrls(rawCatalog);
   const categories = catalog.categories || [];
   const subCategories = catalog.subCategories || [];
   const products = catalog.products || [];

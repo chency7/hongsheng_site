@@ -1,6 +1,7 @@
 'use client';
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import {
   type LucideIcon,
@@ -37,10 +38,11 @@ type SidebarMenuItemProps = {
 };
 
 /**
- * 后台菜单使用整页跳转（普通 <a>）而非客户端路由：
- * 静态导出下 Next 的 SPA 路由在预取请求被取消时会死等
- * （表现为"点了没反应 / 一直 loading"），整页加载虽然多一次文档请求，
- * 但绝对可靠，且 JS/CSS 已长缓存，实测单页约 400ms。
+ * 后台菜单使用客户端路由（next/link）切换，不再整页刷新。
+ * 静态导出下 Next 的预取请求若在点击前被取消会导致路由死等
+ * （表现为"点了没反应 / 一直 loading"），因此显式关闭 prefetch：
+ * 导航时按需拉取静态 payload，既能局部切换、保留侧边栏与会话状态，
+ * 又不会出现预取被取消而卡住的问题。
  */
 const SidebarMenuItem = memo(function SidebarMenuItem({
   href,
@@ -50,8 +52,9 @@ const SidebarMenuItem = memo(function SidebarMenuItem({
   collapsed,
 }: SidebarMenuItemProps) {
   return (
-    <a
+    <Link
       href={href}
+      prefetch={false}
       className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-150 ${
         active
           ? 'bg-[#4A90D9] text-white shadow-md'
@@ -61,7 +64,7 @@ const SidebarMenuItem = memo(function SidebarMenuItem({
     >
       <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
       {!collapsed && <span>{label}</span>}
-    </a>
+    </Link>
   );
 });
 
@@ -93,9 +96,13 @@ function AdminSidebar({ collapsed, pathname, onToggleCollapsed }: AdminSidebarPr
     <div className="flex h-full flex-col bg-[#1E3A5F] text-white">
       <div className="flex h-16 items-center justify-between border-b border-white/10 px-4">
         {!collapsed && (
-          <a href="/admin/dashboard" className="text-lg font-bold tracking-wide">
+          <Link
+            href="/admin/dashboard"
+            prefetch={false}
+            className="text-lg font-bold tracking-wide"
+          >
             HS 后台管理
-          </a>
+          </Link>
         )}
         <button
           onClick={() => {

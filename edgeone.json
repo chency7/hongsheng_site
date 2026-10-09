@@ -1,0 +1,25 @@
+{
+  "redirects": [
+    { "source": "/:a/", "destination": "/:a", "statusCode": 301 },
+    { "source": "/:a/:b/", "destination": "/:a/:b", "statusCode": 301 },
+    { "source": "/:a/:b/:c/", "destination": "/:a/:b/:c", "statusCode": 301 }
+  ],
+  "headers": [
+    {
+      "source": "/_next/static/*",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/images/*",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=604800" }
+      ]
+    }
+  ],
+  "caches": [
+    { "source": "/_next/static/*", "cacheTtl": 31536000 },
+    { "source": "/images/*", "cacheTtl": 604800 }
+  ]
+}
