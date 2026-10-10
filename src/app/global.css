@@ -1,5 +1,8 @@
-/* LXGW WenKai 中文正文字体：unicode-range 分包（每个文件几十 KB，按需加载） */
-@import 'lxgw-wenkai-webfont/style.css';
+/* LXGW WenKai 中文正文字体：unicode-range 分包（每个文件几十 KB，按需加载）
+ * 只引入实际用到的 2 个变体（regular 400 / bold 700），
+ * 不引入 light(300) 与 Mono 系列，避免把 ~19MB 无用字形打进产物。 */
+@import 'lxgw-wenkai-webfont/lxgwwenkai-regular.css';
+@import 'lxgw-wenkai-webfont/lxgwwenkai-bold.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -35,7 +38,6 @@
 body {
   font-family: var(--font-wenkai), var(--font-Pacifico), sans-serif;
 }
-
 
 /* 自定义滚动条样式 */
 ::-webkit-scrollbar {

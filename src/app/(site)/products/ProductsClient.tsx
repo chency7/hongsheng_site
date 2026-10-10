@@ -256,6 +256,27 @@ function ProductsListView({
     );
   }
 
+  // 目录本身为空（后端暂无数据，且非报错、无筛选）：给独立空状态，避免误显示"筛选无结果"
+  if (products.length === 0) {
+    return (
+      <div className="min-h-[70vh] bg-[#F5F7FA]">
+        <Container className="py-24 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+            <PackageSearch className="h-8 w-8 text-[#999999]" aria-hidden="true" />
+          </div>
+          <h1 className="mt-6 text-2xl font-semibold text-[#333333]">暂无产品</h1>
+          <p className="mt-3 text-sm text-[#666666]">产品信息正在整理中，敬请期待。</p>
+          <Link
+            href="/"
+            className="mt-8 inline-flex items-center gap-2 rounded bg-[#4A90D9] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1E3A5F]"
+          >
+            返回首页
+          </Link>
+        </Container>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#F5F7FA] text-[#333333]">
       {/* Breadcrumb */}
