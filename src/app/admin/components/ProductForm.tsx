@@ -22,6 +22,7 @@ import {
   LoaderCircle,
   LayoutTemplate,
   SlidersHorizontal,
+  BookOpen,
 } from 'lucide-react';
 import { useAdminStore } from '@/lib/admin-store';
 import { generateProductSlug, uniqueProductSlug } from '@/lib/admin-catalog';
@@ -48,6 +49,7 @@ import {
 import { thumbnailUrlFromProductImageUrl } from '@/lib/admin/product-thumbnails';
 import SubCategorySelect from '../components/SubCategorySelect';
 import VisualProductEditor from '../components/VisualProductEditor';
+import ProductGuideDialog from '../components/ProductGuideDialog';
 import { Switch } from '@/components/ui/switch';
 
 interface Props {
@@ -192,6 +194,7 @@ export default function ProductForm({ initialProduct }: Props) {
   const [error, setError] = useState('');
   const [previewDraft, setPreviewDraft] = useState<AdminProduct | null>(null);
   const [editorMode, setEditorMode] = useState<'visual' | 'fields'>('visual');
+  const [guideOpen, setGuideOpen] = useState(false);
 
   useEffect(
     () => () => {
@@ -778,6 +781,14 @@ export default function ProductForm({ initialProduct }: Props) {
           </div>
         </div>
         <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto">
+          <button
+            type="button"
+            onClick={() => setGuideOpen(true)}
+            className="inline-flex items-center gap-2 rounded-lg border border-[#DCE5EE] bg-white px-3 py-2 text-sm font-medium text-[#1E3A5F] transition-colors hover:border-[#4A90D9] hover:text-[#4A90D9]"
+          >
+            <BookOpen className="h-4 w-4" />
+            使用手册
+          </button>
           <div className="flex w-full rounded-lg border border-[#DCE5EE] bg-white p-1 sm:w-auto">
             <button
               type="button"
@@ -1611,6 +1622,8 @@ export default function ProductForm({ initialProduct }: Props) {
           <ProductDetailClient product={adminProductToProduct(previewDraft)} />
         </div>
       ) : null}
+
+      <ProductGuideDialog open={guideOpen} onClose={() => setGuideOpen(false)} />
     </div>
   );
 }

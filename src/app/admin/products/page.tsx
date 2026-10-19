@@ -11,11 +11,13 @@ import {
   CornerDownRight,
   FolderTree,
   Layers3,
+  BookOpen,
 } from 'lucide-react';
 import { useAdminStore } from '@/lib/admin-store';
 import type { AdminProduct } from '@/lib/admin-store';
 import { deleteAdminProductMedia } from '@/lib/admin/media-client';
 import DeleteConfirmDialog from '../components/DeleteConfirmDialog';
+import ProductGuideDialog from '../components/ProductGuideDialog';
 import { Switch } from '@/components/ui/switch';
 import {
   Select,
@@ -50,6 +52,7 @@ export default function AdminProductsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteTarget, setDeleteTarget] = useState<AdminProduct | null>(null);
   const [error, setError] = useState('');
+  const [guideOpen, setGuideOpen] = useState(false);
 
   const categoryGroups = useMemo(
     () =>
@@ -140,13 +143,23 @@ export default function AdminProductsPage() {
             共 {stats.totalProducts} 个产品，{stats.activeProducts} 个已启用
           </p>
         </div>
-        <a
-          href="/admin/products/new"
-          className="inline-flex items-center gap-2 rounded-lg bg-[#1E3A5F] px-5 py-2.5 text-sm font-medium text-white shadow-md shadow-[#1E3A5F]/10 transition-[background-color,transform] duration-150 hover:-translate-y-[1px] hover:bg-[#162A45]"
-        >
-          <Plus className="h-4 w-4" />
-          新增产品
-        </a>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setGuideOpen(true)}
+            className="inline-flex items-center gap-2 rounded-lg border border-[#DCE5EE] bg-white px-4 py-2.5 text-sm font-medium text-[#1E3A5F] transition-colors hover:border-[#4A90D9] hover:text-[#4A90D9]"
+          >
+            <BookOpen className="h-4 w-4" />
+            使用手册
+          </button>
+          <a
+            href="/admin/products/new"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#1E3A5F] px-5 py-2.5 text-sm font-medium text-white shadow-md shadow-[#1E3A5F]/10 transition-[background-color,transform] duration-150 hover:-translate-y-[1px] hover:bg-[#162A45]"
+          >
+            <Plus className="h-4 w-4" />
+            新增产品
+          </a>
+        </div>
       </div>
 
       {error && (
@@ -392,6 +405,8 @@ export default function AdminProductsPage() {
           onCancel={() => setDeleteTarget(null)}
         />
       )}
+
+      <ProductGuideDialog open={guideOpen} onClose={() => setGuideOpen(false)} />
     </div>
   );
 }
